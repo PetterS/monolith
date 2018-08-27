@@ -1,0 +1,93 @@
+.TH "MINISAT+" 1
+.SH NAME
+minisat+ \- A Solver for Pseudo-Boolean Optimization
+
+.SH SYNOPSIS
+.B minisat+
+<input\-file> [<result\-file>] [<option> ...]
+
+.SH DESCRIPTION
+MinSat+ is a solver for Pseudo-Boolean Optimization (AKA 0-1 integer
+programming) that is based on the MiniSat SAT-solver. It supports
+optimizing a linear objective function, subject to a set of linear
+constraints. The variables of the objective function and constraints
+are boolean, i.e. required to be 0 or 1. Pseudo-Boolean optimization
+can be used to solve many kinds of combinatorial optimization
+problems. This version of Minisat+ is compiled with bignum support for
+constraint coefficients.
+
+Minisat+ accepts problem specifications written in the OPB format.
+
+.SH OPTIONS
+.SS "Solver options:"
+.TP
+.BR \-ca , \-adders
+Convert PB\-constrs to clauses through adders.
+.TP
+.BR -cs , -sorters
+Convert PB\-constrs to clauses through sorters.
+.TP
+.BR -cb , \-bdds
+Convert PB\-constrs to clauses through bdds.
+.TP
+.BR \-cm , \-mixed
+Convert PB\-constrs to clauses by a mix of the above (default).
+.TP
+.BR -ga , -gs , -gb , -gm
+Override conversion for goal function (long name: \fB\-goal\-xxx\fR).
+.TP
+.BR \-w , \-weak\-off
+Clausify with equivalences instead of implications.
+.TP
+\fB\-bdd \fIn\fR, \fB\-thres=\fIn\fR
+Set threshold for preferring BDDs in mixed mode to \fIn\fR (default:\~3).
+.TP
+\fB\-sort\-thres=\fIn\fR
+Set threshold for preferring sorters to \fIn\fR. Tried after BDDs (default:\~20).
+.TP
+\fB\-goal-bias=\fIn\fR
+Set bias for goal function conversion towards sorters to \fIn\fR (default:\~3).
+.TP
+\fB\-1\fR, \fB\-first\fR
+Don't minimize, just give first solution found.
+.TP
+\fB\-A\fR, \fB\-all\fR
+Don't minimize, give all solutions.
+.TP
+\fB\-goal=\fIn\fR
+Set initial goal limit to \fIn\fR.
+.TP
+\fB\-p\fR, \fB\-pbvars\fR
+Restrict decision heuristic of SAT to original PB variables.
+.TP
+\fB\-ps\fR{+,\-,0}
+Polarity suggestion in SAT towards/away from goal (or neutral).
+
+.SS "Input options:"
+.TP
+\fB\-of\fR, \fB\-old\-fmt\fR
+Use old variant of OPB file format.
+
+.SS "Output options:"
+.TP
+\fB\-s\fR, \fB\-satlive\fR
+Turn off SAT competition output.
+.TP
+\fB\-a\fR, \fB\-ansi\fR
+Turn off ANSI codes in output.
+.TP
+\fB\-v\fIn\fR Set verbosity level to \fIn\fR. Possible values for
+\fIn\fR are 1,2,3 (default:\~1).
+.TP
+\fB\-cnf=\fIfile\fR
+Write SAT problem to a file \fIfile\fR. If the input problem is found to be
+trivially unsatisfiable then no file is written.
+.PP
+
+.SH AUTHORS
+Minisat+ was written by Niklas Een and Niklas Sorensson.
+
+.PP
+The first version of this manual page was written by Ralf Treinen
+<treinen@pps.jussieu.fr> with minor corrections by Niklas Sorensson
+<niklasso@gmail.com>.
