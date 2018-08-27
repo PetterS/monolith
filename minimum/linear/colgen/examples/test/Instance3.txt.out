@@ -1,0 +1,46 @@
+  A:  .E=D=D=D= . . . .D=D=D=D=D=
+  B: D=D=D=D=D= . .L=L= . . .D=L=
+  C:  . .D=D=D= . .E=D=L= . .E=E=
+  D:  . .E=E=L= . .E=E=L= . .E=E=
+  E: E=E= . .E=E=E= . .E=E=E= . .
+  F:  .E=E=E=D= . .E=E=E= . .D=D=
+  G: E=L=L= . .E=E=D= . .L=L= . .
+  H:  . .E=E=L=L=L= . .D=D=L= . .
+  I: D=D=D=D= . . . . .E=E=L=L=L=
+  J:  . . .D=D= . .D=D=D= . .D=D=
+  K: D=D= . . .D=D=D=D=D=D= . . .
+  L: L=L= . . .D=D=L=L=L= . . . .
+  M:  . .L=L=L= . . .E=E=D=D=L=L=
+  N:  .D=D=L=L= . . . .D=D=D=D=D=
+  O: L=L= . . .D=D=D=D=L=L= . . .
+  P: L= . . . .E=E=D= . . . . . .
+  Q:  . .L= . . . .L= . . . .D=D=
+  R:  . . . . .D=D=D= . . .E= . .
+  S:  . . . . .E=E=E= . . .L= . .
+  T:  . . .E=E=D=D= . . . . . . .
+Final solution (checked for feasibility): 1005
+-- Cover costs  : 1000
+-- Roster costs : 5
+  A:  . .D=D=D=D=D= . .D=D=D= . .
+  B: D=D=D=D=D= . .L=L= . . .D=L=
+  C:  . .D=D=D= . .D=D=L= . .E=E=
+  D:  .E=E=E=L= . .E=E=L= . .E=E=
+  E: E=E= . .E=E=E= . .E=E=E= . .
+  F:  .E=E=E=D= . .E=E=E= . .D=D=
+  G: E=L=L= . .E=E=D= . .L=L= . .
+  H:  . .E=E=L=L=L= . .D=D=L= . .
+  I: D=D=D=D= . . . . .E=E=L=L=L=
+  J:  . . .D=D= . .E=D=D= . .D=D=
+  K: D=D= . . .D=D=D=D=D=D= . . .
+  L: L=L= . . .D=D=L=L=L= . . . .
+  M:  . .L=L=L= . . .E=E=D=D=L=L=
+  N:  .D=D=L=L= . . . .D=D=D=D=D=
+  O: L=L= . . .D=D=D=D=L=L= . . .
+  P: L= . . . . . .D= . . . .D=D=
+  Q:  . .L= . . . .L= . . . .D=D=
+  R:  . . . . .D=D=D= . . .E= . .
+  S:  . . . . .E=E=E= . . .L= . .
+  T:  . . .E=E=E=E= . . . . . . .
+Final solution (checked for feasibility): 1005
+-- Cover costs  : 1000
+-- Roster costs : 5

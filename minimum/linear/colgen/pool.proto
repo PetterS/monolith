@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package minimum.linear.colgen.proto;
+
+// Storage format for a column.
+message Column {
+	message Entry {
+		int32 row = 1;
+		double value = 2;
+	}
+	double cost = 1;
+	double lower_bound = 2;
+	double upper_bound = 3;
+	repeated Entry entry = 4;
+}

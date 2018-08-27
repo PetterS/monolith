@@ -1,0 +1,22 @@
+  A:  .D=D=D= . . .D=D=D= . .D=D=
+  B: D=D=D=D=D= . .D=D= . . .D=D=
+  C: D=D=D= . .D=D= . .D=D=D= . .
+  D: D=D= . . .D=D=D=D=D= . . . .
+  E:  .D=D=D=D= . .D=D= . .D=D=D=
+  F: D=D=D=D=D= . .D=D= . .D=D= .
+  G:  . .D=D=D= . .D=D= . .D=D=D=
+  H: D=D= . .D=D=D= . .D=D=D= . .
+Final solution (checked for feasibility): 608
+-- Cover costs  : 601
+-- Roster costs : 7
+  A:  .D=D=D= . . .D=D=D= . .D=D=
+  B: D=D=D=D=D= . . .D=D= . .D=D=
+  C: D=D=D= . .D=D=D= . .D=D= . .
+  D: D=D= . . .D=D=D=D=D= . . . .
+  E:  .D=D=D=D= . .D=D= . .D=D=D=
+  F: D=D=D=D=D= . .D=D= . .D=D= .
+  G:  . .D=D=D= . .D=D= . .D=D=D=
+  H: D=D= . .D=D=D= . .D=D=D= . .
+Final solution (checked for feasibility): 608
+-- Cover costs  : 601
+-- Roster costs : 7

@@ -1,0 +1,83 @@
+Number of days: 14
+-- Shift E, 480 min.
+-- Shift D, 480 min.
+-- Shift L, 480 min.
+Number of shifts: 3
+-- Shift 0. OK after = [0, 1, 2] forbidden_after = []
+-- Shift 1. OK after = [1, 2] forbidden_after = [0]
+-- Shift 2. OK after = [2] forbidden_after = [0, 1]
+-- Staff  A: Consequtive limit [2, 5]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14, 14, 0].
+-- Staff  B: Consequtive limit [2, 5]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14, 14, 5].
+-- Staff  C: Consequtive limit [2, 5]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14, 14, 5].
+-- Staff  D: Consequtive limit [2, 5]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14, 0, 5].
+-- Staff  E: Consequtive limit [2, 5]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14, 0, 0].
+-- Staff  F: Consequtive limit [2, 5]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14, 14, 0].
+-- Staff  G: Consequtive limit [2, 5]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14, 14, 5].
+-- Staff  H: Consequtive limit [2, 5]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14, 14, 5].
+-- Staff  I: Consequtive limit [2, 5]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14, 14, 5].
+-- Staff  J: Consequtive limit [2, 5]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14, 14, 0].
+-- Staff  K: Consequtive limit [2, 6]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14, 14, 0].
+-- Staff  L: Consequtive limit [2, 6]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [0, 14, 5].
+-- Staff  M: Consequtive limit [2, 6]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14, 14, 5].
+-- Staff  N: Consequtive limit [2, 6]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [0, 14, 5].
+-- Staff  O: Consequtive limit [2, 6]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [0, 14, 5].
+-- Staff  P: Consequtive limit [1, 5]. Time limit [1200, 2160]. Max weekends: 1. Max shifts: [14, 14, 2].
+-- Staff  Q: Consequtive limit [1, 5]. Time limit [1200, 2160]. Max weekends: 1. Max shifts: [0, 14, 2].
+-- Staff  R: Consequtive limit [1, 5]. Time limit [1200, 2160]. Max weekends: 1. Max shifts: [14, 14, 0].
+-- Staff  S: Consequtive limit [1, 5]. Time limit [1200, 2160]. Max weekends: 1. Max shifts: [14, 0, 2].
+-- Staff  T: Consequtive limit [1, 5]. Time limit [1200, 2160]. Max weekends: 1. Max shifts: [14, 14, 0].
+Number of staff: 20
+Read 39 shift on requests.
+Read 25 shift off requests.
+Read 42 cover constraints.
+Dividing all minutes by 480
+Setting up colgen problem...             [  OK  ]
+Creating initial rosters...              [  OK  ]
+-- Objective for initial columns: 4708
+  Iter |       Objective      |    Problem   |    Pool   | Fixed  |                  Time                  | Frac. |
+       |    frac.     rounded |   size  diff | size gen. |        |    fix       gen     solve   tot. cum. |       |
+      1       4708       4708        0  104     104    0      0        n/a       n/a     n/a     n/a          0%
+      2     2886.5       2961       42   42     146   42      0        n/a       n/a     n/a     n/a          6%
+      3       1938       2235       81   39     188   42      0        n/a       n/a     n/a     n/a          1%
+      4     1392.9       1752      128   47     234   46      0        n/a       n/a     n/a     n/a          6%
+      5    1265.03       2149      164   36     270   36      0        n/a       n/a     n/a     n/a          6%
+      6    1150.93       1945      194   30     308   38      0        n/a       n/a     n/a     n/a          3%
+      7    1119.55       1839      197    3     345   37      0        n/a       n/a     n/a     n/a          2%
+      8    1051.47       1751      202    5     384   39      0        n/a       n/a     n/a     n/a          2%
+      9     1033.5       1837      201   -1     418   34      0        n/a       n/a     n/a     n/a          3%
+     10    1022.01       1929      200   -1     456   38      0        n/a       n/a     n/a     n/a          2%
+     11    1013.21       1619      200    0     497   41      0        n/a       n/a     n/a     n/a          1%
+     12    1010.05       1515      203    3     533   36      0        n/a       n/a     n/a     n/a          4%
+     13    1006.88       1509      195   -8     563   30      0        n/a       n/a     n/a     n/a          3%
+     14    1005.66       1308      198    3     608   45      0        n/a       n/a     n/a     n/a          9%
+     15    1005.33       1408      184  -14     652   44      0        n/a       n/a     n/a     n/a          2%
+-- Fixed for [A: 4, B: 9, C: 2, D: 6, E: 7, F: 9, G: 4, H: 8, I: 5, J: 7, K: 8, L: 7, M: 7, N: 9, O: 6, P: 4, Q: 4, R: 4, S: 3, T: 2] at level 0.75.
+-- Members remaining: (A, 2) (C, 3) (D, 2) (E, 2) (G, 2) (I, 2) (O, 2) (S, 3) (T, 2) and total is 9.
+     16       1103       1103       44 -140     135    6    523        n/a       n/a     n/a     n/a          0%
+     17       1055       1711       50    6     142    7      0        n/a       n/a     n/a     n/a          7%
+     18       1005       1005       55    5     152   10      0        n/a       n/a     n/a     n/a          0%
+     19       1005       1005       57    2     159    7      0        n/a       n/a     n/a     n/a          0%
+-- Stopping. Objective change is -1.58025e-11 with an integer feasible solution.
+Colgen done.
+Elapsed time : n/a.
+  Iter |       Objective      |    Problem   |    Pool   | Fixed  |                  Time                  | Frac. |
+       |    frac.     rounded |   size  diff | size gen. |        |    fix       gen     solve   tot. cum. |       |
+      1       1005       1005       57    0     682    0      0        n/a       n/a     n/a     n/a          0%
+      2       1005       1005      211  154     723   41      0        n/a       n/a     n/a     n/a          0%
+      3       1005       1308      318  107     766   43      0        n/a       n/a     n/a     n/a          2%
+      4       1005       1207      356   38     805   39      0        n/a       n/a     n/a     n/a          2%
+-- Fixed for [A: 8, B: 9, C: 3, D: 9, E: 8, F: 8, G: 8, H: 8, I: 4, J: 3, K: 8, L: 7, M: 9, N: 9, O: 8, P: 4, Q: 4, R: 4, S: 4, T: 4] at level 0.75.
+-- Members remaining: (C, 2) (F, 2) (I, 2) (J, 2) and total is 4.
+      5       1005       1308       44 -312     138    3    670        n/a       n/a     n/a     n/a          9%
+-- Fixed for [F: 1, J: 1] at level 0.75.
+-- Members remaining: (C, 2) (I, 2) (J, 2) and total is 3.
+      6       1005       1308       33  -11     136    3      5        n/a       n/a     n/a     n/a          1%
+-- Fixing column 174 to 1 for member J, was 0.5
+-- Members remaining: (C, 2) (I, 2) (J, 2) and total is 3.
+      7       1106       1106       38    5     138    2      1        n/a       n/a     n/a     n/a          0%
+      8       1005       1005       36   -2     140    2      0        n/a       n/a     n/a     n/a          0%
+      9       1005       1005       36    0     142    2      0        n/a       n/a     n/a     n/a          0%
+-- Stopping. Objective change is 0 with an integer feasible solution.
+Colgen done.
+Elapsed time : n/a.
+Solution objectives: [1005, 1005].

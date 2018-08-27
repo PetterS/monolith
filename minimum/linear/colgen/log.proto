@@ -1,0 +1,65 @@
+syntax = "proto3";
+import "google/protobuf/any.proto";
+
+package minimum.linear.colgen.proto;
+
+message LogEntry {
+	int32 iteration = 11;
+	double fractional_objective = 3;
+	double integer_objective = 4;
+
+	int64 active_size = 5;
+	int64 active_size_change = 6;
+	int64 pool_size = 7;
+	int64 pool_size_change = 8;
+	int64 fixed_columns = 9;
+
+	double cumulative_time = 10;
+
+	repeated Event event = 12;
+
+	SetPartitioningLogEntry set_partitioning = 1;
+	repeated google.protobuf.Any additional_data = 2;
+}
+
+message Event {
+	// A specific shift was fixed to a member.
+	message FixShift {
+		double level = 1;
+	}
+
+	// A whole column was fixed to a member.
+	// (thereby eliminating them from further optimization)
+	message FixColumn {
+		double fractional_value = 1;
+	}
+
+	// An integer solution was obtained and the solution is
+	// fully fixed.
+	message IntegerSolution {
+	}
+
+	oneof event_type {
+		FixShift fix_shift = 1;
+		FixColumn fix_column = 2;
+		IntegerSolution integer_solution = 3;
+	}
+}
+
+message SetPartitioningLogEntry {
+	repeated Member member = 1;
+
+	message Member {
+		// Arbitrary id of this member.
+		string id = 1;
+
+		// Current fractional solution for this member, computed
+		// as the total contribution to each constraint.
+		repeated Constraint constraint = 2;
+	}
+
+	message Constraint {
+		bool fixed = 1;
+		float value = 2;
+	}
+}

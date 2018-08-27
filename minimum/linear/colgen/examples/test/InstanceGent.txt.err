@@ -1,0 +1,27 @@
+Setting up colgen problem...             [  OK  ]
+Creating initial rosters...              [  OK  ]
+-- Objective for initial columns: 417
+  Iter |       Objective      |    Problem   |    Pool   | Fixed  |                  Time                  | Frac. |
+       |    frac.     rounded |   size  diff | size gen. |        |    fix       gen     solve   tot. cum. |       |
+      1        417        417        0   67      67    0      0        n/a       n/a     n/a     n/a          0%
+      2        311        311       62   62     217  150      0        n/a       n/a     n/a     n/a          0%
+      3        307        307      191  129     392  175      0        n/a       n/a     n/a     n/a          0%
+      4        304        304      284   93     517  125      0        n/a       n/a     n/a     n/a          0%
+      5        301        301      361   77     692  175      0        n/a       n/a     n/a     n/a          0%
+      6        301        301      361    0     692    0      0        n/a       n/a     n/a     n/a          0%
+-- Stopping. Objective change is 0 with an integer feasible solution.
+Colgen done.
+Elapsed time : n/a.
+  Iter |       Objective      |    Problem   |    Pool   | Fixed  |                  Time                  | Frac. |
+       |    frac.     rounded |   size  diff | size gen. |        |    fix       gen     solve   tot. cum. |       |
+      1        301        301      361    0     692    0      0        n/a       n/a     n/a     n/a          0%
+      2        301        301      361    0     692    0      0        n/a       n/a     n/a     n/a          0%
+      3        301        301      361    0     692    0      0        n/a       n/a     n/a     n/a          0%
+      4        301        301      361    0     692    0      0        n/a       n/a     n/a     n/a          0%
+-- Fixed for [65: 4, 66: 6, 67: 4, 68: 4, 69: 5, 70: 4, 71: 4, 72: 4, 73: 4, 74: 4, 75: 4, 76: 6, 77: 6, 78: 4, 79: 4, 80: 6, 81: 6, 82: 5, 83: 4, 84: 6, 85: 4, 86: 4, 87: 6, 88: 4, 89: 4] at level 0.75.
+-- Members remaining: and total is 0.
+      5        301        301       37 -324      82    0    610        n/a       n/a     n/a     n/a          0%
+-- Stopping. Objective change is 0 with an integer feasible solution.
+Colgen done.
+Elapsed time : n/a.
+Solution objectives: [301, 301].

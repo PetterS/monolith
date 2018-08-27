@@ -1,0 +1,86 @@
+  A: L=L=L= . . . . .d1L=L=L= . .d1d1L= . .d1d1d1d1d1 . .L=L=
+  B: L=L=L=L= . . .E=E= . .E=E=E= . .E=E=E= . . .E=d2 . .E=E=
+  C:  . . .L=L=L=L=L= . .L=L= . .E=E=E=E=d1 . .E=E= . . .E=E=
+  D:  . .d2N=N=N=N= . .d2L= . . .d2d2d2d1L= . . .d2d2 . .d1d1
+  E:  . .E=E=E= . .L=L=L=L=L= . .L=L=N= . .L=L=L=L= . . .L=L=
+  F: L=L= . .N=N=N=N=N= . . .d1d1d1d1d1 . . . . .L=L=L=L= . .
+  G:  . . . .d2d2d2d2N= . . . . .d2d2d2L=L= . .L=N=N= . .L=L=
+  H: d2d2d2d1d2 . . .d2d2 . .d1d1d1 . .d1d1 . .d1d2d2 . .d1d1
+  I:  . . .E=d1 . . .E=E=N=N= . . . .E=E=d1d1N= . .E=E=d1d1d1
+  J:  . .N=N= . . .d1d1d1 . .L=L=N=N=N= . .L=L=L= . .L=L= . .
+  K: d1d1 . .d1d1d1d1 . .d1d1 . . . .N=N=N=N=N= . .d1d1d1 . .
+  L: d2d1d1L= . . . . .E=E=E= . .d2d1L= . .d2d2d2d2d2 . .E=E=
+  M: E=d1L= . . . .E=E=E= . .L=L=L=L=L= . .E=E=E=E=d1 . . . .
+  N: L=L= . .L=L=L=L=L= . . . . .L=L=L=L=L= . . . . .L=L=L=L=
+  O: L=L=L=L=L= . . . .E=E=E= . .E=E=d2 . .d2d2d2d2d2 . .E=E=
+  P:  . . .L=L= . . .d2d1d1d1 . .d1d2 . .d1d1d1d1d1 . .E=E=E=
+  Q: E=E=E=d1d1 . . .L=L= . .d1L=L=L=L= . . . . .d1L= . .d1L=
+  R: d1d2d1d2 . . .E=E=d2d2 . . .E=d2 . .E=E=E=d2d1 . .E=d1d1
+  S: E=N= . .d2L=L=L=L= . . .E=d1d1d1d1 . . . .d1d1L=L=L= . .
+  T: d2d2d2 . .d2d2d2 . .d2L=L=L=L= . .d2d2 . .L=L=L=L=L= . .
+  U:  . . .d2L=L=L=L= . .L=L=L=L= . .d2d2d2 . .E=L=L=L=L= . .
+  V:  . . .L=L=L=L=L= . .E=E= . .d1d1d2L=L= . . . .d2d2d2d2d1
+  W: d2d1 . .N=N=N=N=N= . . . . . . .E=d2d1d1d1 . .E=E=E= . .
+  X: E=E=d1 . .E=E=E=E=E= . . . .E=E= . .E=d1d1d1 . .E=E= . .
+  Y: d2d2d2d1 . . . .E=d1d1d1 . . . . .d1d2d2d1L= . .E=E=d1d2
+  Z:  . . . .d2d2d2d2d2 . . . . .E=E=E=d2N= . .d2L= . .d2N=N=
+ AA:  . . .d1d1d1d1 . .d1d1d1d1d1 . .d1d1L= . . .d1d1d1L= . .
+ AB: E=E= . .E=E=E=d2d1 . .d2N=N= . .E=d2d2 . .d2d2d1d2 . . .
+ AC: L=N= . . .E=E=E=E=N= . . . .E=E=E= . .E=E=N= . .E=d1 . .
+ AD:  . .E=E=E= . .d2d2L=L= . . .d2d2 . .E=E=E=E=E= . .d2d2d2
+ AE:  . .d1d2d1 . . .d2d1d1d2 . . . .L=L=L=L=L= . .d2d2d2d2d2
+ AF:  . .E=E=E= . . .E=E=d2d2 . .L=L= . .d2d2d2d2d2 . .E=E=E=
+ AG: E=E=E=E=E= . . . . .E=E=E=E= . .E=E=E=E=E= . . .E=E= . .
+ AH: E=E=L=L= . . . . . .d2d2 . .L=L= . .E=E=E= . . .E=d2L=L=
+ AI: d1d1d1N= . . .d1N= . .E=L=L= . .L=L=L=L=L= . .L=L= . . .
+ AJ:  .E=N= . .E=E=E=d1 . .L=L=L= . .E=L= . . .L=L=N=N=N= . .
+ AK: L=L= . . .d2d1d1d1L= . .E=E=E=E=d1 . . . .E=E=E=d1d1 . .
+ AL: d2d2L= . . . .d1L= . .d1d1d1d2 . .d1d1 . .L=N= . .d1d2d1
+ AM:  . .E=E=E=E=E= . . .E=E= . .E=E=E=E=E= . . .N=N= . .E=E=
+ AN:  .d2d2 . .E=E= . . .d2d2L=L=N= . .E=d1 . .E=E=E=E=N= . .
+Final solution (checked for feasibility): 4761
+-- Cover costs  : 4707
+-- Roster costs : 54
+  A: L=L=L= . . . . .L=L=L=L= . .d1d1L= . .d1d1d1d1d1 . .L=L=
+  B: L=L=L=L= . . .d2d2 . .E=E=E= . .E=d2d2d2d2 . . .E=d2 . .
+  C:  . . .L=L=L=L=L= . .L=L= . .E=E=E=E=d1 . .E=E= . .E=E=E=
+  D: d2d2 . .N=N=N=N=N= . . . . .d2d1d2d2L= . . .d2d2 . .d1d1
+  E: L=N= . . . . .L=L=L=L=L= . . . . .E=E=L=L=L= . .E=E=L=L=
+  F: L=L= . .N=N=N=N=N= . . .d1d1d1d1d1 . . . . .L=L=L=L= . .
+  G:  . . . .d2d2d2d2N= . . . . .d2d2d2L=L= . .L=N=N= . .L=L=
+  H: d2d2d2d1 . . .d1d2 . . .d1d1d1 . .d1d1 . .d1d1 . .d2d2d1
+  I:  . . .E=d1 . . .E=E=N=N= . . . .E=E=d1d1N= . .E=E=d1d1d1
+  J:  . .N=N= . . .d1d1d1 . .L=L=N=N=N= . .L=L=L= . .L=L= . .
+  K: d1d1d1 . . . .d1d1d1 . . . . . .N=N=N=N=N= . .d1d1d1d1d1
+  L: d2d1d1L= . . . . .E=E=E= . .d2d1d2 . .d2d2d2d2d2 . .E=E=
+  M: E=d1L= . . . .E=E=E= . .L=L=L=L=L= . .E=E=E=E=d1 . . . .
+  N:  . .L=L=L=L=L= . .L=L= . . .L=L=L=L=L= . . . . .L=L=L=L=
+  O: L=L=L=L=L= . . . . .E=E= . .d2d2L= . .E=E=d2d2d2 . .E=E=
+  P:  . . .L=L= . .E=d2d1d2d1 . .d1d2 . .E=d1d1d1L= . . .E=E=
+  Q: E=E=E=d1d1 . .L=L=L= . .d1L=L=L=L= . . . . .d1L= . .d1L=
+  R: d1d2d2d2 . . .E=E=d2d1 . . .d1d2 . .E=E=E=d1 . .d2d1d1d1
+  S: d2d2 . .d2L=L=L=L= . . .E=d1d1d1d1 . . . .d2d2d2d1N= . .
+  T: L=L=L= . .d2d2d2 . .d2d2d2L=L= . .d2L= . .L=L=L=L=L= . .
+  U:  . . .d2L=L=L=L= . .L=L=L=L= . .d2d2d2 . . .L=L=L=L= . .
+  V:  . . .L=L=L=L=L= . .d1d1 . .E=E=E=d1d1 . .L=N= . .E=E=E=
+  W:  . .d1N=N=N=N= . .d2d2 . . .E=d2d2 . .d2d2d2d1d2 . . . .
+  X: E=d1d1 . .E=E=E=E=E= . . . .E=E=E= . .d1d1d1 . .E=E= . .
+  Y: d2d2d2d1d1 . . .d2d1d1d1 . . . . .d1d2d2d1L= . .E=E=d1d2
+  Z:  . . . . .E=E=d1N=N= . . . .E=E=E=E=N= . .E=d1d2 . .E=E=
+ AA: d1d1 . .d1d1d1 . .d1d1d1d1d1 . .d1L=L= . . .d1d1L=L= . .
+ AB: E=E= . .E=E=E=d2d1 . .d2N=N= . .E=d2d2 . .d2d2d1d2 . . .
+ AC: N=N= . .E=E=E=E=E= . . . . .L=L=N= . .d1L=L=L=L= . . . .
+ AD:  . .E=E=d2 . . .E=E=E=E= . .L=L= . .E=E=E=E=E= . .d2d2d2
+ AE:  . .d1d1d1 . . .d2d2d1d2 . . . .L=L=L=L=L= . .d2d2d2d2d2
+ AF:  . .E=E=E= . . .E=E=d2d2 . .L=L= . .d2d2d2d2d2 . .E=E=E=
+ AG: E=E=E=E=E= . . . . .E=E=E=E= . . .E=E=E=E= . . .E=E= . .
+ AH: E=E=E=E=E= . . . . .d2d2 . .E=E= . .E=E=E= . . .E=d2L=L=
+ AI: E=N= . . . . .E=E= . .E=E=E= . .L=L=L=L=L= . .L=L=L= . .
+ AJ:  .E=N= . .E=E=E=d1 . .L=L=L= . .E=L= . . .L=L=N=N=N= . .
+ AK: L=L= . . .d2d1d1d1L= . .E=E=E=E=d1 . . . .E=E=E=d1d1 . .
+ AL: d2d2d2 . . . .d2L= . .d1d1d1d2 . .d1d1 . .N=N= . .d1d2d1
+ AM:  . .E=E=E=E=E= . . .E=E= . .E=E=E=E=E= . . .E=E= . .N=N=
+ AN:  . .d2d2d2d1d1 . . .L=L=L=L=N= . .d1d1 . .E=E=E=E= . . .
+Final solution (checked for feasibility): 4650
+-- Cover costs  : 4605
+-- Roster costs : 45

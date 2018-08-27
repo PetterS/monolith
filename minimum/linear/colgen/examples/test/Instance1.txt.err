@@ -1,0 +1,62 @@
+Number of days: 14
+-- Shift D, 480 min.
+Number of shifts: 1
+-- Shift 0. OK after = [0] forbidden_after = []
+-- Staff  A: Consequtive limit [2, 5]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14].
+-- Staff  B: Consequtive limit [2, 5]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14].
+-- Staff  C: Consequtive limit [2, 5]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14].
+-- Staff  D: Consequtive limit [2, 5]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14].
+-- Staff  E: Consequtive limit [2, 5]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14].
+-- Staff  F: Consequtive limit [2, 5]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14].
+-- Staff  G: Consequtive limit [2, 5]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14].
+-- Staff  H: Consequtive limit [2, 5]. Time limit [3360, 4320]. Max weekends: 1. Max shifts: [14].
+Number of staff: 8
+Read 21 shift on requests.
+Read 5 shift off requests.
+Read 14 cover constraints.
+Dividing all minutes by 480
+Setting up colgen problem...             [  OK  ]
+Creating initial rosters...              [  OK  ]
+-- Objective for initial columns: 1723
+  Iter |       Objective      |    Problem   |    Pool   | Fixed  |                  Time                  | Frac. |
+       |    frac.     rounded |   size  diff | size gen. |        |    fix       gen     solve   tot. cum. |       |
+      1       1723       1723        0   36      36    0      0        n/a       n/a     n/a     n/a          0%
+      2        917        917       24   24      60   24      0        n/a       n/a     n/a     n/a          0%
+      3        814        814       42   18      78   18      0        n/a       n/a     n/a     n/a          0%
+      4        613        613       52   10      94   16      0        n/a       n/a     n/a     n/a          0%
+      5        558        710       61    9     103    9      0        n/a       n/a     n/a     n/a          9%
+      6        558        710       62    1     105    2      0        n/a       n/a     n/a     n/a          6%
+-- Fixed for [A: 4, B: 9, C: 8, D: 7, E: 9, F: 6, G: 8, H: 8] at level 0.75.
+-- Members remaining: (A, 2) (F, 2) and total is 2.
+      7        558        710       13  -49      43    0     62        n/a       n/a     n/a     n/a          9%
+-- Fixing column 66 to 1 for member F, was 0.5
+-- Members remaining: (A, 2) (F, 2) and total is 2.
+      8        609        609       14    1      43    0      1        n/a       n/a     n/a     n/a          0%
+      9        608        608       13   -1      44    1      0        n/a       n/a     n/a     n/a          0%
+-- Fixed for [A: 4, F: 3] at level 0.75.
+-- Members remaining: and total is 0.
+     10        608        608        8   -5      36    0      8        n/a       n/a     n/a     n/a          0%
+-- Stopping. Objective change is 0 with an integer feasible solution.
+Colgen done.
+Elapsed time : n/a.
+  Iter |       Objective      |    Problem   |    Pool   | Fixed  |                  Time                  | Frac. |
+       |    frac.     rounded |   size  diff | size gen. |        |    fix       gen     solve   tot. cum. |       |
+      1        608        608        8    0     106    0      0        n/a       n/a     n/a     n/a          0%
+      2        558        710       46   38     106    0      0        n/a       n/a     n/a     n/a          1%
+      3        558        811       53    7     109    3      0        n/a       n/a     n/a     n/a          3%
+      4        558        609       54    1     109    0      0        n/a       n/a     n/a     n/a          6%
+-- Fixed for [A: 4, B: 9, C: 8, D: 7, E: 9, F: 6, G: 8, H: 8] at level 0.75.
+-- Members remaining: (A, 2) (F, 2) and total is 2.
+      5        558        710       16  -38      45    0     64        n/a       n/a     n/a     n/a          7%
+      6        558        710       16    0      45    0      0        n/a       n/a     n/a     n/a          7%
+-- Fixing column 66 to 1 for member F, was 0.5
+-- Members remaining: (A, 2) (F, 2) and total is 2.
+      7        609        609       12   -4      45    0      1        n/a       n/a     n/a     n/a          0%
+      8        608        608       12    0      45    0      0        n/a       n/a     n/a     n/a          0%
+-- Fixed for [A: 4, F: 3] at level 0.75.
+-- Members remaining: and total is 0.
+      9        608        608        8   -4      36    0      9        n/a       n/a     n/a     n/a          0%
+-- Stopping. Objective change is 0 with an integer feasible solution.
+Colgen done.
+Elapsed time : n/a.
+Solution objectives: [608, 608].

@@ -1,0 +1,165 @@
+Number of days: 28
+-- Shift E, 480 min.
+-- Shift D, 480 min.
+-- Shift L, 480 min.
+Number of shifts: 3
+-- Shift 0. OK after = [0, 1, 2] forbidden_after = []
+-- Shift 1. OK after = [1, 2] forbidden_after = [0]
+-- Shift 2. OK after = [2] forbidden_after = [0, 1]
+-- Staff  A: Consequtive limit [2, 5]. Time limit [7560, 8640]. Max weekends: 2. Max shifts: [28, 28, 0].
+-- Staff  B: Consequtive limit [2, 5]. Time limit [7560, 8640]. Max weekends: 2. Max shifts: [28, 28, 0].
+-- Staff  C: Consequtive limit [2, 5]. Time limit [7560, 8640]. Max weekends: 2. Max shifts: [28, 28, 9].
+-- Staff  D: Consequtive limit [2, 5]. Time limit [7560, 8640]. Max weekends: 2. Max shifts: [28, 0, 0].
+-- Staff  E: Consequtive limit [2, 5]. Time limit [7560, 8640]. Max weekends: 2. Max shifts: [28, 28, 9].
+-- Staff  F: Consequtive limit [2, 5]. Time limit [7560, 8640]. Max weekends: 2. Max shifts: [28, 0, 9].
+-- Staff  G: Consequtive limit [2, 5]. Time limit [7560, 8640]. Max weekends: 2. Max shifts: [28, 0, 0].
+-- Staff  H: Consequtive limit [2, 5]. Time limit [7560, 8640]. Max weekends: 2. Max shifts: [28, 28, 9].
+-- Staff  I: Consequtive limit [2, 5]. Time limit [7560, 8640]. Max weekends: 2. Max shifts: [28, 28, 0].
+-- Staff  J: Consequtive limit [2, 5]. Time limit [7560, 8640]. Max weekends: 2. Max shifts: [28, 28, 9].
+-- Staff  K: Consequtive limit [2, 6]. Time limit [7560, 8640]. Max weekends: 2. Max shifts: [28, 28, 9].
+-- Staff  L: Consequtive limit [2, 6]. Time limit [7560, 8640]. Max weekends: 2. Max shifts: [28, 28, 9].
+-- Staff  M: Consequtive limit [2, 6]. Time limit [7560, 8640]. Max weekends: 2. Max shifts: [28, 28, 9].
+-- Staff  N: Consequtive limit [2, 6]. Time limit [7560, 8640]. Max weekends: 2. Max shifts: [28, 28, 9].
+-- Staff  O: Consequtive limit [2, 6]. Time limit [7560, 8640]. Max weekends: 2. Max shifts: [28, 28, 0].
+-- Staff  P: Consequtive limit [1, 5]. Time limit [3240, 4320]. Max weekends: 3. Max shifts: [0, 28, 4].
+-- Staff  Q: Consequtive limit [1, 5]. Time limit [3240, 4320]. Max weekends: 3. Max shifts: [28, 28, 0].
+-- Staff  R: Consequtive limit [1, 5]. Time limit [3240, 4320]. Max weekends: 3. Max shifts: [28, 28, 4].
+-- Staff  S: Consequtive limit [1, 5]. Time limit [3240, 4320]. Max weekends: 3. Max shifts: [28, 28, 4].
+-- Staff  T: Consequtive limit [1, 5]. Time limit [3240, 4320]. Max weekends: 3. Max shifts: [28, 28, 0].
+Number of staff: 20
+Read 104 shift on requests.
+Read 64 shift off requests.
+Read 84 cover constraints.
+Dividing all minutes by 480
+Setting up colgen problem...             [  OK  ]
+Creating initial rosters...              [  OK  ]
+-- Objective for initial columns: 8597
+  Iter |       Objective      |    Problem   |    Pool   | Fixed  |                  Time                  | Frac. |
+       |    frac.     rounded |   size  diff | size gen. |        |    fix       gen     solve   tot. cum. |       |
+      1       8597       8597        0  188     188    0      0        n/a       n/a     n/a     n/a          0%
+      2     5053.9       5331       45   45     233   45      0        n/a       n/a     n/a     n/a          1%
+      3    4224.61       4627       79   34     267   34      0        n/a       n/a     n/a     n/a          8%
+      4    3185.18       4408      110   31     300   33      0        n/a       n/a     n/a     n/a          9%
+      5    2685.89       5023      151   41     339   39      0        n/a       n/a     n/a     n/a          8%
+      6    2354.37       3793      184   33     373   34      0        n/a       n/a     n/a     n/a          2%
+      7    2018.33       4825      215   31     418   45      0        n/a       n/a     n/a     n/a          0%
+      8    1873.28       2984      226   11     450   32      0        n/a       n/a     n/a     n/a          0%
+      9    1712.22       3607      251   25     483   33      0        n/a       n/a     n/a     n/a          7%
+     10    1565.75       4415      253    2     526   43      0        n/a       n/a     n/a     n/a          9%
+     11    1473.48       3620      256    3     556   30      0        n/a       n/a     n/a     n/a          2%
+     12    1351.63       3202      244  -12     584   28      0        n/a       n/a     n/a     n/a          2%
+     13    1312.91       3604      255   11     615   31      0        n/a       n/a     n/a     n/a          1%
+     14    1267.75       3810      257    2     650   35      0        n/a       n/a     n/a     n/a          2%
+     15    1219.68       3517      251   -6     683   33      0        n/a       n/a     n/a     n/a          3%
+     16       1197       3513      254    3     719   36      0        n/a       n/a     n/a     n/a          4%
+     17    1188.96       3410      259    5     748   29      0        n/a       n/a     n/a     n/a          3%
+     18     1179.6       3108      269   10     788   40      0        n/a       n/a     n/a     n/a          1%
+     19    1166.85       3592      275    6     824   36      0        n/a       n/a     n/a     n/a          0%
+     20    1156.62       4190      285   10     856   32      0        n/a       n/a     n/a     n/a          8%
+     21    1148.52       3475      277   -8     891   35      0        n/a       n/a     n/a     n/a          0%
+     22    1143.45       3682      280    3     935   44      0        n/a       n/a     n/a     n/a          1%
+     23    1133.48       4171      270  -10     976   41      0        n/a       n/a     n/a     n/a          1%
+     24    1125.17       3341      261   -9    1014   38      0        n/a       n/a     n/a     n/a          2%
+     25    1120.03       3545      257   -4    1048   34      0        n/a       n/a     n/a     n/a          2%
+     26    1116.15       2934      244  -13    1081   33      0        n/a       n/a     n/a     n/a          4%
+     27    1110.94       3322      238   -6    1122   41      0        n/a       n/a     n/a     n/a          4%
+     28     1107.3       2921      227  -11    1152   30      0        n/a       n/a     n/a     n/a          6%
+     29    1103.43       3525      219   -8    1189   37      0        n/a       n/a     n/a     n/a          6%
+     30    1100.37       2918      210   -9    1214   25      0        n/a       n/a     n/a     n/a          8%
+     31    1095.32       2609      221   11    1259   45      0        n/a       n/a     n/a     n/a          7%
+     32    1092.12       2812      223    2    1296   37      0        n/a       n/a     n/a     n/a          6%
+     33    1091.22       3316      221   -2    1337   41      0        n/a       n/a     n/a     n/a          7%
+-- Fixed for [A: 18, B: 7, C: 7, D: 15, E: 6, F: 18, G: 18, H: 11, I: 12, J: 10, K: 7, L: 17, M: 12, N: 12, O: 10, P: 4, Q: 3, R: 7, S: 5, T: 6] at level 0.75.
+-- Members remaining: (B, 2) (C, 3) (D, 2) (E, 3) (H, 2) (I, 2) (K, 3) (M, 2) (N, 2) (O, 2) (P, 5) (Q, 5) (S, 5) (T, 2) and total is 14.
+     34    1640.79       2504       71 -150     248   16   1105        n/a       n/a     n/a     n/a          1%
+     35     1362.1       2513       85   14     264   16      0        n/a       n/a     n/a     n/a          2%
+     36    1165.92       1804      101   16     280   16      0        n/a       n/a     n/a     n/a          2%
+     37     1112.1       2211      113   12     294   14      0        n/a       n/a     n/a     n/a          5%
+     38    1091.42       2106      130   17     309   15      0        n/a       n/a     n/a     n/a          9%
+     39    1088.76       2001      134    4     324   15      0        n/a       n/a     n/a     n/a          6%
+     40    1087.47       1797      144   10     338   14      0        n/a       n/a     n/a     n/a          6%
+     41    1086.82       1693      153    9     353   15      0        n/a       n/a     n/a     n/a          5%
+-- Fixed for [C: 11, D: 3, E: 6, H: 1, I: 2, J: 8, K: 4, M: 4, N: 4, O: 3, P: 2, Q: 2, R: 2, S: 3, T: 3] at level 0.75.
+-- Members remaining: (B, 3) (E, 2) (H, 3) (I, 4) (K, 2) (M, 2) (O, 3) (P, 4) (Q, 4) and total is 9.
+     42     1288.5       2202       63  -90     239    9    123        n/a       n/a     n/a     n/a          4%
+     43       1122       1491       73   10     249   10      0        n/a       n/a     n/a     n/a          4%
+     44     1108.8       1491       80    7     258    9      0        n/a       n/a     n/a     n/a          6%
+     45       1088       1595       83    3     266    8      0        n/a       n/a     n/a     n/a          9%
+     46     1086.5       1997       89    6     274    8      0        n/a       n/a     n/a     n/a          8%
+     47       1086       1997       87   -2     284   10      0        n/a       n/a     n/a     n/a          9%
+-- Fixed for [E: 1, H: 1, I: 2, O: 1] at level 0.75.
+-- Members remaining: (B, 2) (E, 2) (H, 2) (I, 2) (K, 2) (M, 2) (O, 2) (P, 2) (Q, 2) (S, 2) and total is 10.
+     48       1086       1997       83   -4     270    8     22        n/a       n/a     n/a     n/a          9%
+-- Fixed to zero for [A: 32, B: 33, C: 20, D: 58, E: 15, F: 37, G: 58, H: 12, I: 38, J: 9, K: 19, L: 17, M: 16, N: 23, O: 33, P: 44, Q: 35, R: 15, S: 28, T: 38] at level 0.05.
+-- Fixing column 813 to 1 for member Q, was 0.5
+-- Members remaining: (B, 2) (E, 2) (H, 2) (I, 2) (K, 2) (M, 2) (O, 2) (P, 2) (Q, 2) (S, 2) and total is 10.
+     49       1222       1290       74   -9     272    7      1        n/a       n/a     n/a     n/a          0%
+     50    1188.67       1390       73   -1     278    6      0        n/a       n/a     n/a     n/a          2%
+     51       1188       1289       67   -6     284    6      0        n/a       n/a     n/a     n/a          4%
+-- Fixed for [E: 2, Q: 4] at level 0.75.
+-- Fixed to zero for [A: 3, B: 4, C: 2, E: 15, F: 1, G: 1, H: 10, I: 5, J: 5, K: 12, L: 13, M: 21, N: 9, O: 3, P: 6, Q: 13, R: 21, S: 18, T: 8] at level 0.05.
+-- Members remaining: (B, 2) (E, 3) (H, 2) (I, 2) (K, 2) (M, 3) (O, 2) (P, 3) (S, 2) and total is 9.
+     52       1187       1187       64   -3     266    4     16        n/a       n/a     n/a     n/a          0%
+-- Fixed for [B: 11, E: 1, H: 4, I: 2, K: 5, M: 2, O: 3, P: 3, S: 1] at level 0.75.
+-- Fixed to zero for [B: 2, E: 3, F: 1, H: 2, I: 1, J: 2, K: 1, L: 2, M: 4, N: 2, O: 4, Q: 4, R: 3, S: 4, T: 1] at level 0.05.
+-- Members remaining: and total is 0.
+     53       1187       1187       23  -41     191    0     75        n/a       n/a     n/a     n/a          0%
+-- Stopping. Objective change is 0 with an integer feasible solution.
+Colgen done.
+Elapsed time : n/a.
+  Iter |       Objective      |    Problem   |    Pool   | Fixed  |                  Time                  | Frac. |
+       |    frac.     rounded |   size  diff | size gen. |        |    fix       gen     solve   tot. cum. |       |
+      1       1187       1187       23    0    1543    0      0        n/a       n/a     n/a     n/a          0%
+      2       1187       1187      232  209    1586   43      0        n/a       n/a     n/a     n/a          0%
+      3    1089.34       1188      648  416    1617   31      0        n/a       n/a     n/a     n/a          3%
+      4    1080.86       1490      766  118    1652   35      0        n/a       n/a     n/a     n/a          1%
+      5    1076.93       2996      797   31    1683   31      0        n/a       n/a     n/a     n/a          0%
+      6    1075.91       2790      819   22    1718   35      0        n/a       n/a     n/a     n/a          0%
+      7    1075.27       2588      645 -174    1748   30      0        n/a       n/a     n/a     n/a          3%
+-- Fixed for [A: 12, B: 7, C: 6, D: 16, E: 6, F: 18, G: 16, H: 13, I: 13, J: 7, K: 9, L: 9, M: 18, N: 17, O: 12, P: 8, Q: 4, R: 6, S: 8, T: 9] at level 0.75.
+-- Members remaining: (A, 2) (B, 3) (C, 6) (D, 2) (E, 4) (G, 2) (H, 3) (I, 4) (J, 3) (K, 4) (L, 2) (O, 3) (P, 2) (Q, 4) (S, 3) and total is 15.
+      8    1200.39       2388      105 -540     346   12   1414        n/a       n/a     n/a     n/a          3%
+      9    1155.96       2294      120   15     358   12      0        n/a       n/a     n/a     n/a          4%
+     10    1133.46       2082      124    4     370   12      0        n/a       n/a     n/a     n/a          9%
+     11    1095.27       2081      136   12     381   11      0        n/a       n/a     n/a     n/a          0%
+     12    1080.89       2083      148   12     390    9      0        n/a       n/a     n/a     n/a          8%
+     13    1077.49       2081      145   -3     401   11      0        n/a       n/a     n/a     n/a          0%
+     14     1077.2       2083      143   -2     410    9      0        n/a       n/a     n/a     n/a          1%
+-- Fixed for [A: 6, B: 3, C: 2, D: 1, E: 1, G: 2, H: 4, I: 3, J: 4, K: 1, Q: 2] at level 0.75.
+-- Members remaining: (B, 2) (C, 3) (D, 2) (E, 3) (I, 3) (J, 2) (K, 4) (L, 2) (O, 3) (P, 2) (Q, 4) (R, 3) (S, 2) and total is 13.
+     15    1267.78       1987       86  -57     296    9    123        n/a       n/a     n/a     n/a          2%
+     16    1198.06       2184      103   17     307   11      0        n/a       n/a     n/a     n/a          7%
+     17     1149.8       1986      108    5     317   10      0        n/a       n/a     n/a     n/a          3%
+     18    1091.46       1683      112    4     327   10      0        n/a       n/a     n/a     n/a          6%
+     19    1089.84       1683      117    5     335    8      0        n/a       n/a     n/a     n/a          6%
+     20    1089.69       1579      118    1     341    6      0        n/a       n/a     n/a     n/a          4%
+-- Fixed for [C: 3, D: 1, E: 4, I: 2, J: 4, K: 2, L: 9, Q: 1, R: 3, S: 1] at level 0.75.
+-- Members remaining: (B, 5) (C, 2) (E, 3) (J, 3) (K, 3) (O, 4) (P, 5) (Q, 2) and total is 8.
+     21     1229.5       1685       61  -57     248    6     99        n/a       n/a     n/a     n/a          0%
+     22     1228.5       1379       66    5     255    7      0        n/a       n/a     n/a     n/a          2%
+-- Fixed for [C: 3, E: 3, J: 2, K: 1, O: 1] at level 0.75.
+-- Members remaining: (B, 2) (C, 2) (E, 2) (K, 2) (O, 3) (P, 2) (Q, 2) and total is 7.
+     23       1228       1480       49  -17     238    4     21        n/a       n/a     n/a     n/a          0%
+-- Fixing column 1282 to 1 for member P, was 0.5
+-- Members remaining: (B, 2) (C, 2) (E, 2) (K, 2) (O, 2) (P, 2) (Q, 2) and total is 7.
+     24       1276       1377       54    5     243    5      1        n/a       n/a     n/a     n/a          6%
+     25     1275.5       1477       55    1     247    4      0        n/a       n/a     n/a     n/a          9%
+-- Fixed for [O: 2, P: 1] at level 0.75.
+-- Members remaining: (B, 2) (C, 2) (E, 4) (K, 2) (O, 2) (Q, 2) and total is 6.
+     26       1275       1477       50   -5     238    5     14        n/a       n/a     n/a     n/a          0%
+-- Fixing column 1347 to 1 for member O, was 0.5
+-- Members remaining: (B, 2) (C, 2) (E, 4) (K, 2) (O, 2) (Q, 2) and total is 6.
+     27       1326       1477       51    1     241    3      1        n/a       n/a     n/a     n/a          7%
+     28       1326       1477       51    0     244    3      0        n/a       n/a     n/a     n/a          7%
+-- Fixed for [O: 2] at level 0.75.
+-- Members remaining: (B, 2) (C, 2) (E, 4) (K, 2) (Q, 2) and total is 5.
+     29     1295.6       1377       44   -7     240    3      7        n/a       n/a     n/a     n/a          2%
+     30     1275.5       1377       50    6     244    4      0        n/a       n/a     n/a     n/a          0%
+     31       1275       1275       48   -2     246    2      0        n/a       n/a     n/a     n/a          0%
+-- Fixed for [B: 6, C: 3, E: 3, K: 3, Q: 2] at level 0.75.
+-- Members remaining: and total is 0.
+     32       1275       1275       23  -25     191    2     57        n/a       n/a     n/a     n/a          0%
+-- Stopping. Objective change is 0 with an integer feasible solution.
+Colgen done.
+Elapsed time : n/a.
+Solution objectives: [1187, 1275].
