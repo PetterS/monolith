@@ -1,0 +1,35 @@
+
+* Supposing the MUMPS libraries with appropriate arithmetic have been
+generated, you may compile the example drivers by typing either
+
+   make (which defaults to make d)
+   make s
+   make d
+   make c
+   make z
+or make all
+
+
+* For the small Fortran driver, see comments in simpletest.F and try for example
+    "mpirun -np 2 ./ssimpletest < input_simpletest_real"
+    "mpirun -np 2 ./dsimpletest < input_simpletest_real"
+    "mpirun -np 2 ./csimpletest < input_simpletest_cmplx"
+    "mpirun -np 2 ./zsimpletest < input_simpletest_cmplx"
+  if you are using the parallel version of MUMPS, or
+
+    "./ssimpletest < input_simpletest_real"
+    "./dsimpletest < input_simpletest_real"
+    "./csimpletest < input_simpletest_cmplx"
+    "./zsimpletest < input_simpletest_cmplx"
+
+  if you are using the sequential version.
+
+  The solution should be (1,2,3,4,5)
+
+
+* For the small C driver, only an example using double arithmetic is available.
+  Try for example
+    "mpirun -np 3 ./c_example" (parallel version),or
+    "./c_example" (sequential version).
+  The solution should be (1,2)
+

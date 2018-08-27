@@ -1,0 +1,14 @@
+ACKNOWLEDGEMENT:
+
+This directory contains an implementation of the PORD algorithm,
+as described in:
+     "Towards a tighter coupling of bottom-up and top-down sparse
+      matrix ordering methods, J. Schulze, BIT, 41:4, pp 800, 2001."
+
+It is extracted from the SPACE-1.0 package developed at the
+University of Paderborn by Juergen Schulze (js@juergenschulze.de).
+A lot of the code in SPACE-1.0 was itself based on the SPOOLES
+package by Cleve Ashcraft.
+
+We are grateful to Juergen Schulze for letting us distribute PORD.
+

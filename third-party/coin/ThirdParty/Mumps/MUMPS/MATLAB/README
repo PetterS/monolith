@@ -1,0 +1,119 @@
+README
+************************************************************************
+*  This MATLAB interface to MUMPS is provided to you free of charge.   *
+*  It is part of the MUMPS package (see ../Conditions_of_use) and is   *
+*  public domain. Up-to-date copies can be obtained from the Web       *
+*  pages        http://mumps.enseeiht.fr/         or                   *
+*  		http://graal.ens-lyon.fr/MUMPS                         *
+*                                                                      *
+*  THIS MATERIAL IS PROVIDED AS IS, WITH ABSOLUTELY NO WARRANTY	       *
+*  EXPRESSED OR IMPLIED.  ANY USE IS AT YOUR OWN RISK.                 *
+*                                                                      *
+*  More info is available in the main MUMPS users' guide and in:       *
+*                                                                      *
+*   [2006] Aurelia Fevre, Jean-Yves L'Excellent and Stephane Pralet    *
+*   MATLAB and Scilab interfaces to MUMPS. LIP Report RR2006-06.       *
+*   Also available as an INRIA and an ENSEEIHT-IRIT Technical Report.  *
+*                                                                      *
+************************************************************************
+
+
+************************************************************************
+ COMPATIBILITY WITH OCTAVE:
+ Thanks to the Octave MEX compatibility, it is pretty straightforward
+ to generate an Octave interface for MUMPS. Please refer to the comments
+ inside the make.inc file for instructions on how to do it. Everything
+ said below applies for both cases where a MATLAB or an Octave interface 
+ is needed.
+ Thanks to Carlo De Falco from "Politecnico di Milano" for support 
+ provided on the usage of Octave.
+************************************************************************
+
+
+ CONTENT OF DIRECTORY:
+
+ README
+ Makefile 
+ make.inc
+ initmumps.m 
+ mumps.m
+ other *.m files: examples of usage
+ mumpsmex.c : MATLAB CMEX-file to let you use sequential MUMPS 
+              in double precision from MATLAB.
+
+
+
+ USAGE:
+ see example below and MUMPS documentation
+ 
+
+
+ INSTALLATION:
+ You need
+ 1- 
+ to have compiled/linked a sequential version of MUMPS with both double
+ precision and double complex arithmetics ("make d" and "make z",
+ or "make all"). The code must be position-independent (with gfortran,
+ please add the option -fPIC in both FC, CC, and FL of the main
+ Makefile.inc). Note that this also applies to other external
+ libraries, such as METIS, SCOTCH, BLAS, etc.
+
+
+ 2- 
+ to edit make.inc.
+ Modify paths for orderings and BLAS. You should also 
+ give the path to the runtime libraries of your FORTRAN 90
+ compiler. Some commented examples are provided.
+
+ You can use something like
+ nm -o /opt/intel/compiler80/lib/*.a | grep <name of missing compiler symbol>
+ to find which libraries should be added 
+
+ 3-
+ to run the make command
+
+ 4- We advise you to run the 4 examples 
+    simple_example.m, multiplerhs_example.m, sparserhs_example.m and
+    schurrhs_example.m
+    and to check that everything runs smoothly.
+
+******************************************************************************
+
+ LIMITATION:
+
+ This interface enables you to call MUMPS from MATLAB only
+ in sequential for double precision and double complex versions.
+ For example it does not support:
+  - other versions (single precision arithmetic, parallel version...)
+  - elemental format
+
+******************************************************************************
+
+
+%Example of using MUMPS in matlab
+% initialization of a matlab MUMPS structure
+id = initmumps;
+% here JOB = -1, the call to MUMPS will initialize C and fortran MUMPS structure
+id = dmumps(id);
+% load a sparse matrix
+load lhr01;
+mat = Problem.A;
+% JOB = 6 means analysis+facto+solve
+id.JOB = 6;
+id.ICNTL(6) = 0;
+% we set the rigth hand side
+id.RHS = ones(size(mat,1),1);
+%call to mumps
+id = dmumps(id,mat);
+% we see that there is a memory problem in INFO(1) and INFO(2)
+id.INFOG(1)
+id.INFOG(2)
+% we activate the numerical maximum transversal 
+id.ICNTL(6) = 6;
+id = dmumps(id,mat);
+norm(mat*id.SOL - ones(size(mat,1),1),'inf')
+% solution OK
+% destroy mumps instance
+id.JOB = -2;
+id = dmumps(id)
+

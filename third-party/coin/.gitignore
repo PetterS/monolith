@@ -1,0 +1,10 @@
+*.a
+*.err
+/bin
+CMakeFiles
+cmake_install.cmake
+CPackConfig.cmake
+CPackSourceConfig.cmake
+CTestTestfile.cmake
+Makefile
+/ThirdParty/lapack/bin

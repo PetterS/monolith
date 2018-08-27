@@ -1,0 +1,3 @@
+[submodule "ThirdParty/mp"]
+	path = ThirdParty/mp
+	url = https://github.com/ampl/mp.git
