@@ -8,6 +8,8 @@ __pycache__
 # Non-public source
 misc/*.py
 misc/*.cpp
+vision/surveillance_camera.cpp
+vision/vision_demo.cpp
 
 # Non-public stuff for boundvariable.
 misc/boundvariable/codex.out
