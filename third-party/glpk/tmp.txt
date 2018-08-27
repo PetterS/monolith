@@ -1,0 +1,945 @@
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+	new file:   ../../minimum/.mypy_cache/3.6/minimum/linear/__init__.data.json
+	new file:   ../../minimum/.mypy_cache/3.6/minimum/linear/__init__.meta.json
+	new file:   ../../minimum/.mypy_cache/3.6/minimum/linear/constraint.data.json
+	new file:   ../../minimum/.mypy_cache/3.6/minimum/linear/constraint.meta.json
+	new file:   ../../minimum/.mypy_cache/3.6/minimum/linear/ip.data.json
+	new file:   ../../minimum/.mypy_cache/3.6/minimum/linear/ip.meta.json
+	new file:   ../../minimum/.mypy_cache/3.6/minimum/linear/proto/__init__.data.json
+	new file:   ../../minimum/.mypy_cache/3.6/minimum/linear/proto/__init__.meta.json
+	new file:   ../../minimum/.mypy_cache/3.6/minimum/linear/solver.data.json
+	new file:   ../../minimum/.mypy_cache/3.6/minimum/linear/solver.meta.json
+	new file:   ../../minimum/.mypy_cache/3.6/minimum/linear/sum.data.json
+	new file:   ../../minimum/.mypy_cache/3.6/minimum/linear/sum.meta.json
+	new file:   ../../minimum/.mypy_cache/3.6/minimum/linear/variable.data.json
+	new file:   ../../minimum/.mypy_cache/3.6/minimum/linear/variable.meta.json
+	new file:   ../../minimum/.mypy_cache/3.6/mypy_extensions.data.json
+	new file:   ../../minimum/.mypy_cache/3.6/mypy_extensions.meta.json
+	new file:   ../../minimum/.mypy_cache/3.6/numbers.data.json
+	new file:   ../../minimum/.mypy_cache/3.6/numbers.meta.json
+	new file:   ../../minimum/.mypy_cache/3.6/os/__init__.data.json
+	new file:   ../../minimum/.mypy_cache/3.6/os/__init__.meta.json
+	new file:   ../../minimum/.mypy_cache/3.6/os/path.data.json
+	new file:   ../../minimum/.mypy_cache/3.6/os/path.meta.json
+	new file:   ../../minimum/.mypy_cache/3.6/posix.data.json
+	new file:   ../../minimum/.mypy_cache/3.6/posix.meta.json
+	new file:   ../../minimum/.mypy_cache/3.6/string.data.json
+	new file:   ../../minimum/.mypy_cache/3.6/string.meta.json
+	new file:   ../../minimum/.mypy_cache/3.6/sys.data.json
+	new file:   ../../minimum/.mypy_cache/3.6/sys.meta.json
+	new file:   ../../minimum/.mypy_cache/3.6/threading.data.json
+	new file:   ../../minimum/.mypy_cache/3.6/threading.meta.json
+	new file:   ../../minimum/.mypy_cache/3.6/time.data.json
+	new file:   ../../minimum/.mypy_cache/3.6/time.meta.json
+	new file:   ../../minimum/.mypy_cache/3.6/types.data.json
+	new file:   ../../minimum/.mypy_cache/3.6/types.meta.json
+	new file:   ../../minimum/.mypy_cache/3.6/typing.data.json
+	new file:   ../../minimum/.mypy_cache/3.6/typing.meta.json
+	new file:   ../../minimum/.mypy_cache/3.6/unittest/__init__.data.json
+	new file:   ../../minimum/.mypy_cache/3.6/unittest/__init__.meta.json
+	new file:   ../../minimum/bibliotek/examples/online_islands2.cpp
+	new file:   ../../minimum/cluster/build_to_gcloud.py
+	new file:   ../../minimum/cluster/https.py
+	new file:   ../../minimum/cluster/https2.py
+	new file:   ../../minimum/cluster/server.crt
+	new file:   ../../minimum/cluster/server.key
+	new file:   ../../minimum/cluster/server.pem
+	new file:   ../../minimum/linear/.mypy_cache/3.6/_importlib_modulespec.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/_importlib_modulespec.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/abc.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/abc.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/builtins.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/builtins.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/codecs.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/codecs.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/contextlib.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/contextlib.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/enum.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/enum.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/importlib/__init__.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/importlib/__init__.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/importlib/abc.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/importlib/abc.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/importlib/machinery.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/importlib/machinery.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/io.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/io.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/ip_test.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/ip_test.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/logging/__init__.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/logging/__init__.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/__init__.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/__init__.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/bibliotek/__init__.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/bibliotek/__init__.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/bibliotek/c_api.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/bibliotek/c_api.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/bibliotek/c_api.meta.json.a97ab3464afcc0e2
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/linear/__init__.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/linear/__init__.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/linear/constraint.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/linear/constraint.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/linear/ip.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/linear/ip.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/linear/proto/__init__.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/linear/proto/__init__.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/linear/solver.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/linear/solver.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/linear/sum.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/linear/sum.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/linear/variable.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/minimum/linear/variable.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/mypy_extensions.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/mypy_extensions.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/numbers.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/numbers.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/os/__init__.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/os/__init__.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/os/path.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/os/path.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/string.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/string.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/sum_test.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/sum_test.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/sys.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/sys.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/threading.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/threading.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/time.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/time.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/types.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/types.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/typing.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/typing.meta.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/unittest/__init__.data.json
+	new file:   ../../minimum/linear/.mypy_cache/3.6/unittest/__init__.meta.json
+	new file:   ../../minimum/linear/C.mps
+	new file:   ../../minimum/linear/__init__.pyc
+	new file:   ../../minimum/linear/data/ICICT/Converted.txt
+	new file:   ../../minimum/linear/data/ICICT/ICICT_Problems.xlsx
+	new file:   ../../minimum/linear/data/ICICT/The Core Staff Rostering Problem - Benchmark Instances.url
+	new file:   ../../minimum/linear/data/ICICT/convert.py
+	new file:   ../../minimum/linear/data/ICICT/jobs.txt
+	new file:   ../../minimum/linear/data/ICICT/prefs.txt
+	new file:   ../../minimum/linear/data/NSPLib/converted.txt
+	new file:   ../../minimum/linear/data/convex.mps
+	new file:   ../../minimum/linear/data/convex.mps.log
+	new file:   ../../minimum/linear/data/csp/A tree search algorithm for the crew scheduling problem.pdf
+	new file:   ../../minimum/linear/data/csp/Crew scheduling.html
+	new file:   ../../minimum/linear/data/csp/csp100.txt
+	new file:   ../../minimum/linear/data/csp/csp150.txt
+	new file:   ../../minimum/linear/data/csp/csp200.txt
+	new file:   ../../minimum/linear/data/csp/csp250.txt
+	new file:   ../../minimum/linear/data/csp/csp300.txt
+	new file:   ../../minimum/linear/data/csp/csp350.txt
+	new file:   ../../minimum/linear/data/csp/csp400.txt
+	new file:   ../../minimum/linear/data/csp/csp450.txt
+	new file:   ../../minimum/linear/data/csp/csp50.txt
+	new file:   ../../minimum/linear/data/csp/csp500.txt
+	new file:   ../../minimum/linear/data/cutting_stock/hard28.txt
+	new file:   ../../minimum/linear/data/cutting_stock/harddir/3xMTP0xJES.dat
+	new file:   ../../minimum/linear/data/cutting_stock/harddir/53NIRUPs.dat
+	new file:   ../../minimum/linear/data/cutting_stock/harddir/5xMTP0.dat
+	new file:   ../../minimum/linear/data/cutting_stock/harddir/HART1CSP.dat
+	new file:   ../../minimum/linear/data/cutting_stock/harddir/gau3
+	new file:   ../../minimum/linear/data/cutting_stock/harddir/hard28
+	new file:   ../../minimum/linear/data/cutting_stock/harddir/m200l10l70000L100000b1b100f0r0-5_compl.txt
+	new file:   ../../minimum/linear/data/cutting_stock/hardres/hard28.txt
+	new file:   ../../minimum/linear/data/cutting_stock/readme.txt
+	new file:   ../../minimum/linear/data/model.mps
+	new file:   ../../minimum/linear/data/model.mps.log
+	new file:   ../../minimum/linear/data/netlib/25FV47.SIF
+	new file:   ../../minimum/linear/data/netlib/25FV47.SIF.log
+	new file:   ../../minimum/linear/data/netlib/80BAU3B.SIF
+	new file:   ../../minimum/linear/data/netlib/80BAU3B.SIF.log
+	new file:   ../../minimum/linear/data/netlib/ADLITTLE.SIF
+	new file:   ../../minimum/linear/data/netlib/ADLITTLE.SIF.log
+	new file:   ../../minimum/linear/data/netlib/AFIRO.SIF
+	new file:   ../../minimum/linear/data/netlib/AFIRO.SIF.log
+	new file:   ../../minimum/linear/data/netlib/AGG.SIF
+	new file:   ../../minimum/linear/data/netlib/AGG.SIF.log
+	new file:   ../../minimum/linear/data/netlib/AGG2.SIF
+	new file:   ../../minimum/linear/data/netlib/AGG2.SIF.log
+	new file:   ../../minimum/linear/data/netlib/AGG3.SIF
+	new file:   ../../minimum/linear/data/netlib/AGG3.SIF.log
+	new file:   ../../minimum/linear/data/netlib/BANDM.SIF
+	new file:   ../../minimum/linear/data/netlib/BANDM.SIF.log
+	new file:   ../../minimum/linear/data/netlib/BEACONFD.SIF
+	new file:   ../../minimum/linear/data/netlib/BEACONFD.SIF.log
+	new file:   ../../minimum/linear/data/netlib/BLEND.SIF
+	new file:   ../../minimum/linear/data/netlib/BLEND.SIF.log
+	new file:   ../../minimum/linear/data/netlib/BNL1.SIF
+	new file:   ../../minimum/linear/data/netlib/BNL1.SIF.log
+	new file:   ../../minimum/linear/data/netlib/BNL2.SIF
+	new file:   ../../minimum/linear/data/netlib/BNL2.SIF.log
+	new file:   ../../minimum/linear/data/netlib/BOEING1.SIF
+	new file:   ../../minimum/linear/data/netlib/BOEING1.SIF.log
+	new file:   ../../minimum/linear/data/netlib/BOEING2.SIF
+	new file:   ../../minimum/linear/data/netlib/BOEING2.SIF.log
+	new file:   ../../minimum/linear/data/netlib/BORE3D.SIF
+	new file:   ../../minimum/linear/data/netlib/BORE3D.SIF.log
+	new file:   ../../minimum/linear/data/netlib/BRANDY.SIF
+	new file:   ../../minimum/linear/data/netlib/BRANDY.SIF.log
+	new file:   ../../minimum/linear/data/netlib/CAPRI.SIF
+	new file:   ../../minimum/linear/data/netlib/CAPRI.SIF.log
+	new file:   ../../minimum/linear/data/netlib/CYCLE.SIF
+	new file:   ../../minimum/linear/data/netlib/CYCLE.SIF.log
+	new file:   ../../minimum/linear/data/netlib/CZPROB.SIF
+	new file:   ../../minimum/linear/data/netlib/CZPROB.SIF.log
+	new file:   ../../minimum/linear/data/netlib/D2Q06C.SIF
+	new file:   ../../minimum/linear/data/netlib/D2Q06C.SIF.log
+	new file:   ../../minimum/linear/data/netlib/D6CUBE.SIF
+	new file:   ../../minimum/linear/data/netlib/D6CUBE.SIF.log
+	new file:   ../../minimum/linear/data/netlib/DEGEN2.SIF
+	new file:   ../../minimum/linear/data/netlib/DEGEN2.SIF.log
+	new file:   ../../minimum/linear/data/netlib/DEGEN3.SIF
+	new file:   ../../minimum/linear/data/netlib/DEGEN3.SIF.log
+	new file:   ../../minimum/linear/data/netlib/DFL001.SIF
+	new file:   ../../minimum/linear/data/netlib/DFL001.SIF.log
+	new file:   ../../minimum/linear/data/netlib/E226.SIF
+	new file:   ../../minimum/linear/data/netlib/E226.SIF.log
+	new file:   ../../minimum/linear/data/netlib/ETAMACRO.SIF
+	new file:   ../../minimum/linear/data/netlib/ETAMACRO.SIF.log
+	new file:   ../../minimum/linear/data/netlib/FFFFF800.SIF
+	new file:   ../../minimum/linear/data/netlib/FFFFF800.SIF.log
+	new file:   ../../minimum/linear/data/netlib/FINNIS.SIF
+	new file:   ../../minimum/linear/data/netlib/FINNIS.SIF.log
+	new file:   ../../minimum/linear/data/netlib/FIT1D.SIF
+	new file:   ../../minimum/linear/data/netlib/FIT1D.SIF.log
+	new file:   ../../minimum/linear/data/netlib/FIT1P.SIF
+	new file:   ../../minimum/linear/data/netlib/FIT1P.SIF.log
+	new file:   ../../minimum/linear/data/netlib/FIT2D.SIF
+	new file:   ../../minimum/linear/data/netlib/FIT2D.SIF.log
+	new file:   ../../minimum/linear/data/netlib/FIT2P.SIF
+	new file:   ../../minimum/linear/data/netlib/FIT2P.SIF.log
+	new file:   ../../minimum/linear/data/netlib/FORPLAN.SIF
+	new file:   ../../minimum/linear/data/netlib/FORPLAN.SIF.log
+	new file:   ../../minimum/linear/data/netlib/GANGES.SIF
+	new file:   ../../minimum/linear/data/netlib/GANGES.SIF.log
+	new file:   ../../minimum/linear/data/netlib/GFRD-PNC.SIF
+	new file:   ../../minimum/linear/data/netlib/GFRD-PNC.SIF.log
+	new file:   ../../minimum/linear/data/netlib/GREENBEA.SIF
+	new file:   ../../minimum/linear/data/netlib/GREENBEA.SIF.log
+	new file:   ../../minimum/linear/data/netlib/GREENBEB.SIF
+	new file:   ../../minimum/linear/data/netlib/GREENBEB.SIF.log
+	new file:   ../../minimum/linear/data/netlib/GROW15.SIF
+	new file:   ../../minimum/linear/data/netlib/GROW15.SIF.log
+	new file:   ../../minimum/linear/data/netlib/GROW22.SIF
+	new file:   ../../minimum/linear/data/netlib/GROW22.SIF.log
+	new file:   ../../minimum/linear/data/netlib/GROW7.SIF
+	new file:   ../../minimum/linear/data/netlib/GROW7.SIF.log
+	new file:   ../../minimum/linear/data/netlib/ISRAEL.SIF
+	new file:   ../../minimum/linear/data/netlib/ISRAEL.SIF.log
+	new file:   ../../minimum/linear/data/netlib/KB2.SIF
+	new file:   ../../minimum/linear/data/netlib/KB2.SIF.log
+	new file:   ../../minimum/linear/data/netlib/LOTFI.SIF
+	new file:   ../../minimum/linear/data/netlib/LOTFI.SIF.log
+	new file:   ../../minimum/linear/data/netlib/MAROS-R7.SIF
+	new file:   ../../minimum/linear/data/netlib/MAROS-R7.SIF.log
+	new file:   ../../minimum/linear/data/netlib/MAROS.SIF
+	new file:   ../../minimum/linear/data/netlib/MAROS.SIF.log
+	new file:   ../../minimum/linear/data/netlib/MODSZK1.SIF
+	new file:   ../../minimum/linear/data/netlib/MODSZK1.SIF.log
+	new file:   ../../minimum/linear/data/netlib/NESM.SIF
+	new file:   ../../minimum/linear/data/netlib/NESM.SIF.log
+	new file:   ../../minimum/linear/data/netlib/PEROLD.SIF
+	new file:   ../../minimum/linear/data/netlib/PEROLD.SIF.log
+	new file:   ../../minimum/linear/data/netlib/PILOT-JA.SIF
+	new file:   ../../minimum/linear/data/netlib/PILOT-JA.SIF.log
+	new file:   ../../minimum/linear/data/netlib/PILOT-WE.SIF
+	new file:   ../../minimum/linear/data/netlib/PILOT-WE.SIF.log
+	new file:   ../../minimum/linear/data/netlib/PILOT.SIF
+	new file:   ../../minimum/linear/data/netlib/PILOT.SIF.log
+	new file:   ../../minimum/linear/data/netlib/PILOT4.SIF
+	new file:   ../../minimum/linear/data/netlib/PILOT4.SIF.log
+	new file:   ../../minimum/linear/data/netlib/PILOT87.SIF
+	new file:   ../../minimum/linear/data/netlib/PILOT87.SIF.log
+	new file:   ../../minimum/linear/data/netlib/PILOTNOV.SIF
+	new file:   ../../minimum/linear/data/netlib/PILOTNOV.SIF.log
+	new file:   ../../minimum/linear/data/netlib/QAP12.SIF
+	new file:   ../../minimum/linear/data/netlib/QAP12.SIF.log
+	new file:   ../../minimum/linear/data/netlib/QAP15.SIF
+	new file:   ../../minimum/linear/data/netlib/QAP15.SIF.log
+	new file:   ../../minimum/linear/data/netlib/QAP8.SIF
+	new file:   ../../minimum/linear/data/netlib/QAP8.SIF.log
+	new file:   ../../minimum/linear/data/netlib/README
+	new file:   ../../minimum/linear/data/netlib/RECIPELP.SIF
+	new file:   ../../minimum/linear/data/netlib/RECIPELP.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SC105.SIF
+	new file:   ../../minimum/linear/data/netlib/SC105.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SC205.SIF
+	new file:   ../../minimum/linear/data/netlib/SC205.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SC50A.SIF
+	new file:   ../../minimum/linear/data/netlib/SC50A.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SC50B.SIF
+	new file:   ../../minimum/linear/data/netlib/SC50B.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SCAGR25.SIF
+	new file:   ../../minimum/linear/data/netlib/SCAGR25.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SCAGR7.SIF
+	new file:   ../../minimum/linear/data/netlib/SCAGR7.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SCFXM1.SIF
+	new file:   ../../minimum/linear/data/netlib/SCFXM1.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SCFXM2.SIF
+	new file:   ../../minimum/linear/data/netlib/SCFXM2.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SCFXM3.SIF
+	new file:   ../../minimum/linear/data/netlib/SCFXM3.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SCORPION.SIF
+	new file:   ../../minimum/linear/data/netlib/SCORPION.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SCRS8.SIF
+	new file:   ../../minimum/linear/data/netlib/SCRS8.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SCSD1.SIF
+	new file:   ../../minimum/linear/data/netlib/SCSD1.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SCSD6.SIF
+	new file:   ../../minimum/linear/data/netlib/SCSD6.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SCSD8.SIF
+	new file:   ../../minimum/linear/data/netlib/SCSD8.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SCTAP1.SIF
+	new file:   ../../minimum/linear/data/netlib/SCTAP1.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SCTAP2.SIF
+	new file:   ../../minimum/linear/data/netlib/SCTAP2.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SCTAP3.SIF
+	new file:   ../../minimum/linear/data/netlib/SCTAP3.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SEBA.SIF
+	new file:   ../../minimum/linear/data/netlib/SEBA.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SHARE1B.SIF
+	new file:   ../../minimum/linear/data/netlib/SHARE1B.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SHARE2B.SIF
+	new file:   ../../minimum/linear/data/netlib/SHARE2B.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SHELL.SIF
+	new file:   ../../minimum/linear/data/netlib/SHELL.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SHIP04L.SIF
+	new file:   ../../minimum/linear/data/netlib/SHIP04L.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SHIP04S.SIF
+	new file:   ../../minimum/linear/data/netlib/SHIP04S.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SHIP08L.SIF
+	new file:   ../../minimum/linear/data/netlib/SHIP08L.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SHIP08S.SIF
+	new file:   ../../minimum/linear/data/netlib/SHIP08S.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SHIP12L.SIF
+	new file:   ../../minimum/linear/data/netlib/SHIP12L.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SHIP12S.SIF
+	new file:   ../../minimum/linear/data/netlib/SHIP12S.SIF.log
+	new file:   ../../minimum/linear/data/netlib/SIERRA.SIF
+	new file:   ../../minimum/linear/data/netlib/SIERRA.SIF.log
+	new file:   ../../minimum/linear/data/netlib/STAIR.SIF
+	new file:   ../../minimum/linear/data/netlib/STAIR.SIF.log
+	new file:   ../../minimum/linear/data/netlib/STANDATA.SIF
+	new file:   ../../minimum/linear/data/netlib/STANDATA.SIF.log
+	new file:   ../../minimum/linear/data/netlib/STANDMPS.SIF
+	new file:   ../../minimum/linear/data/netlib/STANDMPS.SIF.log
+	new file:   ../../minimum/linear/data/netlib/STOCFOR1.SIF
+	new file:   ../../minimum/linear/data/netlib/STOCFOR1.SIF.log
+	new file:   ../../minimum/linear/data/netlib/STOCFOR2.SIF
+	new file:   ../../minimum/linear/data/netlib/STOCFOR2.SIF.log
+	new file:   ../../minimum/linear/data/netlib/STOCFOR3.SIF
+	new file:   ../../minimum/linear/data/netlib/STOCFOR3.SIF.log
+	new file:   ../../minimum/linear/data/netlib/TRUSS.SIF
+	new file:   ../../minimum/linear/data/netlib/TRUSS.SIF.log
+	new file:   ../../minimum/linear/data/netlib/TUFF.SIF
+	new file:   ../../minimum/linear/data/netlib/TUFF.SIF.log
+	new file:   ../../minimum/linear/data/netlib/VTP-BASE.SIF
+	new file:   ../../minimum/linear/data/netlib/VTP-BASE.SIF.log
+	new file:   ../../minimum/linear/data/netlib/WOOD1P.SIF
+	new file:   ../../minimum/linear/data/netlib/WOOD1P.SIF.log
+	new file:   ../../minimum/linear/data/netlib/WOODW.SIF
+	new file:   ../../minimum/linear/data/netlib/WOODW.SIF.log
+	new file:   ../../minimum/linear/data/nrpcompetition/long01.txt
+	new file:   ../../minimum/linear/data/nrpcompetition/long02.txt
+	new file:   ../../minimum/linear/data/nrpcompetition/long03.txt
+	new file:   ../../minimum/linear/data/nrpcompetition/long04.txt
+	new file:   ../../minimum/linear/data/nrpcompetition/long05.txt
+	new file:   ../../minimum/linear/data/nrpcompetition/long_hidden01.txt
+	new file:   ../../minimum/linear/data/nrpcompetition/long_hidden02.txt
+	new file:   ../../minimum/linear/data/nrpcompetition/long_hidden03.txt
+	new file:   ../../minimum/linear/data/nrpcompetition/long_hidden04.txt
+	new file:   ../../minimum/linear/data/nrpcompetition/long_hidden05.txt
+	new file:   ../../minimum/linear/data/nrpcompetition/long_late01.txt
+	new file:   ../../minimum/linear/data/nrpcompetition/long_late02.txt
+	new file:   ../../minimum/linear/data/nrpcompetition/long_late03.txt
+	new file:   ../../minimum/linear/data/nrpcompetition/long_late04.txt
+	new file:   ../../minimum/linear/data/nrpcompetition/long_late05.txt
+	new file:   ../../minimum/linear/data/nrpcompetition/nrpcompetition_description.pdf
+	new file:   ../../minimum/linear/data/nrpcompetition/toy1.txt
+	new file:   ../../minimum/linear/data/nrpcompetition/toy1_sol.xml
+	new file:   ../../minimum/linear/data/nrpcompetition/toy2.txt
+	new file:   ../../minimum/linear/data/shift_generation.textproto
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance1.ros
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance1.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance10.ros
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance10.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance11.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance12.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance12.txt.db
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance13.ros
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance13.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance14.ros
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance14.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance15.ros
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance15.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance16.ros
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance16.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance16.txt.db
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance17.ros
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance17.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance18.ros
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance18.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance19.ros
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance19.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance19.txt.db
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance2.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance2.txt.db
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance20.ros
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance20.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance20.txt.db
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance21.ros
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance21.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance21.txt.db
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance22.ros
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance22.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance22.txt.db
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance23.ros
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance23.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance24.ros
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance24.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance3.ros
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance3.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance3.txt.db
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance4.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance5.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance6.ros
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance6.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance7.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance7.txt.db
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance8.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance8.txt.db
+	new file:   ../../minimum/linear/data/shift_scheduling/Instance9.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/colgen.flamegraph.data
+	new file:   ../../minimum/linear/data/shift_scheduling/flamegraph.data
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance1.txt.solution-608.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance1.txt.solution-611.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance1.txt.solution-614.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance1.txt.solution-711.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance1.txt.solution-714.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance1.txt.solution-tmp.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance10.txt.solution-4639.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance10.txt.solution-4642.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance10.txt.solution-4651.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance10.txt.solution-4652.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance10.txt.solution-4661.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance10.txt.solution-4740.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance10.txt.solution-4741.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance10.txt.solution-4745.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance10.txt.solution-4755.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance10.txt.solution-4854.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance10.txt.solution-tmp.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance11.txt.solution-3454.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance12.txt.solution-tmp.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance13.txt.solution-1388.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance13.txt.solution-1456.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance13.txt.solution-1460.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance13.txt.solution-1556.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance13.txt.solution-1658.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance13.txt.solution-1861.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance13.txt.solution-1862.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance13.txt.solution-2068.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance13.txt.solution-tmp.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance14.txt.solution-1675.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance14.txt.solution-1876.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance14.txt.solution-1961.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance14.txt.solution-1976.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance14.txt.solution-1984.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance14.txt.solution-1986.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance14.txt.solution-2115.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance14.txt.solution-2169.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance14.txt.solution-2175.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance14.txt.solution-2192.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance14.txt.solution-2270.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance14.txt.solution-2316.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance14.txt.solution-2397.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance15.txt.refined-4039.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance15.txt.refined-4040.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance15.txt.refined-4041.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance15.txt.refined-4045.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance15.txt.refined-4048.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance15.txt.refined-4053.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance15.txt.solution-4083.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance15.txt.solution-4283.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance15.txt.solution-4293.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance15.txt.solution-4301.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance15.txt.solution-4374.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance15.txt.solution-4477.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance15.txt.solution-4486.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance15.txt.solution-4541.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance15.txt.solution-4650.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance15.txt.solution-4933.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance15.txt.solution-5293.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance15.txt.solution-tmp.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance16.txt.solution-3533.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance16.txt.solution-3718.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance16.txt.solution-3727.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance16.txt.solution-3941.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance16.txt.solution-4137.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance16.txt.solution-tmp.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance17.txt.solution-6056.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance17.txt.solution-6168.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance17.txt.solution-6170.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance17.txt.solution-6338.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance17.txt.solution-6490.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance17.txt.solution-6504.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance17.txt.solution-6598.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance17.txt.solution-6715.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance17.txt.solution-6923.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance17.txt.solution-6962.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance17.txt.solution-7184.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance17.txt.solution-7955.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance18.txt.solution-4745.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance18.txt.solution-4755.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance18.txt.solution-4877.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance18.txt.solution-4990.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance18.txt.solution-5010.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance18.txt.solution-5014.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance18.txt.solution-5015.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance18.txt.solution-5199.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance18.txt.solution-5212.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance18.txt.solution-5341.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance18.txt.solution-5450.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance18.txt.solution-5465.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance18.txt.solution-5684.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance18.txt.solution-5802.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance18.txt.solution-5981.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance19.txt.refined-3218.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance19.txt.solution-3228.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance19.txt.solution-3229.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance19.txt.solution-3234.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance19.txt.solution-3237.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance19.txt.solution-3290.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance19.txt.solution-3294.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance19.txt.solution-3397.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance19.txt.solution-3400.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance19.txt.solution-3413.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance19.txt.solution-3420.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance19.txt.solution-3470.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance19.txt.solution-3549.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance19.txt.solution-3588.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance19.txt.solution-3609.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance19.txt.solution-3712.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance19.txt.solution-3771.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance19.txt.solution-3791.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance19.txt.solution-3799.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance2.txt.solution-836.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance2.txt.solution-842.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance2.txt.solution-845.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance2.txt.solution-933.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance2.txt.solution-tmp.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance20.txt.refined-4943.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance20.txt.refined-4944.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance20.txt.refined-4946.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance20.txt.refined-4953.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance20.txt.refined-4966.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance20.txt.solution-5084.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance20.txt.solution-5201.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance20.txt.solution-5214.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance20.txt.solution-5219.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance20.txt.solution-5221.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance20.txt.solution-5305.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance21.txt.refined-21159.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance21.txt.solution-21187.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance21.txt.solution-21402.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance21.txt.solution-tmp.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance22.txt.refined-33155.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance22.txt.solution-35617.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance22.txt.solution-36616.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance22.txt.solution-36621.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance22.txt.solution-37218.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance22.txt.solution-41139.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance22.txt.solution-tmp.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance23.txt.booster-17421.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance23.txt.refined-17428.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance23.txt.solution-17880.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance23.txt.solution-19949.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance23.txt.solution-tmp.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance24.txt.refined-48777.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance24.txt.solution-49242.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance3.txt.solution-1005.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance3.txt.solution-1006.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance3.txt.solution-tmp.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance4.txt.solution-1731.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance4.txt.solution-1735.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance4.txt.solution-1750.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance4.txt.solution-1834.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance4.txt.solution-2041.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance4.txt.solution-tmp.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance5.txt.solution-1169.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance5.txt.solution-1275.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance5.txt.solution-1369.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance5.txt.solution-tmp.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance6.txt.solution-2067.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance6.txt.solution-2079.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance6.txt.solution-2081.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance6.txt.solution-2189.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance6.txt.solution-2281.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance6.txt.solution-2286.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance6.txt.solution-2287.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance6.txt.solution-2292.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance6.txt.solution-2296.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance6.txt.solution-2390.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance6.txt.solution-2780.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance7.txt.solution-1089.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance7.txt.solution-1186.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance7.txt.solution-1287.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance7.txt.solution-1489.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance7.txt.solution-1583.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance7.txt.solution-1797.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance7.txt.solution-tmp.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance8.txt.mps
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance8.txt.solution-1717.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance8.txt.solution-1723.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance8.txt.solution-1727.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance8.txt.solution-1818.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance8.txt.solution-1820.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance8.txt.solution-1821.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance9.txt.solution-439.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance9.txt.solution-451.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance9.txt.solution-540.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance9.txt.solution-647.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/old/Instance9.txt.solution-tmp.txt
+	new file:   ../../minimum/linear/data/shift_scheduling/readme.txt
+	new file:   ../../minimum/linear/data/vrp/X-n1001-k43.vrp
+	new file:   ../../minimum/linear/data/vrp/X-n101-k25.vrp
+	new file:   ../../minimum/linear/examples/Matlab Scheduling.ipynb
+	new file:   ../../minimum/linear/examples/Netlib.ipynb
+	new file:   ../../minimum/linear/examples/Test Numpy.ipynb
+	new file:   ../../minimum/linear/examples/Test.ipynb
+	new file:   ../../minimum/linear/examples/scheduling.xlsx
+	new file:   ../../minimum/linear/sat_pump.cpp
+	new file:   ../../misc/__init__.pyc
+	new file:   ../../misc/boundvariable/test.out
+	new file:   ../../misc/notifier.pyc
+	new file:   ../../misc/range_disassembly.cpp
+	new file:   ../../misc/signal_test.cpp
+	new file:   ../../misc/write_file_to_stdout.cpp
+	modified:   CMakeLists.txt
+	modified:   ChangeLog
+	modified:   INSTALL
+	modified:   Makefile.in
+	modified:   NEWS
+	modified:   README
+	modified:   THANKS
+	new file:   autogen.sh
+	modified:   config.h.in
+	modified:   configure
+	modified:   configure.ac
+	modified:   doc/glpk.pdf
+	modified:   doc/glpk.tex
+	modified:   doc/glpk01.tex
+	modified:   doc/glpk02.tex
+	modified:   doc/glpk03.tex
+	modified:   doc/glpk04.tex
+	modified:   doc/glpk05.tex
+	modified:   doc/glpk06.tex
+	modified:   doc/glpk08.tex
+	modified:   doc/glpk09.tex
+	modified:   doc/glpk10.tex
+	modified:   doc/glpk11.tex
+	modified:   doc/glpk12.tex
+	modified:   doc/gmpl.pdf
+	modified:   doc/gmpl.tex
+	modified:   doc/gmpl_es.pdf
+	modified:   doc/gmpl_es.tex
+	new file:   doc/gmpl_pt-BR.pdf
+	new file:   doc/gmpl_pt-BR.tex
+	modified:   doc/graphs.pdf
+	modified:   doc/graphs.tex
+	deleted:    doc/notes/dfeas.pdf
+	modified:   doc/notes/simplex1.pdf
+	modified:   doc/notes/simplex2.pdf
+	modified:   examples/CMakeLists.txt
+	modified:   examples/INDEX
+	modified:   examples/Makefile.am
+	modified:   examples/Makefile.in
+	modified:   examples/glpsol.c
+	new file:   examples/graceful.mod
+	new file:   examples/life_goe.mod
+	modified:   examples/pbn/pbn.mod
+	new file:   examples/pentomino.mod
+	new file:   examples/planarity.mod
+	new file:   examples/powpl25h.mod
+	new file:   examples/powplant.mod
+	new file:   examples/threads/Build_Multiseed.bat
+	new file:   examples/threads/Makefile
+	new file:   examples/threads/Makefile_VC
+	new file:   examples/threads/README
+	new file:   examples/threads/clustering.mod
+	new file:   examples/threads/multiseed.c
+	new file:   examples/threads/thread.h
+	new file:   examples/tiling.mod
+	new file:   examples/toto.mod
+	modified:   examples/tsp/main.c
+	modified:   examples/tsp/mincut.c
+	modified:   examples/tsp/tsplib.h
+	new file:   examples/wolfra6d.lp
+	new file:   examples/wolfra6d.mod
+	modified:   src/CMakeLists.txt
+	modified:   src/Makefile.am
+	modified:   src/Makefile.in
+	new file:   src/api/advbas.c
+	new file:   src/api/asnhall.c
+	new file:   src/api/asnlp.c
+	new file:   src/api/asnokalg.c
+	new file:   src/api/ckasn.c
+	new file:   src/api/ckcnf.c
+	new file:   src/api/cplex.c
+	new file:   src/api/cpp.c
+	new file:   src/api/cpxbas.c
+	new file:   src/api/graph.c
+	new file:   src/api/gridgen.c
+	new file:   src/api/intfeas1.c
+	new file:   src/api/maxffalg.c
+	new file:   src/api/maxflp.c
+	new file:   src/api/mcflp.c
+	new file:   src/api/mcfokalg.c
+	new file:   src/api/mcfrelax.c
+	new file:   src/api/minisat1.c
+	new file:   src/api/mpl.c
+	new file:   src/api/mps.c
+	new file:   src/api/netgen.c
+	new file:   src/api/pript.c
+	new file:   src/api/prmip.c
+	new file:   src/api/prob.h
+	new file:   src/api/prob1.c
+	new file:   src/api/prob2.c
+	new file:   src/api/prob3.c
+	new file:   src/api/prob4.c
+	new file:   src/api/prob5.c
+	new file:   src/api/prrngs.c
+	new file:   src/api/prsol.c
+	new file:   src/api/rdasn.c
+	new file:   src/api/rdcc.c
+	new file:   src/api/rdcnf.c
+	new file:   src/api/rdipt.c
+	new file:   src/api/rdmaxf.c
+	new file:   src/api/rdmcf.c
+	new file:   src/api/rdmip.c
+	new file:   src/api/rdprob.c
+	new file:   src/api/rdsol.c
+	new file:   src/api/rmfgen.c
+	new file:   src/api/strong.c
+	new file:   src/api/topsort.c
+	new file:   src/api/wcliqex.c
+	new file:   src/api/weak.c
+	new file:   src/api/wrasn.c
+	new file:   src/api/wrcc.c
+	new file:   src/api/wrcnf.c
+	new file:   src/api/wript.c
+	new file:   src/api/wrmaxf.c
+	new file:   src/api/wrmcf.c
+	new file:   src/api/wrmip.c
+	new file:   src/api/wrprob.c
+	new file:   src/api/wrsol.c
+	deleted:    src/avl.c
+	deleted:    src/avl.h
+	deleted:    src/bfd.c
+	deleted:    src/bfd.h
+	new file:   src/bflib/fvs.c
+	new file:   src/bflib/fvs.h
+	modified:   src/bflib/luf.h
+	modified:   src/bflib/sgf.c
+	modified:   src/bflib/sgf.h
+	deleted:    src/bfx.h
+	modified:   src/cglib/cfg.h
+	modified:   src/cglib/cfg1.c
+	new file:   src/cglib/cfg2.c
+	new file:   src/cglib/clqcut.c
+	new file:   src/cglib/gmicut.c
+	new file:   src/cglib/gmigen.c
+	new file:   src/cglib/mirgen.c
+	new file:   src/cglib/spv.c
+	new file:   src/cglib/spv.h
+	deleted:    src/draft.h
+	new file:   src/draft/bfd.c
+	new file:   src/draft/bfd.h
+	renamed:    src/bfx.c -> src/draft/bfx.c
+	new file:   src/draft/bfx.h
+	new file:   src/draft/draft.h
+	new file:   src/draft/glpapi06.c
+	new file:   src/draft/glpapi07.c
+	renamed:    src/glpapi08.c -> src/draft/glpapi08.c
+	new file:   src/draft/glpapi09.c
+	renamed:    src/glpapi10.c -> src/draft/glpapi10.c
+	new file:   src/draft/glpapi12.c
+	renamed:    src/glpapi13.c -> src/draft/glpapi13.c
+	new file:   src/draft/glphbm.c
+	renamed:    src/glphbm.h -> src/draft/glphbm.h
+	new file:   src/draft/glpios.h
+	new file:   src/draft/glpios01.c
+	renamed:    src/glpios02.c -> src/draft/glpios02.c
+	new file:   src/draft/glpios03.c
+	renamed:    src/glpios07.c -> src/draft/glpios07.c
+	renamed:    src/glpios09.c -> src/draft/glpios09.c
+	new file:   src/draft/glpios10.c
+	new file:   src/draft/glpios11.c
+	renamed:    src/glpios12.c -> src/draft/glpios12.c
+	renamed:    src/glpipm.c -> src/draft/glpipm.c
+	renamed:    src/glpipm.h -> src/draft/glpipm.h
+	renamed:    src/glpmat.c -> src/draft/glpmat.c
+	renamed:    src/glpmat.h -> src/draft/glpmat.h
+	new file:   src/draft/glpnpp.h
+	renamed:    src/glpnpp01.c -> src/draft/glpnpp01.c
+	renamed:    src/glpnpp02.c -> src/draft/glpnpp02.c
+	renamed:    src/glpnpp03.c -> src/draft/glpnpp03.c
+	renamed:    src/glpnpp04.c -> src/draft/glpnpp04.c
+	renamed:    src/glpnpp05.c -> src/draft/glpnpp05.c
+	renamed:    src/glpnpp06.c -> src/draft/glpnpp06.c
+	new file:   src/draft/glprgr.c
+	renamed:    src/glprgr.h -> src/draft/glprgr.h
+	renamed:    src/glpscl.c -> src/draft/glpscl.c
+	renamed:    src/glpspm.c -> src/draft/glpspm.c
+	renamed:    src/glpspm.h -> src/draft/glpspm.h
+	new file:   src/draft/glpssx.h
+	renamed:    src/glpssx01.c -> src/draft/glpssx01.c
+	new file:   src/draft/glpssx02.c
+	renamed:    src/lux.c -> src/draft/lux.c
+	new file:   src/draft/lux.h
+	modified:   src/env/env.c
+	modified:   src/env/env.h
+	new file:   src/env/stdc.c
+	modified:   src/env/stdc.h
+	modified:   src/env/stream.c
+	modified:   src/env/time.c
+	modified:   src/env/tls.c
+	deleted:    src/glpapi01.c
+	deleted:    src/glpapi02.c
+	deleted:    src/glpapi03.c
+	deleted:    src/glpapi04.c
+	deleted:    src/glpapi05.c
+	deleted:    src/glpapi06.c
+	deleted:    src/glpapi07.c
+	deleted:    src/glpapi09.c
+	deleted:    src/glpapi11.c
+	deleted:    src/glpapi12.c
+	deleted:    src/glpapi14.c
+	deleted:    src/glpapi15.c
+	deleted:    src/glpapi16.c
+	deleted:    src/glpapi17.c
+	deleted:    src/glpapi18.c
+	deleted:    src/glpapi19.c
+	deleted:    src/glpapi20.c
+	deleted:    src/glpapi21.c
+	deleted:    src/glpcpx.c
+	deleted:    src/glpdmx.c
+	deleted:    src/glpgmp.c
+	deleted:    src/glpgmp.h
+	deleted:    src/glphbm.c
+	deleted:    src/glpini01.c
+	deleted:    src/glpini02.c
+	deleted:    src/glpios.h
+	deleted:    src/glpios01.c
+	deleted:    src/glpios03.c
+	deleted:    src/glpios04.c
+	deleted:    src/glpios05.c
+	deleted:    src/glpios06.c
+	deleted:    src/glpios08.c
+	deleted:    src/glpios10.c
+	deleted:    src/glpios11.c
+	modified:   src/glpk.h
+	deleted:    src/glpmpl.h
+	deleted:    src/glpmpl01.c
+	deleted:    src/glpmpl02.c
+	deleted:    src/glpmpl03.c
+	deleted:    src/glpmpl04.c
+	deleted:    src/glpmpl05.c
+	deleted:    src/glpmpl06.c
+	deleted:    src/glpmps.c
+	deleted:    src/glpnet03.c
+	deleted:    src/glpnet04.c
+	deleted:    src/glpnet05.c
+	deleted:    src/glpnpp.h
+	deleted:    src/glprgr.c
+	deleted:    src/glpsdf.c
+	deleted:    src/glpsdf.h
+	deleted:    src/glpsql.c
+	deleted:    src/glpsql.h
+	deleted:    src/glpssx.h
+	deleted:    src/glpssx02.c
+	deleted:    src/lux.h
+	modified:   src/minisat/minisat.c
+	new file:   src/misc/avl.c
+	new file:   src/misc/avl.h
+	modified:   src/misc/bignum.h
+	new file:   src/misc/dimacs.c
+	new file:   src/misc/dimacs.h
+	new file:   src/misc/mygmp.c
+	new file:   src/misc/mygmp.h
+	modified:   src/misc/wclique1.c
+	new file:   src/mpl/mpl.h
+	new file:   src/mpl/mpl1.c
+	new file:   src/mpl/mpl2.c
+	new file:   src/mpl/mpl3.c
+	new file:   src/mpl/mpl4.c
+	new file:   src/mpl/mpl5.c
+	new file:   src/mpl/mpl6.c
+	new file:   src/mpl/mplsql.c
+	new file:   src/mpl/mplsql.h
+	deleted:    src/prob.h
+	modified:   src/proxy/proxy.c
+	modified:   src/proxy/proxy1.c
+	modified:   src/simplex/simplex.h
+	modified:   src/simplex/spxchuzr.c
+	modified:   src/simplex/spxchuzr.h
+	modified:   src/simplex/spxlp.c
+	modified:   src/simplex/spxlp.h
+	modified:   src/simplex/spxnt.c
+	modified:   src/simplex/spxnt.h
+	modified:   src/simplex/spxprim.c
+	modified:   src/simplex/spychuzc.c
+	modified:   src/simplex/spychuzc.h
+	modified:   src/simplex/spychuzr.c
+	modified:   src/simplex/spychuzr.h
+	modified:   src/simplex/spydual.c
+	new file:   w32/Build_GLPK_with_VC10_stdcall_DLL.bat
+	modified:   w32/Makefile_VC
+	modified:   w32/Makefile_VC_DLL
+	new file:   w32/Makefile_VC_stdcall_DLL
+	modified:   w32/config_VC
+	deleted:    w32/glpk_4_57.def
+	new file:   w32/glpk_4_64.def
+	new file:   w32/glpk_4_64_stdcall.def
+	modified:   w64/config_VC
+	deleted:    w64/glpk_4_57.def
+	new file:   w64/glpk_4_64.def
+	modified:   w64/makefile_VC
+	modified:   w64/makefile_VC_DLL
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	../../.cache/
+	../../.mypy_cache/
+	../../.vscode/
+	../../emscripten/emscripten.txt
+	../../emscripten/emscripten_command_line.txt
+	../../minimum/.cache/
+	../../minimum/.mypy_cache/3.6/_importlib_modulespec.data.json
+	../../minimum/.mypy_cache/3.6/_importlib_modulespec.meta.json
+	../../minimum/.mypy_cache/3.6/abc.data.json
+	../../minimum/.mypy_cache/3.6/abc.meta.json
+	../../minimum/.mypy_cache/3.6/builtins.data.json
+	../../minimum/.mypy_cache/3.6/builtins.meta.json
+	../../minimum/.mypy_cache/3.6/codecs.data.json
+	../../minimum/.mypy_cache/3.6/codecs.meta.json
+	../../minimum/.mypy_cache/3.6/collections/
+	../../minimum/.mypy_cache/3.6/enum.data.json
+	../../minimum/.mypy_cache/3.6/enum.meta.json
+	../../minimum/.mypy_cache/3.6/importlib/
+	../../minimum/.mypy_cache/3.6/io.data.json
+	../../minimum/.mypy_cache/3.6/io.meta.json
+	../../minimum/.mypy_cache/3.6/linear/
+	../../minimum/.mypy_cache/3.6/logging/
+	../../minimum/.mypy_cache/3.6/minimum/__init__.data.json
+	../../minimum/.mypy_cache/3.6/minimum/__init__.meta.json
+	../../minimum/.mypy_cache/3.6/minimum/bibliotek/
+	tmp.txt
+

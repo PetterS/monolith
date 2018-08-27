@@ -1,0 +1,263 @@
+On branch master
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	modified:   CMakeLists.txt
+	modified:   ChangeLog
+	modified:   INSTALL
+	modified:   Makefile.in
+	modified:   NEWS
+	modified:   README
+	modified:   THANKS
+	modified:   config.h.in
+	modified:   configure
+	modified:   configure.ac
+	modified:   doc/glpk.pdf
+	modified:   doc/glpk.tex
+	modified:   doc/glpk01.tex
+	modified:   doc/glpk02.tex
+	modified:   doc/glpk03.tex
+	modified:   doc/glpk04.tex
+	modified:   doc/glpk05.tex
+	modified:   doc/glpk06.tex
+	modified:   doc/glpk08.tex
+	modified:   doc/glpk09.tex
+	modified:   doc/glpk10.tex
+	modified:   doc/glpk11.tex
+	modified:   doc/glpk12.tex
+	modified:   doc/gmpl.pdf
+	modified:   doc/gmpl.tex
+	modified:   doc/gmpl_es.pdf
+	modified:   doc/gmpl_es.tex
+	modified:   doc/graphs.pdf
+	modified:   doc/graphs.tex
+	deleted:    doc/notes/dfeas.pdf
+	modified:   doc/notes/simplex1.pdf
+	modified:   doc/notes/simplex2.pdf
+	modified:   examples/CMakeLists.txt
+	modified:   examples/INDEX
+	modified:   examples/Makefile.am
+	modified:   examples/Makefile.in
+	modified:   examples/glpsol.c
+	modified:   examples/pbn/pbn.mod
+	modified:   examples/tsp/main.c
+	modified:   examples/tsp/mincut.c
+	modified:   examples/tsp/tsplib.h
+	modified:   src/CMakeLists.txt
+	modified:   src/Makefile.am
+	modified:   src/Makefile.in
+	deleted:    src/avl.c
+	deleted:    src/avl.h
+	deleted:    src/bfd.c
+	deleted:    src/bfd.h
+	modified:   src/bflib/luf.h
+	modified:   src/bflib/sgf.c
+	modified:   src/bflib/sgf.h
+	deleted:    src/bfx.c
+	deleted:    src/bfx.h
+	modified:   src/cglib/cfg.h
+	modified:   src/cglib/cfg1.c
+	deleted:    src/draft.h
+	modified:   src/env/env.c
+	modified:   src/env/env.h
+	modified:   src/env/stdc.h
+	modified:   src/env/stream.c
+	modified:   src/env/time.c
+	modified:   src/env/tls.c
+	deleted:    src/glpapi01.c
+	deleted:    src/glpapi02.c
+	deleted:    src/glpapi03.c
+	deleted:    src/glpapi04.c
+	deleted:    src/glpapi05.c
+	deleted:    src/glpapi06.c
+	deleted:    src/glpapi07.c
+	deleted:    src/glpapi08.c
+	deleted:    src/glpapi09.c
+	deleted:    src/glpapi10.c
+	deleted:    src/glpapi11.c
+	deleted:    src/glpapi12.c
+	deleted:    src/glpapi13.c
+	deleted:    src/glpapi14.c
+	deleted:    src/glpapi15.c
+	deleted:    src/glpapi16.c
+	deleted:    src/glpapi17.c
+	deleted:    src/glpapi18.c
+	deleted:    src/glpapi19.c
+	deleted:    src/glpapi20.c
+	deleted:    src/glpapi21.c
+	deleted:    src/glpcpx.c
+	deleted:    src/glpdmx.c
+	deleted:    src/glpgmp.c
+	deleted:    src/glpgmp.h
+	deleted:    src/glphbm.c
+	deleted:    src/glphbm.h
+	deleted:    src/glpini01.c
+	deleted:    src/glpini02.c
+	deleted:    src/glpios.h
+	deleted:    src/glpios01.c
+	deleted:    src/glpios02.c
+	deleted:    src/glpios03.c
+	deleted:    src/glpios04.c
+	deleted:    src/glpios05.c
+	deleted:    src/glpios06.c
+	deleted:    src/glpios07.c
+	deleted:    src/glpios08.c
+	deleted:    src/glpios09.c
+	deleted:    src/glpios10.c
+	deleted:    src/glpios11.c
+	deleted:    src/glpios12.c
+	deleted:    src/glpipm.c
+	deleted:    src/glpipm.h
+	modified:   src/glpk.h
+	deleted:    src/glpmat.c
+	deleted:    src/glpmat.h
+	deleted:    src/glpmpl.h
+	deleted:    src/glpmpl01.c
+	deleted:    src/glpmpl02.c
+	deleted:    src/glpmpl03.c
+	deleted:    src/glpmpl04.c
+	deleted:    src/glpmpl05.c
+	deleted:    src/glpmpl06.c
+	deleted:    src/glpmps.c
+	deleted:    src/glpnet03.c
+	deleted:    src/glpnet04.c
+	deleted:    src/glpnet05.c
+	deleted:    src/glpnpp.h
+	deleted:    src/glpnpp01.c
+	deleted:    src/glpnpp02.c
+	deleted:    src/glpnpp03.c
+	deleted:    src/glpnpp04.c
+	deleted:    src/glpnpp05.c
+	deleted:    src/glpnpp06.c
+	deleted:    src/glprgr.c
+	deleted:    src/glprgr.h
+	deleted:    src/glpscl.c
+	deleted:    src/glpsdf.c
+	deleted:    src/glpsdf.h
+	deleted:    src/glpspm.c
+	deleted:    src/glpspm.h
+	deleted:    src/glpsql.c
+	deleted:    src/glpsql.h
+	deleted:    src/glpssx.h
+	deleted:    src/glpssx01.c
+	deleted:    src/glpssx02.c
+	deleted:    src/lux.c
+	deleted:    src/lux.h
+	modified:   src/minisat/minisat.c
+	modified:   src/misc/bignum.h
+	modified:   src/misc/wclique1.c
+	deleted:    src/prob.h
+	modified:   src/proxy/proxy.c
+	modified:   src/proxy/proxy1.c
+	modified:   src/simplex/simplex.h
+	modified:   src/simplex/spxchuzr.c
+	modified:   src/simplex/spxchuzr.h
+	modified:   src/simplex/spxlp.c
+	modified:   src/simplex/spxlp.h
+	modified:   src/simplex/spxnt.c
+	modified:   src/simplex/spxnt.h
+	modified:   src/simplex/spxprim.c
+	modified:   src/simplex/spychuzc.c
+	modified:   src/simplex/spychuzc.h
+	modified:   src/simplex/spychuzr.c
+	modified:   src/simplex/spychuzr.h
+	modified:   src/simplex/spydual.c
+	modified:   w32/Makefile_VC
+	modified:   w32/Makefile_VC_DLL
+	modified:   w32/config_VC
+	deleted:    w32/glpk_4_57.def
+	modified:   w64/config_VC
+	deleted:    w64/glpk_4_57.def
+	modified:   w64/makefile_VC
+	modified:   w64/makefile_VC_DLL
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	../../.cache/
+	../../.mypy_cache/
+	../../.vscode/
+	../../emscripten/emscripten.txt
+	../../emscripten/emscripten_command_line.txt
+	../../minimum/.cache/
+	../../minimum/.mypy_cache/
+	../../minimum/bibliotek/examples/online_islands2.cpp
+	../../minimum/cluster/build_to_gcloud.py
+	../../minimum/cluster/https.py
+	../../minimum/cluster/https2.py
+	../../minimum/cluster/server.crt
+	../../minimum/cluster/server.key
+	../../minimum/cluster/server.pem
+	../../minimum/linear/.mypy_cache/
+	../../minimum/linear/C.mps
+	../../minimum/linear/__init__.pyc
+	../../minimum/linear/data/ICICT/
+	../../minimum/linear/data/NSPLib/converted.txt
+	../../minimum/linear/data/convex.mps
+	../../minimum/linear/data/convex.mps.log
+	../../minimum/linear/data/csp/
+	../../minimum/linear/data/cutting_stock/
+	../../minimum/linear/data/model.mps
+	../../minimum/linear/data/model.mps.log
+	../../minimum/linear/data/netlib/
+	../../minimum/linear/data/nrpcompetition/
+	../../minimum/linear/data/shift_generation.textproto
+	../../minimum/linear/data/shift_scheduling/
+	../../minimum/linear/data/vrp/X-n1001-k43.vrp
+	../../minimum/linear/data/vrp/X-n101-k25.vrp
+	../../minimum/linear/examples/Matlab Scheduling.ipynb
+	../../minimum/linear/examples/Netlib.ipynb
+	../../minimum/linear/examples/Test Numpy.ipynb
+	../../minimum/linear/examples/Test.ipynb
+	../../minimum/linear/examples/scheduling.xlsx
+	../../minimum/linear/sat_pump.cpp
+	../../misc/__init__.pyc
+	../../misc/boundvariable/test.out
+	../../misc/notifier.pyc
+	../../misc/range_disassembly.cpp
+	../../misc/signal_test.cpp
+	../../misc/write_file_to_stdout.cpp
+	autogen.sh
+	doc/gmpl_pt-BR.pdf
+	doc/gmpl_pt-BR.tex
+	examples/graceful.mod
+	examples/life_goe.mod
+	examples/pentomino.mod
+	examples/planarity.mod
+	examples/powpl25h.mod
+	examples/powplant.mod
+	examples/threads/
+	examples/tiling.mod
+	examples/toto.mod
+	examples/wolfra6d.lp
+	examples/wolfra6d.mod
+	src/api/
+	src/bflib/fvs.c
+	src/bflib/fvs.h
+	src/cglib/cfg2.c
+	src/cglib/clqcut.c
+	src/cglib/gmicut.c
+	src/cglib/gmigen.c
+	src/cglib/mirgen.c
+	src/cglib/spv.c
+	src/cglib/spv.h
+	src/draft/
+	src/env/stdc.c
+	src/misc/avl.c
+	src/misc/avl.h
+	src/misc/dimacs.c
+	src/misc/dimacs.h
+	src/misc/mygmp.c
+	src/misc/mygmp.h
+	src/mpl/
+	tmp.txt
+	tmp2.txt
+	tmp3.txt
+	w32/Build_GLPK_with_VC10_stdcall_DLL.bat
+	w32/Makefile_VC_stdcall_DLL
+	w32/glpk_4_64.def
+	w32/glpk_4_64_stdcall.def
+	w64/glpk_4_64.def
+
+no changes added to commit (use "git add" and/or "git commit -a")
