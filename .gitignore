@@ -1,0 +1,26 @@
+__pycache__
+.coverage
+.ipynb_checkpoints
+.cache
+.mypy_cache
+.pytest_cache
+
+# Non-public source
+misc/compile_test.cpp
+misc/constexpr_glob.cpp
+misc/extra/
+misc/islands.cpp
+misc/norwegian_cards.cpp
+misc/notifier.py
+misc/online_islands.cpp
+misc/online_islands2.cpp
+
+# Non-public stuff for boundvariable.
+misc/boundvariable/codex.out
+misc/boundvariable/log/
+misc/boundvariable/program.out
+misc/boundvariable/program.umz
+misc/boundvariable/tmp/
+
+# Generated files.
+htmlcov
