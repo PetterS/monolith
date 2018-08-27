@@ -6,6 +6,7 @@ __pycache__
 .pytest_cache
 
 # Non-public source
+minimum/cluster
 misc/*.py
 misc/*.cpp
 vision/surveillance_camera.cpp
