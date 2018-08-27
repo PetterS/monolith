@@ -1,0 +1,6 @@
+[run]
+omit = *_test.py 
+       *_tests.py
+       */third-party/*
+       */site-packages/*
+       */dist-packages/*
