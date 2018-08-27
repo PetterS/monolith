@@ -1,0 +1,6 @@
+*.flamegraph.data
+*.log
+*.record
+*.ros
+*.txt.db
+/old/
