@@ -190,14 +190,6 @@ class Yapf(Precommit):
 		                             "Please stage them if OK.")
 
 
-class Eslint(Precommit):
-	def __init__(self, files):
-		self.files = files
-
-	def run(self):
-		subprocess.run(["eslint"] + self.files, check=True, shell=True)
-
-
 class Prettier(Precommit):
 	def __init__(self, files):
 		self.files = files
@@ -311,7 +303,7 @@ def main():
 	if cpp_files:
 		precommits += [ClangFormat(cpp_files)]
 	if js_files:
-		precommits += [Eslint(js_files), Prettier(js_files)]
+		precommits += [Prettier(js_files)]
 
 	print(Style.BRIGHT, "Pre-commit run starting.")
 	print_files("Python", python_files)
