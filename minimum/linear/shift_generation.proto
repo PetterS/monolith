@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+import "minimum/linear/scheduling.proto";
+
+package minimum.linear.proto;
+
+message ShiftGenerationProblem {
+	message Period {
+		int32 demand = 1;
+	}
+
+	repeated Period period = 1;
+
+	double under_cost = 2;
+	double over_cost = 3;
+	double shift_cost = 4;
+
+	IntegerBound shift_length_bound = 5;
+}

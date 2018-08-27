@@ -1,0 +1,52 @@
+
+syntax = "proto3";
+
+package minimum.linear.proto;
+
+message Bound {
+	double lower = 1;
+	double upper = 2;
+}
+
+message Variable {
+	double cost = 1;
+	Bound bound = 2;
+	enum Type {
+		CONTINUOUS = 0;
+		INTEGER = 1;
+	}
+	Type type = 3;
+
+	// Helper variables are not taken into account when enumerating
+	// all solutions.
+	bool is_helper = 4;
+
+	// Whether this variable is a variable representing a convex term and can
+	// not appear with a negative coefficient.
+	bool is_convex = 6;
+}
+
+message Entry {
+	double coefficient = 1;
+	int64 variable = 2;
+}
+
+message Constraint {
+	// The sum can not contain multiple entries with the same variable.
+	repeated Entry sum = 1;
+	Bound bound = 2;
+}
+
+message IP {
+	repeated Variable variable = 1;
+	repeated Constraint constraint = 2;
+	double objective_constant = 3;
+}
+
+// Solution to an IP.
+message Solution {
+	// If not available, the primal or dual solution will
+	// be set to nan.
+	repeated double primal = 1;
+	repeated double dual = 2;
+}

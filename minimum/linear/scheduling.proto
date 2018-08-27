@@ -1,0 +1,131 @@
+syntax = "proto3";
+
+package minimum.linear.proto;
+
+message IntegerBound {
+	int32 min = 1;
+	int32 max = 2;
+}
+
+message Shift {
+	// Arbitrary ID of this shift. Can be anything, but printing solutions
+	// looks better if the ID is one or two characters.
+	string id = 1;
+
+	// Duration of the shift in minutes.
+	int32 duration = 2;
+
+	// Shifts that are not allowed after this shift. The union of this field
+	// and the next one should be all shifts.
+	//
+	// Forbidden shifts after another are not expensive.
+	repeated int32 forbidden_after = 3;
+	// Shifts that are allowed after this shift.
+	repeated int32 ok_after = 4;
+
+	// How many of this shift that are allowed in a row.
+	//
+	// This constraint is expensive.
+	IntegerBound consecutive_limit = 5;
+}
+
+message Worker {
+	// Arbitrary id of this worker.
+	string id = 1;
+
+	// Working time limit in minutes for this worker during the
+	// planning period.
+	//
+	// This constraint is expensive.
+	IntegerBound time_limit = 2;
+
+	// How many consecutive days the worker can be assigned without
+	// a day off.
+	//
+	// This constraint is expensive.
+	IntegerBound consecutive_shifts_limit = 3;
+
+	// How many consecutive days the worker can be free without
+	// working.
+	//
+	// This constraint is not expensive.
+	IntegerBound consecutive_days_off_limit = 4;
+
+	// How many weekends the worker can be working during the
+	// planning period.
+	//
+	// This constraint is expensive.
+	IntegerBound working_weekends_limit = 5;
+
+	// For each shift, the minimum and maximum assignments that
+	// can be made. Typically equal to 0 and the number of days
+	// (that is, disabled).
+	//
+	// These constraints are expensive.
+	repeated IntegerBound shift_limit = 6;
+
+	// Days that the worker is not allowed to work.
+	//
+	// These constraints are not expensive.
+	repeated int32 required_day_off = 7;
+
+	message ShiftPreference {
+		int32 day = 1;
+		int32 shift = 2;
+		// Cost added to the objective function if the worker is
+		// assiged this shift on this day. May be positive or
+		// negative.
+		double cost = 3;
+	}
+	// These costs are not expensive to model.
+	repeated ShiftPreference shift_preference = 8;
+
+	message DayOffPreference {
+		int32 day = 1;
+		// Cost added to the objective function if the worker is
+		// assiged any shift on this day. May be positive or
+		// negative.
+		double cost = 2;
+	}
+	// These costs are not expensive to model.
+	repeated DayOffPreference day_off_preference = 9;
+}
+
+message Requirement {
+	int32 day = 1;
+	int32 shift = 2;
+	// Number of workers wanted for this shift on this day.
+	int32 wanted = 3;
+	// Cost for every extra worker assigned. Non-negative.
+	double over_cost = 4;
+	// Cost for every worker that is missing. Non-negative.
+	double under_cost = 5;
+}
+
+message SchedulingProblem {
+	// Number of days in the planning period. The period
+	// starts on a Monday.
+	int32 num_days = 1;
+
+	repeated Shift shift = 2;
+	repeated Worker worker = 3;
+	repeated Requirement requirement = 4;
+
+	// Constant added to the objective function. Does not
+	// affect optimization and is for logging.
+	double objective_constant = 5;
+}
+
+message TaskSchedulingProblem {
+	message Task {
+		int32 start = 1;
+		int32 end = 2;
+	}
+
+	message Machine {
+		repeated int32 qualification = 1;
+	}
+
+	repeated Task task = 1;
+	repeated Machine machine = 2;
+}
