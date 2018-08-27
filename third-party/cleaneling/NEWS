@@ -1,0 +1,16 @@
+new for version 00v since 00a
+-----------------------------
+
+More simplification.
+
+Better simplification scheduling.
+
+Blocked clause elimination.
+
+Nicer 'report' (6 character numbers as in PicoSAT).
+
+Finished strengthening (both in 'distill' and 'backward').
+
+Fixed reduce schedule.
+
+Continued to work on comments.

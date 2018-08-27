@@ -1,0 +1,24 @@
+CXX=@CXX@
+CXXFLAGS=@CXXFLAGS@
+LDFLAGS=@LDFLAGS@
+all: cleaneling libcleaneling.a
+cleaneling: cleaneling.o libcleaneling.a makefile
+	$(CXX) $(CXXFLAGS) -o $@ cleaneling.o -L. -lcleaneling $(LDFLAGS)
+libcleaneling.a: libcleaneling.o config.o makefile
+	ar rc $@ libcleaneling.o config.o
+	ranlib $@
+cleaneling.o: cleaneling.cc cleaneling.h options.h makefile
+	$(CXX) $(CXXFLAGS) -c cleaneling.cc
+libcleaneling.o: libcleaneling.cc cleaneling.h options.h makefile
+	$(CXX) $(CXXFLAGS) -c libcleaneling.cc
+config.o: config.cc config.h cxxflags.h makefile
+	$(CXX) $(CXXFLAGS) -c config.cc
+config.h: VERSION cleaneling.cc libcleaneling.cc cleaneling.h options.h
+	rm -f $@; ./mkconfig.sh >$@
+cxxflags.h: makefile
+	rm -f $@
+	echo '#define CLEANELING_CXX "$(shell $(CXX) --version|head -1)"' >>$@
+	echo '#define CLEANELING_CXXFLAGS "$(CXXFLAGS)"' >>$@
+clean:
+	rm -f *.o *.a cleaneling libcleaneling.a
+	rm -f makefile config.h cxxflags.h
