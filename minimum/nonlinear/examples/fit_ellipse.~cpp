@@ -1,0 +1,226 @@
+
+#include <functional>
+#include <iostream>
+#include <random>
+#include <sstream>
+#include <stdexcept>
+#include <typeinfo>
+
+#include <spii/auto_diff_term.h>
+#include <spii/solver.h>
+
+using namespace spii;
+
+struct EllipseDistance
+{
+	double x, y;
+	double x0, y0, a, b, phi;
+	EllipseDistance(double x, double y, double x0, double y0,
+	                double a, double b, double phi)
+	{
+		this->x = x;
+		this->y = y;
+		this->x0 = x0;
+		this->y0 = y0;
+		this->a = a;
+		this->b = b;
+		this->phi = phi;
+	}
+
+	template<typename R>
+	R operator()(const R* const t) const
+	{
+		R xe = x0 + a * cos(*t)*cos(phi) - b * sin(*t)*sin(phi);
+		R ye = y0 + a * cos(*t)*sin(phi) + b * sin(*t)*cos(phi);
+		R dx = x - xe;
+		R dy = y - ye;
+		return dx*dx + dy*dy;
+	}
+};
+
+template<typename R>
+class ToDouble 
+{
+public:
+	static double convert(R& x)
+	{
+		std::cerr << "to_double<" << typeid(R).name() << "> called.\n";
+		throw std::runtime_error("to_double");
+		return 0.0;
+	}
+};
+
+typedef fadbad::F<fadbad::F<double, 5>, 5> F2;
+
+template<>
+class ToDouble<F2>
+{
+public:
+	static double convert(F2& x)
+	{
+		return x.x().x();
+	}
+};
+
+typedef fadbad::F<double, 5> F1;
+
+template<>
+class ToDouble<F1>
+{
+public:
+	static double convert(F1& x)
+	{
+		return x.x();
+	}
+};
+
+
+template<>
+class ToDouble<double>
+{
+public:
+	static double convert(const double& x)
+	{
+		return x;
+	}
+};
+
+struct EllipseTerm
+{
+	double x, y;
+
+	EllipseTerm(double x, double y)
+	{
+		this->x = x;
+		this->y = y;
+	}
+
+	template<typename R>
+	R operator()(R* E) const
+	{
+		R& x0  = E[0];
+		R& y0  = E[1];
+		R& a   = E[2];
+		R& b   = E[3];
+		R& phi = E[4];
+
+		// Parameter
+		double t = 0.0;
+
+		Function f;
+		f.set_number_of_threads(1);
+		f.add_variable(&t, 1);
+
+		auto term = std::make_shared<AutoDiffTerm<EllipseDistance, 1>>
+			(x, y,
+			 ToDouble<R>::convert(x0),
+			 ToDouble<R>::convert(y0),
+			 ToDouble<R>::convert(a),
+			 ToDouble<R>::convert(b),
+			 ToDouble<R>::convert(phi));
+		f.add_term(term, &t);
+
+		NewtonSolver solver;
+		solver.log_function = 0;
+		SolverResults results;
+		solver.solve(f, &results);
+		/*if (! results.exit_sucess()) {
+			throw std::runtime_error("EllipseTerm: Minimization failed.");
+		}*/
+
+		R xe = x0 + a * cos(t)*cos(phi) - b * sin(t)*sin(phi);
+		R ye = y0 + a * cos(t)*sin(phi) + b * sin(t)*cos(phi);
+		R dx = x - xe;
+		R dy = y - ye;
+
+		// Solve the minimization
+		return dx*dx + dy*dy;
+	}
+};
+
+int main_function()
+{
+	std::mt19937 prng(0);
+	std::normal_distribution<double> normal;
+	std::uniform_real_distribution<double> uniform(0.0, 1.0);
+	auto randn = std::bind(normal, prng);
+	auto rand  = std::bind(uniform, prng);
+
+	// Ellipse
+	double x0 = 3;
+	double y0 = 4;
+	double a = 3;
+	double b = 0.5;
+	double phi = 1.0;
+
+	// Generate random points
+	size_t npoints = 500;
+	Eigen::VectorXd x(npoints), y(npoints);
+	for (size_t i = 0; i < npoints; ++i) {
+		double t = 2 * 3.141592 * rand();
+		x[i] = x0 + a * cos(t)*cos(phi) - b * sin(t)*sin(phi) + 0.01 * randn();
+		y[i] = y0 + a * cos(t)*sin(phi) + b * sin(t)*cos(phi) + 0.01 * randn();
+	}
+
+	Function f;
+	f.set_number_of_threads(1);
+	std::vector<double> data(5);
+	data[0] = x.mean();
+	data[1] = y.mean();
+	data[2] = 1.0;
+	data[3] = 1.0;
+	data[4] = phi;
+	f.add_variable(&data[0], 5);
+
+	for (size_t i = 0; i < npoints; ++i) {
+		auto term = std::make_shared<AutoDiffTerm<EllipseTerm, 5>>
+			(x[i], y[i]);
+		f.add_term(term, &data[0]);
+	}
+
+	std::cout << f.evaluate() << std::endl;
+
+	LBFGSSolver solver;
+	solver.maximum_iterations = 100;
+	SolverResults results;
+	solver.solve(f, &results);
+
+	std::cout << results << std::endl;
+	std::cout << "Estimated:" << std::endl;
+	std::cout << "x0  = " << data[0] << std::endl;
+	std::cout << "y0  = " << data[1] << std::endl;
+	std::cout << "a   = " << data[2] << std::endl;
+	std::cout << "b   = " << data[3] << std::endl;
+	std::cout << "phi = " << data[4] << std::endl;
+
+	// Point outside.
+	//double x = 6;
+	//double y = 6;
+
+	//// Parameter
+	//double t = 0.0;
+	//
+	//Function f;
+	//f.add_variable(&t, 1);
+	//f.add_term(new AutoDiffTerm<EllipseDistance, 1>
+	//	(new EllipseDistance(x, y, x0, y0, a, b, phi)), &t);
+
+	//Solver solver;
+	//SolverResults results;
+	//solver.solve_newton(f, &results);
+
+	//std::cout << "Estimated:" << std::endl;
+	//std::cout << "t = " << t << std::endl;
+
+	return 0;
+}
+
+int main()
+{
+	try {
+		return main_function();
+	}
+	catch (std::exception& e) {
+		std::cerr << "Exception: " << e.what() << std::endl;
+	}
+}
