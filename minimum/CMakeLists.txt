@@ -1,0 +1,10 @@
+
+add_subdirectory(ai)
+add_subdirectory(algorithms)
+add_subdirectory(bibliotek)
+add_subdirectory(constrained)
+add_subdirectory(core)
+add_subdirectory(curvature)
+add_subdirectory(isomorphism)
+add_subdirectory(linear)
+add_subdirectory(nonlinear)
