@@ -6,14 +6,8 @@ __pycache__
 .pytest_cache
 
 # Non-public source
-misc/compile_test.cpp
-misc/constexpr_glob.cpp
-misc/extra/
-misc/islands.cpp
-misc/norwegian_cards.cpp
-misc/notifier.py
-misc/online_islands.cpp
-misc/online_islands2.cpp
+misc/*.py
+misc/*.cpp
 
 # Non-public stuff for boundvariable.
 misc/boundvariable/codex.out
