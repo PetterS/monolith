@@ -1,0 +1,87 @@
+diff --git a/cmake/CMakeLists.txt b/cmake/CMakeLists.txt
+index fca4da3..edf5c2c 100644
+--- a/cmake/CMakeLists.txt
++++ b/cmake/CMakeLists.txt
+@@ -15,13 +15,22 @@ endif()
+ # Project
+ project(protobuf C CXX)
+ 
+-# Add c++11 flags for clang
+-set(CMAKE_CXX_FLAGS "-std=c++11")
++# Add c++11 flags for clang # Disabled by Petter
++# set(CMAKE_CXX_FLAGS "-std=c++11")
+ 
+ # Options
+-option(protobuf_BUILD_TESTS "Build tests" ON)
++option(protobuf_BUILD_TESTS "Build tests" OFF)  # Petter set to OFF.
+ option(protobuf_BUILD_EXAMPLES "Build examples" OFF)
+-option(protobuf_BUILD_PROTOC_BINARIES "Build libprotoc and protoc compiler" ON)
++
++# Petter
++if (EMSCRIPTEN)
++  set(protobuf_BUILD_PROTOC_BINARIES_DEFAULT OFF)
++else()
++  set(protobuf_BUILD_PROTOC_BINARIES_DEFAULT ON)
++endif()
++option(protobuf_BUILD_PROTOC_BINARIES "Build libprotoc and protoc compiler" ${protobuf_BUILD_PROTOC_BINARIES_DEFAULT})
++# End Petter
++
+ if (BUILD_SHARED_LIBS)
+   set(protobuf_BUILD_SHARED_LIBS_DEFAULT ON)
+ else (BUILD_SHARED_LIBS)
+@@ -90,6 +99,12 @@ if (CMAKE_USE_PTHREADS_INIT)
+   add_definitions(-DHAVE_PTHREAD)
+ endif (CMAKE_USE_PTHREADS_INIT)
+ 
++# Petter
++set(HAVE_ZLIB 0)
++set(ZLIB_LIBRARIES)
++set(ZLIB_INCLUDE_DIRECTORIES)
++# End Petter
++
+ set(_protobuf_FIND_ZLIB)
+ if (protobuf_WITH_ZLIB)
+   find_package(ZLIB)
+@@ -125,15 +140,17 @@ else (protobuf_BUILD_SHARED_LIBS)
+   # https://msdn.microsoft.com/en-us/library/2kzt1wy3.aspx
+   # This is achieved by replacing msvc option /MD with /MT and /MDd with /MTd
+   # http://www.cmake.org/Wiki/CMake_FAQ#How_can_I_build_my_MSVC_application_with_a_static_runtime.3F
+-  if (MSVC AND protobuf_MSVC_STATIC_RUNTIME)
+-    foreach(flag_var
+-        CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
+-        CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+-      if(${flag_var} MATCHES "/MD")
+-        string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
+-      endif(${flag_var} MATCHES "/MD")
+-    endforeach(flag_var)
+-  endif (MSVC AND protobuf_MSVC_STATIC_RUNTIME)
++
++  # Disabled by Petter
++##  if (MSVC AND protobuf_MSVC_STATIC_RUNTIME)
++##    foreach(flag_var
++##        CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
++##        CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
++##      if(${flag_var} MATCHES "/MD")
++##        string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
++##      endif(${flag_var} MATCHES "/MD")
++##    endforeach(flag_var)
++##  endif (MSVC AND protobuf_MSVC_STATIC_RUNTIME)
+ endif (protobuf_BUILD_SHARED_LIBS)
+ 
+ if (MSVC)
+@@ -193,6 +210,15 @@ if (protobuf_BUILD_PROTOC_BINARIES)
+   include(protoc.cmake)
+ endif (protobuf_BUILD_PROTOC_BINARIES)
+ 
++# Petter
++set_property(TARGET libprotobuf PROPERTY FOLDER "Third-party/protobuf")
++set_property(TARGET libprotobuf-lite PROPERTY FOLDER "Third-party/protobuf")
++set_property(TARGET libprotoc PROPERTY FOLDER "Third-party/protobuf")
++if (NOT EMSCRIPTEN)
++  set_property(TARGET protoc PROPERTY FOLDER "Third-party/protobuf")
++endif()
++# End Petter
++
+ if (protobuf_BUILD_TESTS)
+   include(tests.cmake)
+ endif (protobuf_BUILD_TESTS)
