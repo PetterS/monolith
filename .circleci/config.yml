@@ -12,14 +12,18 @@ jobs:
       - run:
           name: Install CMake
           command: |
-            sudo apt-get install cmake
+            cd ..
+            git clone https://gitlab.kitware.com/cmake/cmake.git
+            cd cmake
+            ./configure
+            make
 
       - run:
           name: Run CMake
           command: |
             cd ..
             cd build
-            cmake ../source
+            ../cmake/cmake ../source
 
       - run:
           name: Compile
