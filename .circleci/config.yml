@@ -1,0 +1,36 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/18.04-scm
+
+    working_directory: ~/source
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install CMake
+          command: |
+            sudo apt-get install cmake
+
+      - run:
+          name: Run CMake
+          command: |
+            cd ..
+            cd build
+            cmake ../source
+
+      - run:
+          name: Compile
+          command: |
+            cd ..
+            cd build
+            make
+
+      - run:
+          name: Test
+          command: |
+            cd ..
+            cd build
+            make test
