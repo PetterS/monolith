@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/18.04-scm
+      - image: ubuntu:18.04
 
     working_directory: ~/source
 
