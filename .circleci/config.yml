@@ -19,6 +19,7 @@ jobs:
           name: Run CMake
           command: |
             cd ..
+            mkdir build
             cd build
             cmake ../source
 
