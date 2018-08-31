@@ -31,8 +31,15 @@ jobs:
             make
 
       - run:
-          name: Test
+          name: Test Core
           command: |
             cd ..
             cd build
-            make test
+            ctest -R minimum_core
+
+      - run:
+          name: Test Linear
+          command: |
+            cd ..
+            cd build
+            ctest -R minimum_linear
