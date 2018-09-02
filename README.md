@@ -27,6 +27,20 @@ The `minimum::linear` module contains code originally from my [easy-IP](https://
 ### Minimum/Nonlinear
 The `minimum::nonlinear` module contains code originally from my [spii](https://github.com/PetterS/spii) repository. When a function is defined, it will be automatically differentiated with an autodiff library. This makes the resulting code very fast and numerically stable. The library contains minimization routines like L-BFGS and Newton’s method.
 
+For example, a function of one vector variable is simply defined as:
+```
+auto lambda = [](auto* x) {
+    auto d0 = x[1] - x[0] * x[0];
+    auto d1 = 1 - x[0];
+    return 100 * d0 * d0 + d1 * d1;
+};
+```
+Having `auto` here instead of e.g. `double` is crucial. Efficient code for first and second-order derivatives is generated with
+
+```
+auto term = make_differentiable<2>(lambda);
+```
+
 ### Minimum/Constrained
 Using both `minimum::linear` and `minimum::nonlinear`, this module implements constrained optimization via successive linear programming.
 
