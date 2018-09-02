@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/18.04-scm
+      - image: gcc:latest
 
     working_directory: ~/source
 
@@ -12,12 +12,14 @@ jobs:
       - run:
           name: Install CMake
           command: |
-            sudo apt-get install cmake
+            apt-get update
+            apt-get install -y cmake
 
       - run:
           name: Run CMake
           command: |
             cd ..
+            mkdir build
             cd build
             cmake ../source
 
@@ -29,8 +31,15 @@ jobs:
             make
 
       - run:
-          name: Test
+          name: Test Core
           command: |
             cd ..
             cd build
-            make test
+            ctest -R minimum_core
+
+      - run:
+          name: Test Linear
+          command: |
+            cd ..
+            cd build
+            ctest -R minimum_linear
