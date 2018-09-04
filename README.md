@@ -3,6 +3,11 @@ Monolith is a monorepo with several optimization projects. Some of the code was 
 
 One of the highlights is a state-of-the-art scheduler using column generation, which significantly outperforms all other optimizers at [schedulingbenchmarks.org](http://www.schedulingbenchmarks.org/).
 
+
+## Why a monorepo?
+ - C++ does not have an ABI. Every compiler, or worse, every flag configuration of every compiler generates potentially incompatible code. I want to use many compilers (MCVC, GCC, Clang) and many settings (debug, release, asan, fuzzers etc.). I also use Emscripten to compile programs to WASM (example [here](https://www.strandmark.net/wasm/glpk.html)).
+- Refactoring code becomes much easier if all code with all dependencies is available in one IDE at the same time.
+ 
 ## Contact
 Petter Strandmark, petter.strandmark@gmail.com
 
