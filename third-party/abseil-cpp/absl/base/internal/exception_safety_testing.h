@@ -62,6 +62,9 @@ constexpr AllocSpec operator&(AllocSpec a, AllocSpec b) {
 
 namespace exceptions_internal {
 
+std::string GetSpecString(TypeSpec);
+std::string GetSpecString(AllocSpec);
+
 struct NoThrowTag {};
 struct StrongGuaranteeTagType {};
 
@@ -101,36 +104,9 @@ void MaybeThrow(absl::string_view msg, bool throw_bad_alloc = false);
 testing::AssertionResult FailureMessage(const TestException& e,
                                         int countdown) noexcept;
 
-class ConstructorTracker;
-
-class TrackedObject {
- public:
-  TrackedObject(const TrackedObject&) = delete;
-  TrackedObject(TrackedObject&&) = delete;
-
- protected:
-  explicit TrackedObject(const char* child_ctor) {
-    if (!GetInstanceMap().emplace(this, child_ctor).second) {
-      ADD_FAILURE() << "Object at address " << static_cast<void*>(this)
-                    << " re-constructed in ctor " << child_ctor;
-    }
-  }
-
-  ~TrackedObject() noexcept {
-    if (GetInstanceMap().erase(this) == 0) {
-      ADD_FAILURE() << "Object at address " << static_cast<void*>(this)
-                    << " destroyed improperly";
-    }
-  }
-
- private:
-  using InstanceMap = std::unordered_map<TrackedObject*, absl::string_view>;
-  static InstanceMap& GetInstanceMap() {
-    static auto* instance_map = new InstanceMap();
-    return *instance_map;
-  }
-
-  friend class ConstructorTracker;
+struct TrackedAddress {
+  bool is_alive;
+  std::string description;
 };
 
 // Inspects the constructions and destructions of anything inheriting from
@@ -138,43 +114,96 @@ class TrackedObject {
 // ConstructorTracker will destroy everything left over in its destructor.
 class ConstructorTracker {
  public:
-  explicit ConstructorTracker(int c)
-      : init_count_(c), init_instances_(TrackedObject::GetInstanceMap()) {}
+  explicit ConstructorTracker(int count) : countdown_(count) {
+    assert(current_tracker_instance_ == nullptr);
+    current_tracker_instance_ = this;
+  }
+
   ~ConstructorTracker() {
-    auto& cur_instances = TrackedObject::GetInstanceMap();
-    for (auto it = cur_instances.begin(); it != cur_instances.end();) {
-      if (init_instances_.count(it->first) == 0) {
-        ADD_FAILURE() << "Object at address " << static_cast<void*>(it->first)
-                      << " constructed from " << it->second
-                      << " where the exception countdown was set to "
-                      << init_count_ << " was not destroyed";
-        // Erasing an item inside an unordered_map invalidates the existing
-        // iterator. A new one is returned for iteration to continue.
-        it = cur_instances.erase(it);
-      } else {
-        ++it;
+    assert(current_tracker_instance_ == this);
+    current_tracker_instance_ = nullptr;
+
+    for (auto& it : address_map_) {
+      void* address = it.first;
+      TrackedAddress& tracked_address = it.second;
+      if (tracked_address.is_alive) {
+        ADD_FAILURE() << "Object at address " << address
+                      << " with countdown of " << countdown_
+                      << " was not destroyed [" << tracked_address.description
+                      << "]";
       }
     }
   }
 
+  static void ObjectConstructed(void* address, std::string description) {
+    if (!CurrentlyTracking()) return;
+
+    TrackedAddress& tracked_address =
+        current_tracker_instance_->address_map_[address];
+    if (tracked_address.is_alive) {
+      ADD_FAILURE() << "Object at address " << address << " with countdown of "
+                    << current_tracker_instance_->countdown_
+                    << " was re-constructed. Previously: ["
+                    << tracked_address.description << "] Now: [" << description
+                    << "]";
+    }
+    tracked_address = {true, std::move(description)};
+  }
+
+  static void ObjectDestructed(void* address) {
+    if (!CurrentlyTracking()) return;
+
+    auto it = current_tracker_instance_->address_map_.find(address);
+    // Not tracked. Ignore.
+    if (it == current_tracker_instance_->address_map_.end()) return;
+
+    TrackedAddress& tracked_address = it->second;
+    if (!tracked_address.is_alive) {
+      ADD_FAILURE() << "Object at address " << address << " with countdown of "
+                    << current_tracker_instance_->countdown_
+                    << " was re-destroyed or created prior to construction "
+                    << "tracking [" << tracked_address.description << "]";
+    }
+    tracked_address.is_alive = false;
+  }
+
  private:
-  int init_count_;
-  TrackedObject::InstanceMap init_instances_;
+  static bool CurrentlyTracking() {
+    return current_tracker_instance_ != nullptr;
+  }
+
+  std::unordered_map<void*, TrackedAddress> address_map_;
+  int countdown_;
+
+  static ConstructorTracker* current_tracker_instance_;
 };
 
-template <typename Factory, typename Operation, typename Invariant>
-absl::optional<testing::AssertionResult> TestSingleInvariantAtCountdownImpl(
-    const Factory& factory, Operation operation, int count,
-    const Invariant& invariant) {
+class TrackedObject {
+ public:
+  TrackedObject(const TrackedObject&) = delete;
+  TrackedObject(TrackedObject&&) = delete;
+
+ protected:
+  explicit TrackedObject(std::string description) {
+    ConstructorTracker::ObjectConstructed(this, std::move(description));
+  }
+
+  ~TrackedObject() noexcept { ConstructorTracker::ObjectDestructed(this); }
+};
+
+template <typename Factory, typename Operation, typename Contract>
+absl::optional<testing::AssertionResult> TestSingleContractAtCountdownImpl(
+    const Factory& factory, const Operation& operation, int count,
+    const Contract& contract) {
   auto t_ptr = factory();
   absl::optional<testing::AssertionResult> current_res;
   SetCountdown(count);
   try {
     operation(t_ptr.get());
   } catch (const exceptions_internal::TestException& e) {
-    current_res.emplace(invariant(t_ptr.get()));
+    current_res.emplace(contract(t_ptr.get()));
     if (!current_res.value()) {
-      *current_res << e.what() << " failed invariant check";
+      *current_res << e.what() << " failed contract check";
     }
   }
   UnsetCountdown();
@@ -182,22 +211,22 @@ absl::optional<testing::AssertionResult> TestSingleInvariantAtCountdownImpl(
 }
 
 template <typename Factory, typename Operation>
-absl::optional<testing::AssertionResult> TestSingleInvariantAtCountdownImpl(
+absl::optional<testing::AssertionResult> TestSingleContractAtCountdownImpl(
     const Factory& factory, const Operation& operation, int count,
     StrongGuaranteeTagType) {
   using TPtr = typename decltype(factory())::pointer;
   auto t_is_strong = [&](TPtr t) { return *t == *factory(); };
-  return TestSingleInvariantAtCountdownImpl(factory, operation, count,
-                                            t_is_strong);
+  return TestSingleContractAtCountdownImpl(factory, operation, count,
+                                           t_is_strong);
 }
 
-template <typename Factory, typename Operation, typename Invariant>
-int TestSingleInvariantAtCountdown(
+template <typename Factory, typename Operation, typename Contract>
+int TestSingleContractAtCountdown(
     const Factory& factory, const Operation& operation, int count,
-    const Invariant& invariant,
+    const Contract& contract,
     absl::optional<testing::AssertionResult>* reduced_res) {
   // If reduced_res is empty, it means the current call to
-  // TestSingleInvariantAtCountdown(...) is the first test being run so we do
+  // TestSingleContractAtCountdown(...) is the first test being run so we do
   // want to run it. Alternatively, if it's not empty (meaning a previous test
   // has run) we want to check if it passed. If the previous test did pass, we
   // want to contine running tests so we do want to run the current one. If it
@@ -205,22 +234,22 @@ int TestSingleInvariantAtCountdown(
   // output. If that's the case, we do not run the current test and instead we
   // simply return.
   if (!reduced_res->has_value() || reduced_res->value()) {
-    *reduced_res = TestSingleInvariantAtCountdownImpl(factory, operation, count,
-                                                      invariant);
+    *reduced_res =
+        TestSingleContractAtCountdownImpl(factory, operation, count, contract);
   }
   return 0;
 }
 
-template <typename Factory, typename Operation, typename... Invariants>
-inline absl::optional<testing::AssertionResult> TestAllInvariantsAtCountdown(
+template <typename Factory, typename Operation, typename... Contracts>
+inline absl::optional<testing::AssertionResult> TestAllContractsAtCountdown(
     const Factory& factory, const Operation& operation, int count,
-    const Invariants&... invariants) {
+    const Contracts&... contracts) {
   absl::optional<testing::AssertionResult> reduced_res;
 
   // Run each checker, short circuiting after the first failure
   int dummy[] = {
-      0, (TestSingleInvariantAtCountdown(factory, operation, count, invariants,
-                                         &reduced_res))...};
+      0, (TestSingleContractAtCountdown(factory, operation, count, contracts,
+                                        &reduced_res))...};
   static_cast<void>(dummy);
   return reduced_res;
 }
@@ -229,7 +258,6 @@ inline absl::optional<testing::AssertionResult> TestAllInvariantsAtCountdown(
 
 extern exceptions_internal::NoThrowTag nothrow_ctor;
 
-bool nothrow_guarantee(const void*);
 extern exceptions_internal::StrongGuaranteeTagType strong_guarantee;
 
 // A test class which is convertible to bool.  The conversion can be
@@ -283,17 +311,18 @@ class ThrowingValue : private exceptions_internal::TrackedObject {
     return static_cast<bool>(Spec & spec);
   }
 
+  static constexpr int kDefaultValue = 0;
   static constexpr int kBadValue = 938550620;
 
  public:
-  ThrowingValue() : TrackedObject(ABSL_PRETTY_FUNCTION) {
+  ThrowingValue() : TrackedObject(GetInstanceString(kDefaultValue)) {
     exceptions_internal::MaybeThrow(ABSL_PRETTY_FUNCTION);
-    dummy_ = 0;
+    dummy_ = kDefaultValue;
   }
 
   ThrowingValue(const ThrowingValue& other) noexcept(
       IsSpecified(TypeSpec::kNoThrowCopy))
-      : TrackedObject(ABSL_PRETTY_FUNCTION) {
+      : TrackedObject(GetInstanceString(other.dummy_)) {
     if (!IsSpecified(TypeSpec::kNoThrowCopy)) {
       exceptions_internal::MaybeThrow(ABSL_PRETTY_FUNCTION);
     }
@@ -302,20 +331,20 @@ class ThrowingValue : private exceptions_internal::TrackedObject {
 
   ThrowingValue(ThrowingValue&& other) noexcept(
       IsSpecified(TypeSpec::kNoThrowMove))
-      : TrackedObject(ABSL_PRETTY_FUNCTION) {
+      : TrackedObject(GetInstanceString(other.dummy_)) {
     if (!IsSpecified(TypeSpec::kNoThrowMove)) {
       exceptions_internal::MaybeThrow(ABSL_PRETTY_FUNCTION);
     }
     dummy_ = other.dummy_;
   }
 
-  explicit ThrowingValue(int i) : TrackedObject(ABSL_PRETTY_FUNCTION) {
+  explicit ThrowingValue(int i) : TrackedObject(GetInstanceString(i)) {
     exceptions_internal::MaybeThrow(ABSL_PRETTY_FUNCTION);
     dummy_ = i;
   }
 
   ThrowingValue(int i, exceptions_internal::NoThrowTag) noexcept
-      : TrackedObject(ABSL_PRETTY_FUNCTION), dummy_(i) {}
+      : TrackedObject(GetInstanceString(i)), dummy_(i) {}
 
   // absl expects nothrow destructors
   ~ThrowingValue() noexcept = default;
@@ -548,9 +577,9 @@ class ThrowingValue : private exceptions_internal::TrackedObject {
   void operator&() const = delete;  // NOLINT(runtime/operator)
 
   // Stream operators
-  friend std::ostream& operator<<(std::ostream& os, const ThrowingValue&) {
+  friend std::ostream& operator<<(std::ostream& os, const ThrowingValue& tv) {
     exceptions_internal::MaybeThrow(ABSL_PRETTY_FUNCTION);
-    return os;
+    return os << GetInstanceString(tv.dummy_);
   }
 
   friend std::istream& operator>>(std::istream& is, const ThrowingValue&) {
@@ -606,6 +635,12 @@ class ThrowingValue : private exceptions_internal::TrackedObject {
   const int& Get() const noexcept { return dummy_; }
 
  private:
+  static std::string GetInstanceString(int dummy) {
+    return absl::StrCat("ThrowingValue<",
+                        exceptions_internal::GetSpecString(Spec), ">(", dummy,
+                        ")");
+  }
+
   int dummy_;
 };
 // While not having to do with exceptions, explicitly delete comma operator, to
@@ -658,26 +693,30 @@ class ThrowingAllocator : private exceptions_internal::TrackedObject {
   using propagate_on_container_swap = std::true_type;
   using is_always_equal = std::false_type;
 
-  ThrowingAllocator() : TrackedObject(ABSL_PRETTY_FUNCTION) {
+  ThrowingAllocator() : TrackedObject(GetInstanceString(next_id_)) {
     exceptions_internal::MaybeThrow(ABSL_PRETTY_FUNCTION);
     dummy_ = std::make_shared<const int>(next_id_++);
   }
 
   template <typename U>
   ThrowingAllocator(const ThrowingAllocator<U, Spec>& other) noexcept  // NOLINT
-      : TrackedObject(ABSL_PRETTY_FUNCTION), dummy_(other.State()) {}
+      : TrackedObject(GetInstanceString(*other.State())),
+        dummy_(other.State()) {}
 
   // According to C++11 standard [17.6.3.5], Table 28, the move/copy ctors of
   // allocator shall not exit via an exception, thus they are marked noexcept.
   ThrowingAllocator(const ThrowingAllocator& other) noexcept
-      : TrackedObject(ABSL_PRETTY_FUNCTION), dummy_(other.State()) {}
+      : TrackedObject(GetInstanceString(*other.State())),
+        dummy_(other.State()) {}
 
   template <typename U>
   ThrowingAllocator(ThrowingAllocator<U, Spec>&& other) noexcept  // NOLINT
-      : TrackedObject(ABSL_PRETTY_FUNCTION), dummy_(std::move(other.State())) {}
+      : TrackedObject(GetInstanceString(*other.State())),
+        dummy_(std::move(other.State())) {}
 
   ThrowingAllocator(ThrowingAllocator&& other) noexcept
-      : TrackedObject(ABSL_PRETTY_FUNCTION), dummy_(std::move(other.State())) {}
+      : TrackedObject(GetInstanceString(*other.State())),
+        dummy_(std::move(other.State())) {}
 
   ~ThrowingAllocator() noexcept = default;
 
@@ -758,6 +797,12 @@ class ThrowingAllocator : private exceptions_internal::TrackedObject {
   friend class ThrowingAllocator;
 
  private:
+  static std::string GetInstanceString(int dummy) {
+    return absl::StrCat("ThrowingAllocator<",
+                        exceptions_internal::GetSpecString(Spec), ">(", dummy,
+                        ")");
+  }
+
   const std::shared_ptr<const int>& State() const { return dummy_; }
   std::shared_ptr<const int>& State() { return dummy_; }
 
@@ -801,6 +846,29 @@ void TestThrowingCtor(Args&&... args) {
   }
 }
 
+// Tests the nothrow guarantee of the provided nullary operation. If the an
+// exception is thrown, the result will be AssertionFailure(). Otherwise, it
+// will be AssertionSuccess().
+template <typename Operation>
+testing::AssertionResult TestNothrowOp(const Operation& operation) {
+  struct Cleanup {
+    Cleanup() { exceptions_internal::SetCountdown(); }
+    ~Cleanup() { exceptions_internal::UnsetCountdown(); }
+  } c;
+  try {
+    operation();
+    return testing::AssertionSuccess();
+  } catch (const exceptions_internal::TestException&) {
+    return testing::AssertionFailure()
+           << "TestException thrown during call to operation() when nothrow "
+              "guarantee was expected.";
+  } catch (...) {
+    return testing::AssertionFailure()
+           << "Unknown exception thrown during call to operation() when "
+              "nothrow guarantee was expected.";
+  }
+}
+
 namespace exceptions_internal {
 
 // Dummy struct for ExceptionSafetyTester<> partial state.
@@ -816,15 +884,15 @@ class DefaultFactory {
   T t_;
 };
 
-template <size_t LazyInvariantsCount, typename LazyFactory,
+template <size_t LazyContractsCount, typename LazyFactory,
           typename LazyOperation>
 using EnableIfTestable = typename absl::enable_if_t<
-    LazyInvariantsCount != 0 &&
+    LazyContractsCount != 0 &&
     !std::is_same<LazyFactory, UninitializedT>::value &&
     !std::is_same<LazyOperation, UninitializedT>::value>;
 
 template <typename Factory = UninitializedT,
-          typename Operation = UninitializedT, typename... Invariants>
+          typename Operation = UninitializedT, typename... Contracts>
 class ExceptionSafetyTester;
 
 }  // namespace exceptions_internal
@@ -835,7 +903,7 @@ namespace exceptions_internal {
 
 /*
  * Builds a tester object that tests if performing a operation on a T follows
- * exception safety guarantees. Verification is done via invariant assertion
+ * exception safety guarantees. Verification is done via contract assertion
  * callbacks applied to T instances post-throw.
  *
  * Template parameters for ExceptionSafetyTester:
@@ -853,18 +921,18 @@ namespace exceptions_internal {
  *   fresh T instance so it's free to modify and destroy the T instances as it
  *   pleases.
  *
- * - Invariants...: The invariant assertion callback objects (passed in via
- *   tester.WithInvariants(...)) must be invocable with the signature
+ * - Contracts...: The contract assertion callback objects (passed in via
+ *   tester.WithContracts(...)) must be invocable with the signature
  *   `testing::AssertionResult operator()(T*) const` where T is the type being
- *   tested. Invariant assertion callbacks are provided T instances post-throw.
- *   They must return testing::AssertionSuccess when the type invariants of the
- *   provided T instance hold. If the type invariants of the T instance do not
+ *   tested. Contract assertion callbacks are provided T instances post-throw.
+ *   They must return testing::AssertionSuccess when the type contracts of the
+ *   provided T instance hold. If the type contracts of the T instance do not
  *   hold, they must return testing::AssertionFailure. Execution order of
- *   Invariants... is unspecified. They will each individually get a fresh T
+ *   Contracts... is unspecified. They will each individually get a fresh T
  *   instance so they are free to modify and destroy the T instances as they
  *   please.
  */
-template <typename Factory, typename Operation, typename... Invariants>
+template <typename Factory, typename Operation, typename... Contracts>
 class ExceptionSafetyTester {
  public:
   /*
@@ -880,7 +948,7 @@ class ExceptionSafetyTester {
    *   tester.WithFactory(...).
    */
   template <typename T>
-  ExceptionSafetyTester<DefaultFactory<T>, Operation, Invariants...>
+  ExceptionSafetyTester<DefaultFactory<T>, Operation, Contracts...>
   WithInitialValue(const T& t) const {
     return WithFactory(DefaultFactory<T>(t));
   }
@@ -893,9 +961,9 @@ class ExceptionSafetyTester {
    * method tester.WithInitialValue(...).
    */
   template <typename NewFactory>
-  ExceptionSafetyTester<absl::decay_t<NewFactory>, Operation, Invariants...>
+  ExceptionSafetyTester<absl::decay_t<NewFactory>, Operation, Contracts...>
   WithFactory(const NewFactory& new_factory) const {
-    return {new_factory, operation_, invariants_};
+    return {new_factory, operation_, contracts_};
   }
 
   /*
@@ -904,39 +972,39 @@ class ExceptionSafetyTester {
    * tester.
    */
   template <typename NewOperation>
-  ExceptionSafetyTester<Factory, absl::decay_t<NewOperation>, Invariants...>
+  ExceptionSafetyTester<Factory, absl::decay_t<NewOperation>, Contracts...>
   WithOperation(const NewOperation& new_operation) const {
-    return {factory_, new_operation, invariants_};
+    return {factory_, new_operation, contracts_};
   }
 
   /*
-   * Returns a new ExceptionSafetyTester with the provided MoreInvariants...
-   * combined with the Invariants... that were already included in the instance
-   * on which the method was called. Invariants... cannot be removed or replaced
+   * Returns a new ExceptionSafetyTester with the provided MoreContracts...
+   * combined with the Contracts... that were already included in the instance
+   * on which the method was called. Contracts... cannot be removed or replaced
    * once added to an ExceptionSafetyTester instance. A fresh object must be
-   * created in order to get an empty Invariants... list.
+   * created in order to get an empty Contracts... list.
    *
-   * In addition to passing in custom invariant assertion callbacks, this method
+   * In addition to passing in custom contract assertion callbacks, this method
    * accepts `testing::strong_guarantee` as an argument which checks T instances
    * post-throw against freshly created T instances via operator== to verify
    * that any state changes made during the execution of the operation were
    * properly rolled back.
    */
-  template <typename... MoreInvariants>
-  ExceptionSafetyTester<Factory, Operation, Invariants...,
-                        absl::decay_t<MoreInvariants>...>
-  WithInvariants(const MoreInvariants&... more_invariants) const {
-    return {factory_, operation_,
-            std::tuple_cat(invariants_,
-                           std::tuple<absl::decay_t<MoreInvariants>...>(
-                               more_invariants...))};
+  template <typename... MoreContracts>
+  ExceptionSafetyTester<Factory, Operation, Contracts...,
+                        absl::decay_t<MoreContracts>...>
+  WithContracts(const MoreContracts&... more_contracts) const {
+    return {
+        factory_, operation_,
+        std::tuple_cat(contracts_, std::tuple<absl::decay_t<MoreContracts>...>(
+                                       more_contracts...))};
   }
 
   /*
    * Returns a testing::AssertionResult that is the reduced result of the
    * exception safety algorithm. The algorithm short circuits and returns
-   * AssertionFailure after the first invariant callback returns an
-   * AssertionFailure. Otherwise, if all invariant callbacks return an
+   * AssertionFailure after the first contract callback returns an
+   * AssertionFailure. Otherwise, if all contract callbacks return an
    * AssertionSuccess, the reduced result is AssertionSuccess.
    *
    * The passed-in testable operation will not be saved in a new tester instance
@@ -945,33 +1013,33 @@ class ExceptionSafetyTester {
    *
    * Preconditions for tester.Test(const NewOperation& new_operation):
    *
-   * - May only be called after at least one invariant assertion callback and a
+   * - May only be called after at least one contract assertion callback and a
    *   factory or initial value have been provided.
    */
   template <
       typename NewOperation,
-      typename = EnableIfTestable<sizeof...(Invariants), Factory, NewOperation>>
+      typename = EnableIfTestable<sizeof...(Contracts), Factory, NewOperation>>
   testing::AssertionResult Test(const NewOperation& new_operation) const {
-    return TestImpl(new_operation, absl::index_sequence_for<Invariants...>());
+    return TestImpl(new_operation, absl::index_sequence_for<Contracts...>());
   }
 
   /*
    * Returns a testing::AssertionResult that is the reduced result of the
    * exception safety algorithm. The algorithm short circuits and returns
-   * AssertionFailure after the first invariant callback returns an
-   * AssertionFailure. Otherwise, if all invariant callbacks return an
+   * AssertionFailure after the first contract callback returns an
+   * AssertionFailure. Otherwise, if all contract callbacks return an
    * AssertionSuccess, the reduced result is AssertionSuccess.
    *
    * Preconditions for tester.Test():
    *
-   * - May only be called after at least one invariant assertion callback, a
+   * - May only be called after at least one contract assertion callback, a
    *   factory or initial value and a testable operation have been provided.
    */
-  template <typename LazyOperation = Operation,
-            typename =
-                EnableIfTestable<sizeof...(Invariants), Factory, LazyOperation>>
+  template <
+      typename LazyOperation = Operation,
+      typename = EnableIfTestable<sizeof...(Contracts), Factory, LazyOperation>>
   testing::AssertionResult Test() const {
-    return TestImpl(operation_, absl::index_sequence_for<Invariants...>());
+    return TestImpl(operation_, absl::index_sequence_for<Contracts...>());
   }
 
  private:
@@ -983,8 +1051,8 @@ class ExceptionSafetyTester {
   ExceptionSafetyTester() {}
 
   ExceptionSafetyTester(const Factory& f, const Operation& o,
-                        const std::tuple<Invariants...>& i)
-      : factory_(f), operation_(o), invariants_(i) {}
+                        const std::tuple<Contracts...>& i)
+      : factory_(f), operation_(o), contracts_(i) {}
 
   template <typename SelectedOperation, size_t... Indices>
   testing::AssertionResult TestImpl(const SelectedOperation& selected_operation,
@@ -996,28 +1064,28 @@ class ExceptionSafetyTester {
 
       // Run the full exception safety test algorithm for the current countdown
       auto reduced_res =
-          TestAllInvariantsAtCountdown(factory_, selected_operation, count,
-                                       std::get<Indices>(invariants_)...);
-      // If there is no value in the optional, no invariants were run because no
+          TestAllContractsAtCountdown(factory_, selected_operation, count,
+                                      std::get<Indices>(contracts_)...);
+      // If there is no value in the optional, no contracts were run because no
       // exception was thrown. This means that the test is complete and the loop
       // can exit successfully.
       if (!reduced_res.has_value()) {
         return testing::AssertionSuccess();
       }
-      // If the optional is not empty and the value is falsy, an invariant check
+      // If the optional is not empty and the value is falsy, an contract check
       // failed so the test must exit to propegate the failure.
       if (!reduced_res.value()) {
         return reduced_res.value();
       }
       // If the optional is not empty and the value is not falsy, it means
-      // exceptions were thrown but the invariants passed so the test must
+      // exceptions were thrown but the contracts passed so the test must
       // continue to run.
     }
   }
 
   Factory factory_;
   Operation operation_;
-  std::tuple<Invariants...> invariants_;
+  std::tuple<Contracts...> contracts_;
 };
 
 }  // namespace exceptions_internal
@@ -1028,7 +1096,7 @@ class ExceptionSafetyTester {
  * instances of ExceptionSafetyTester.
  *
  * In order to test a T for exception safety, a factory for that T, a testable
- * operation, and at least one invariant callback returning an assertion
+ * operation, and at least one contract callback returning an assertion
  * result must be applied using the respective methods.
  */
 inline exceptions_internal::ExceptionSafetyTester<>

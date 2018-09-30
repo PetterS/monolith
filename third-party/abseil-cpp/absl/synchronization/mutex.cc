@@ -43,6 +43,7 @@
 #include "absl/base/dynamic_annotations.h"
 #include "absl/base/internal/atomic_hook.h"
 #include "absl/base/internal/cycleclock.h"
+#include "absl/base/internal/hide_ptr.h"
 #include "absl/base/internal/low_level_alloc.h"
 #include "absl/base/internal/raw_logging.h"
 #include "absl/base/internal/spinlock.h"
@@ -272,13 +273,6 @@ static absl::base_internal::SpinLock synch_event_mu(
 // Can't be too small, as it's used for deadlock detection information.
 static const uint32_t kNSynchEvent = 1031;
 
-// We need to hide Mutexes (or other deadlock detection's pointers)
-// from the leak detector.
-static const uintptr_t kHideMask = static_cast<uintptr_t>(0xF03A5F7BF03A5F7BLL);
-static uintptr_t MaskMu(const void *mu) {
-  return reinterpret_cast<uintptr_t>(mu) ^ kHideMask;
-}
-
 static struct SynchEvent {     // this is a trivial hash table for the events
   // struct is freed when refcount reaches 0
   int refcount GUARDED_BY(synch_event_mu);
@@ -304,7 +298,7 @@ static struct SynchEvent {     // this is a trivial hash table for the events
 // set "bits" in the word there (waiting until lockbit is clear before doing
 // so), and return a refcounted reference that will remain valid until
 // UnrefSynchEvent() is called.  If a new SynchEvent is allocated,
-// the std::string name is copied into it.
+// the string name is copied into it.
 // When used with a mutex, the caller should also ensure that kMuEvent
 // is set in the mutex word, and similarly for condition variables and kCVEvent.
 static SynchEvent *EnsureSynchEvent(std::atomic<intptr_t> *addr,
@@ -314,7 +308,8 @@ static SynchEvent *EnsureSynchEvent(std::atomic<intptr_t> *addr,
   SynchEvent *e;
   // first look for existing SynchEvent struct..
   synch_event_mu.Lock();
-  for (e = synch_event[h]; e != nullptr && e->masked_addr != MaskMu(addr);
+  for (e = synch_event[h];
+       e != nullptr && e->masked_addr != base_internal::HidePtr(addr);
        e = e->next) {
   }
   if (e == nullptr) {  // no SynchEvent struct found; make one.
@@ -325,7 +320,7 @@ static SynchEvent *EnsureSynchEvent(std::atomic<intptr_t> *addr,
     e = reinterpret_cast<SynchEvent *>(
         base_internal::LowLevelAlloc::Alloc(sizeof(*e) + l));
     e->refcount = 2;    // one for return value, one for linked list
-    e->masked_addr = MaskMu(addr);
+    e->masked_addr = base_internal::HidePtr(addr);
     e->invariant = nullptr;
     e->arg = nullptr;
     e->log = false;
@@ -367,7 +362,8 @@ static void ForgetSynchEvent(std::atomic<intptr_t> *addr, intptr_t bits,
   SynchEvent *e;
   synch_event_mu.Lock();
   for (pe = &synch_event[h];
-       (e = *pe) != nullptr && e->masked_addr != MaskMu(addr); pe = &e->next) {
+       (e = *pe) != nullptr && e->masked_addr != base_internal::HidePtr(addr);
+       pe = &e->next) {
   }
   bool del = false;
   if (e != nullptr) {
@@ -388,7 +384,8 @@ static SynchEvent *GetSynchEvent(const void *addr) {
   uint32_t h = reinterpret_cast<intptr_t>(addr) % kNSynchEvent;
   SynchEvent *e;
   synch_event_mu.Lock();
-  for (e = synch_event[h]; e != nullptr && e->masked_addr != MaskMu(addr);
+  for (e = synch_event[h];
+       e != nullptr && e->masked_addr != base_internal::HidePtr(addr);
        e = e->next) {
   }
   if (e != nullptr) {
@@ -1830,8 +1827,8 @@ bool Mutex::LockSlowWithDeadline(MuHow how, const Condition *cond,
          cond == nullptr || EvalConditionAnnotated(cond, this, true, how);
 }
 
-// RAW_CHECK_FMT() takes a condition, a printf-style format std::string, and
-// the printf-style argument list.   The format std::string must be a literal.
+// RAW_CHECK_FMT() takes a condition, a printf-style format string, and
+// the printf-style argument list.   The format string must be a literal.
 // Arguments after the first are not evaluated unless the condition is true.
 #define RAW_CHECK_FMT(cond, ...)                                   \
   do {                                                             \
@@ -1978,7 +1975,7 @@ void Mutex::LockSlowLoop(SynchWaitParams *waitp, int flags) {
 // Unlock this mutex, which is held by the current thread.
 // If waitp is non-zero, it must be the wait parameters for the current thread
 // which holds the lock but is not runnable because its condition is false
-// or it n the process of blocking on a condition variable; it must requeue
+// or it is in the process of blocking on a condition variable; it must requeue
 // itself on the mutex/condvar to wait for its condition to become true.
 void Mutex::UnlockSlow(SynchWaitParams *waitp) {
   intptr_t v = mu_.load(std::memory_order_relaxed);

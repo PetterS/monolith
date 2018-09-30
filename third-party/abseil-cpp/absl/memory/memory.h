@@ -40,7 +40,8 @@ namespace absl {
 // -----------------------------------------------------------------------------
 //
 //  Adopts ownership from a raw pointer and transfers it to the returned
-//  `std::unique_ptr`, whose type is deduced.
+//  `std::unique_ptr`, whose type is deduced. DO NOT specify the template type T
+//  when calling WrapUnique.
 //
 // Example:
 //   X* NewX(int, int);
@@ -82,7 +83,11 @@ struct MakeUniqueResult<T[N]> {
 
 }  // namespace memory_internal
 
-#if __cplusplus >= 201402L || defined(_MSC_VER)
+// gcc 4.8 has __cplusplus at 201301 but doesn't define make_unique.  Other
+// supported compilers either just define __cplusplus as 201103 but have
+// make_unique (msvc), or have make_unique whenever __cplusplus > 201103 (clang)
+#if (__cplusplus > 201103L || defined(_MSC_VER)) && \
+    !(defined(__GNUC__) && __GNUC__ == 4 && __GNUC_MINOR__ == 8)
 using std::make_unique;
 #else
 // -----------------------------------------------------------------------------
@@ -178,9 +183,9 @@ typename memory_internal::MakeUniqueResult<T>::invalid make_unique(
 // useful within templates that need to handle a complement of raw pointers,
 // `std::nullptr_t`, and smart pointers.
 template <typename T>
-auto RawPtr(T&& ptr) -> decltype(&*ptr) {
+auto RawPtr(T&& ptr) -> decltype(std::addressof(*ptr)) {
   // ptr is a forwarding reference to support Ts with non-const operators.
-  return (ptr != nullptr) ? &*ptr : nullptr;
+  return (ptr != nullptr) ? std::addressof(*ptr) : nullptr;
 }
 inline std::nullptr_t RawPtr(std::nullptr_t) { return nullptr; }
 
@@ -635,6 +640,61 @@ struct default_allocator_is_nothrow : std::true_type {};
 struct default_allocator_is_nothrow : std::false_type {};
 #endif
 
+namespace memory_internal {
+#ifdef ABSL_HAVE_EXCEPTIONS  // ConstructRange
+template <typename Allocator, typename Iterator, typename... Args>
+void ConstructRange(Allocator& alloc, Iterator first, Iterator last,
+                    const Args&... args) {
+  for (Iterator cur = first; cur != last; ++cur) {
+    try {
+      std::allocator_traits<Allocator>::construct(alloc, cur, args...);
+    } catch (...) {
+      while (cur != first) {
+        --cur;
+        std::allocator_traits<Allocator>::destroy(alloc, cur);
+      }
+      throw;
+    }
+  }
+}
+#else   // ABSL_HAVE_EXCEPTIONS  // ConstructRange
+template <typename Allocator, typename Iterator, typename... Args>
+void ConstructRange(Allocator& alloc, Iterator first, Iterator last,
+                    const Args&... args) {
+  for (; first != last; ++first) {
+    std::allocator_traits<Allocator>::construct(alloc, first, args...);
+  }
+}
+#endif  // ABSL_HAVE_EXCEPTIONS  // ConstructRange
+
+#ifdef ABSL_HAVE_EXCEPTIONS  // CopyRange
+template <typename Allocator, typename Iterator, typename InputIterator>
+void CopyRange(Allocator& alloc, Iterator destination, InputIterator first,
+               InputIterator last) {
+  for (Iterator cur = destination; first != last;
+       static_cast<void>(++cur), static_cast<void>(++first)) {
+    try {
+      std::allocator_traits<Allocator>::construct(alloc, cur, *first);
+    } catch (...) {
+      while (cur != destination) {
+        --cur;
+        std::allocator_traits<Allocator>::destroy(alloc, cur);
+      }
+      throw;
+    }
+  }
+}
+#else   // ABSL_HAVE_EXCEPTIONS  // CopyRange
+template <typename Allocator, typename Iterator, typename InputIterator>
+void CopyRange(Allocator& alloc, Iterator destination, InputIterator first,
+               InputIterator last) {
+  for (; first != last;
+       static_cast<void>(++destination), static_cast<void>(++first)) {
+    std::allocator_traits<Allocator>::construct(alloc, destination, *first);
+  }
+}
+#endif  // ABSL_HAVE_EXCEPTIONS  // CopyRange
+}  // namespace memory_internal
 }  // namespace absl
 
 #endif  // ABSL_MEMORY_MEMORY_H_

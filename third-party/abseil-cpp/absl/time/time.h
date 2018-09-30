@@ -25,11 +25,12 @@
 //  * `absl::TimeZone` defines geopolitical time zone regions (as collected
 //     within the IANA Time Zone database (https://www.iana.org/time-zones)).
 //
+//
 // Example:
 //
 //   absl::TimeZone nyc;
 //
-//   // LoadTimeZone may fail so it's always better to check for success.
+//   // LoadTimeZone() may fail so it's always better to check for success.
 //   if (!absl::LoadTimeZone("America/New_York", &nyc)) {
 //      // handle error case
 //   }
@@ -50,7 +51,7 @@
 #ifndef ABSL_TIME_TIME_H_
 #define ABSL_TIME_TIME_H_
 
-#if !defined(_WIN32)
+#if !defined(_MSC_VER)
 #include <sys/time.h>
 #else
 #include <winsock2.h>
@@ -64,6 +65,7 @@
 #include <utility>
 
 #include "absl/base/port.h"  // Needed for string vs std::string
+#include "absl/strings/string_view.h"
 #include "absl/time/internal/cctz/include/cctz/time_zone.h"
 
 namespace absl {
@@ -80,10 +82,18 @@ constexpr int64_t GetRepHi(Duration d);
 constexpr uint32_t GetRepLo(Duration d);
 constexpr Duration MakeDuration(int64_t hi, uint32_t lo);
 constexpr Duration MakeDuration(int64_t hi, int64_t lo);
+inline Duration MakePosDoubleDuration(double n);
 constexpr int64_t kTicksPerNanosecond = 4;
 constexpr int64_t kTicksPerSecond = 1000 * 1000 * 1000 * kTicksPerNanosecond;
+template <std::intmax_t N>
+constexpr Duration FromInt64(int64_t v, std::ratio<1, N>);
+constexpr Duration FromInt64(int64_t v, std::ratio<60>);
+constexpr Duration FromInt64(int64_t v, std::ratio<3600>);
 template <typename T>
-using IsFloatingPoint =
+using EnableIfIntegral = typename std::enable_if<
+    std::is_integral<T>::value || std::is_enum<T>::value, int>::type;
+template <typename T>
+using EnableIfFloat =
     typename std::enable_if<std::is_floating_point<T>::value, int>::type;
 }  // namespace time_internal
 
@@ -178,15 +188,15 @@ inline Duration operator-(Duration lhs, Duration rhs) { return lhs -= rhs; }
 
 // Multiplicative Operators
 template <typename T>
-inline Duration operator*(Duration lhs, T rhs) {
+Duration operator*(Duration lhs, T rhs) {
   return lhs *= rhs;
 }
 template <typename T>
-inline Duration operator*(T lhs, Duration rhs) {
+Duration operator*(T lhs, Duration rhs) {
   return rhs *= lhs;
 }
 template <typename T>
-inline Duration operator/(Duration lhs, T rhs) {
+Duration operator/(Duration lhs, T rhs) {
   return lhs /= rhs;
 }
 inline int64_t operator/(Duration lhs, Duration rhs) {
@@ -287,6 +297,42 @@ Duration Floor(Duration d, Duration unit);
 //   absl::Duration c = absl::Ceil(d, absl::Microseconds(1));   // 123457us
 Duration Ceil(Duration d, Duration unit);
 
+// InfiniteDuration()
+//
+// Returns an infinite `Duration`.  To get a `Duration` representing negative
+// infinity, use `-InfiniteDuration()`.
+//
+// Duration arithmetic overflows to +/- infinity and saturates. In general,
+// arithmetic with `Duration` infinities is similar to IEEE 754 infinities
+// except where IEEE 754 NaN would be involved, in which case +/-
+// `InfiniteDuration()` is used in place of a "nan" Duration.
+//
+// Examples:
+//
+//   constexpr absl::Duration inf = absl::InfiniteDuration();
+//   const absl::Duration d = ... any finite duration ...
+//
+//   inf == inf + inf
+//   inf == inf + d
+//   inf == inf - inf
+//   -inf == d - inf
+//
+//   inf == d * 1e100
+//   inf == inf / 2
+//   0 == d / inf
+//   INT64_MAX == inf / d
+//
+//   d < inf
+//   -inf < d
+//
+//   // Division by zero returns infinity, or INT64_MIN/MAX where appropriate.
+//   inf == d / 0
+//   INT64_MAX == d / absl::ZeroDuration()
+//
+// The examples involving the `/` operator above also apply to `IDivDuration()`
+// and `FDivDuration()`.
+constexpr Duration InfiniteDuration();
+
 // Nanoseconds()
 // Microseconds()
 // Milliseconds()
@@ -322,27 +368,33 @@ constexpr Duration Hours(int64_t n);
 // Example:
 //   auto a = absl::Seconds(1.5);        // OK
 //   auto b = absl::Milliseconds(1500);  // BETTER
-template <typename T, time_internal::IsFloatingPoint<T> = 0>
+template <typename T, time_internal::EnableIfFloat<T> = 0>
 Duration Nanoseconds(T n) {
   return n * Nanoseconds(1);
 }
-template <typename T, time_internal::IsFloatingPoint<T> = 0>
+template <typename T, time_internal::EnableIfFloat<T> = 0>
 Duration Microseconds(T n) {
   return n * Microseconds(1);
 }
-template <typename T, time_internal::IsFloatingPoint<T> = 0>
+template <typename T, time_internal::EnableIfFloat<T> = 0>
 Duration Milliseconds(T n) {
   return n * Milliseconds(1);
 }
-template <typename T, time_internal::IsFloatingPoint<T> = 0>
+template <typename T, time_internal::EnableIfFloat<T> = 0>
 Duration Seconds(T n) {
-  return n * Seconds(1);
+  if (n >= 0) {
+    if (n >= std::numeric_limits<int64_t>::max()) return InfiniteDuration();
+    return time_internal::MakePosDoubleDuration(n);
+  } else {
+    if (n <= std::numeric_limits<int64_t>::min()) return -InfiniteDuration();
+    return -time_internal::MakePosDoubleDuration(-n);
+  }
 }
-template <typename T, time_internal::IsFloatingPoint<T> = 0>
+template <typename T, time_internal::EnableIfFloat<T> = 0>
 Duration Minutes(T n) {
   return n * Minutes(1);
 }
-template <typename T, time_internal::IsFloatingPoint<T> = 0>
+template <typename T, time_internal::EnableIfFloat<T> = 0>
 Duration Hours(T n) {
   return n * Hours(1);
 }
@@ -431,42 +483,9 @@ std::chrono::seconds ToChronoSeconds(Duration d);
 std::chrono::minutes ToChronoMinutes(Duration d);
 std::chrono::hours ToChronoHours(Duration d);
 
-// InfiniteDuration()
-//
-// Returns an infinite `Duration`.  To get a `Duration` representing negative
-// infinity, use `-InfiniteDuration()`.
-//
-// Duration arithmetic overflows to +/- infinity and saturates. In general,
-// arithmetic with `Duration` infinities is similar to IEEE 754 infinities
-// except where IEEE 754 NaN would be involved, in which case +/-
-// `InfiniteDuration()` is used in place of a "nan" Duration.
-//
-// Examples:
-//
-//   constexpr absl::Duration inf = absl::InfiniteDuration();
-//   const absl::Duration d = ... any finite duration ...
-//
-//   inf == inf + inf
-//   inf == inf + d
-//   inf == inf - inf
-//   -inf == d - inf
-//
-//   inf == d * 1e100
-//   inf == inf / 2
-//   0 == d / inf
-//   INT64_MAX == inf / d
-//
-//   // Division by zero returns infinity, or INT64_MIN/MAX where appropriate.
-//   inf == d / 0
-//   INT64_MAX == d / absl::ZeroDuration()
-//
-// The examples involving the `/` operator above also apply to `IDivDuration()`
-// and `FDivDuration()`.
-constexpr Duration InfiniteDuration();
-
 // FormatDuration()
 //
-// Returns a std::string representing the duration in the form "72h3m0.5s".
+// Returns a string representing the duration in the form "72h3m0.5s".
 // Returns "inf" or "-inf" for +/- `InfiniteDuration()`.
 std::string FormatDuration(Duration d);
 
@@ -477,22 +496,16 @@ inline std::ostream& operator<<(std::ostream& os, Duration d) {
 
 // ParseDuration()
 //
-// Parses a duration std::string consisting of a possibly signed sequence of
+// Parses a duration string consisting of a possibly signed sequence of
 // decimal numbers, each with an optional fractional part and a unit
 // suffix.  The valid suffixes are "ns", "us" "ms", "s", "m", and "h".
 // Simple examples include "300ms", "-1.5h", and "2h45m".  Parses "0" as
-// `ZeroDuration()`.  Parses "inf" and "-inf" as +/- `InfiniteDuration()`.
+// `ZeroDuration()`. Parses "inf" and "-inf" as +/- `InfiniteDuration()`.
 bool ParseDuration(const std::string& dur_string, Duration* d);
 
-// Flag Support
-// TODO(absl-team): Remove once dependencies are removed.
-
-// ParseFlag()
-//
+// Support for flag values of type Duration. Duration flags must be specified
+// in a format that is valid input for absl::ParseDuration().
 bool ParseFlag(const std::string& text, Duration* dst, std::string* error);
-
-// UnparseFlag()
-//
 std::string UnparseFlag(Duration d);
 
 // Time
@@ -680,7 +693,9 @@ constexpr Time InfinitePast() {
 // Examples:
 //
 //   absl::TimeZone lax;
-//   if (!absl::LoadTimeZone("America/Los_Angeles", &lax)) { ... }
+//   if (!absl::LoadTimeZone("America/Los_Angeles", &lax)) {
+//     // handle error case
+//   }
 //
 //   // A unique civil time
 //   absl::TimeConversion jan01 =
@@ -750,7 +765,9 @@ TimeConversion ConvertDateTime(int64_t year, int mon, int day, int hour,
 // Example:
 //
 //   absl::TimeZone seattle;
-//   if (!absl::LoadTimeZone("America/Los_Angeles", &seattle)) { ... }
+//   if (!absl::LoadTimeZone("America/Los_Angeles", &seattle)) {
+//     // handle error case
+//   }
 //   absl::Time t =  absl::FromDateTime(2017, 9, 26, 9, 30, 0, seattle);
 Time FromDateTime(int64_t year, int mon, int day, int hour, int min, int sec,
                   TimeZone tz);
@@ -862,8 +879,10 @@ std::chrono::system_clock::time_point ToChronoTime(Time);
 // FormatTime()/ParseTime() format specifiers for RFC3339 date/time strings,
 // with trailing zeros trimmed or with fractional seconds omitted altogether.
 //
-// Note that RFC3339_sec[] matches an ISO 8601 extended format for date
-// and time with UTC offset.
+// Note that RFC3339_sec[] matches an ISO 8601 extended format for date and
+// time with UTC offset.  Also note the use of "%Y": RFC3339 mandates that
+// years have exactly four digits, but we allow them to take their natural
+// width.
 extern const char RFC3339_full[];  // %Y-%m-%dT%H:%M:%E*S%Ez
 extern const char RFC3339_sec[];   // %Y-%m-%dT%H:%M:%S%Ez
 
@@ -877,7 +896,7 @@ extern const char RFC1123_no_wday[];  // %d %b %E4Y %H:%M:%S %z
 // FormatTime()
 //
 // Formats the given `absl::Time` in the `absl::TimeZone` according to the
-// provided format std::string. Uses strftime()-like formatting options, with
+// provided format string. Uses strftime()-like formatting options, with
 // the following extensions:
 //
 //   - %Ez  - RFC3339-compatible numeric UTC offset (+hh:mm or -hh:mm)
@@ -901,16 +920,18 @@ extern const char RFC1123_no_wday[];  // %d %b %E4Y %H:%M:%S %z
 // Example:
 //
 //   absl::TimeZone lax;
-//   if (!absl::LoadTimeZone("America/Los_Angeles", &lax)) { ... }
+//   if (!absl::LoadTimeZone("America/Los_Angeles", &lax)) {
+//     // handle error case
+//   }
 //   absl::Time t = absl::FromDateTime(2013, 1, 2, 3, 4, 5, lax);
 //
-//   std::string f = absl::FormatTime("%H:%M:%S", t, lax);  // "03:04:05"
+//   string f = absl::FormatTime("%H:%M:%S", t, lax);  // "03:04:05"
 //   f = absl::FormatTime("%H:%M:%E3S", t, lax);  // "03:04:05.000"
 //
 // Note: If the given `absl::Time` is `absl::InfiniteFuture()`, the returned
-// std::string will be exactly "infinite-future". If the given `absl::Time` is
-// `absl::InfinitePast()`, the returned std::string will be exactly "infinite-past".
-// In both cases the given format std::string and `absl::TimeZone` are ignored.
+// string will be exactly "infinite-future". If the given `absl::Time` is
+// `absl::InfinitePast()`, the returned string will be exactly "infinite-past".
+// In both cases the given format string and `absl::TimeZone` are ignored.
 //
 std::string FormatTime(const std::string& format, Time t, TimeZone tz);
 
@@ -927,7 +948,7 @@ inline std::ostream& operator<<(std::ostream& os, Time t) {
 
 // ParseTime()
 //
-// Parses an input std::string according to the provided format std::string and
+// Parses an input string according to the provided format string and
 // returns the corresponding `absl::Time`. Uses strftime()-like formatting
 // options, with the same extensions as FormatTime(), but with the
 // exceptions that %E#S is interpreted as %E*S, and %E#f as %E*f.  %Ez
@@ -941,7 +962,7 @@ inline std::ostream& operator<<(std::ostream& os, Time t) {
 //
 //   "1970-01-01 00:00:00.0 +0000"
 //
-// For example, parsing a std::string of "15:45" (%H:%M) will return an absl::Time
+// For example, parsing a string of "15:45" (%H:%M) will return an absl::Time
 // that represents "1970-01-01 15:45:00.0 +0000".
 //
 // Note that since ParseTime() returns time instants, it makes the most sense
@@ -968,15 +989,15 @@ inline std::ostream& operator<<(std::ostream& os, Time t) {
 // Errors are indicated by returning false and assigning an error message
 // to the "err" out param if it is non-null.
 //
-// Note: If the input std::string is exactly "infinite-future", the returned
+// Note: If the input string is exactly "infinite-future", the returned
 // `absl::Time` will be `absl::InfiniteFuture()` and `true` will be returned.
-// If the input std::string is "infinite-past", the returned `absl::Time` will be
+// If the input string is "infinite-past", the returned `absl::Time` will be
 // `absl::InfinitePast()` and `true` will be returned.
 //
 bool ParseTime(const std::string& format, const std::string& input, Time* time,
                std::string* err);
 
-// Like ParseTime() above, but if the format std::string does not contain a UTC
+// Like ParseTime() above, but if the format string does not contain a UTC
 // offset specification (%z/%Ez/%E*z) then the input is interpreted in the
 // given TimeZone.  This means that the input, by itself, does not identify a
 // unique instant.  Being time-zone dependent, it also admits the possibility
@@ -986,11 +1007,6 @@ bool ParseTime(const std::string& format, const std::string& input, Time* time,
 bool ParseTime(const std::string& format, const std::string& input, TimeZone tz,
                Time* time, std::string* err);
 
-// TODO(absl-team): Remove once dependencies are removed.
-
-// ParseFlag()
-// UnparseFlag()
-//
 // Support for flag values of type Time. Time flags must be specified in a
 // format that matches absl::RFC3339_full. For example:
 //
@@ -1024,7 +1040,9 @@ std::string UnparseFlag(Time t);
 //   absl::TimeZone pst = absl::FixedTimeZone(-8 * 60 * 60);
 //   absl::TimeZone loc = absl::LocalTimeZone();
 //   absl::TimeZone lax;
-//   if (!absl::LoadTimeZone("America/Los_Angeles", &lax)) { ... }
+//   if (!absl::LoadTimeZone("America/Los_Angeles", &lax)) {
+//     // handle error case
+//   }
 //
 // See also:
 // - https://github.com/google/cctz
@@ -1111,6 +1129,18 @@ constexpr Duration MakeDuration(int64_t hi, int64_t lo) {
   return MakeDuration(hi, static_cast<uint32_t>(lo));
 }
 
+// Make a Duration value from a floating-point number, as long as that number
+// is in the range [ 0 .. numeric_limits<int64_t>::max ), that is, as long as
+// it's positive and can be converted to int64_t without risk of UB.
+inline Duration MakePosDoubleDuration(double n) {
+  const int64_t int_secs = static_cast<int64_t>(n);
+  const uint32_t ticks =
+      static_cast<uint32_t>((n - int_secs) * kTicksPerSecond + 0.5);
+  return ticks < kTicksPerSecond
+             ? MakeDuration(int_secs, ticks)
+             : MakeDuration(int_secs + 1, ticks - kTicksPerSecond);
+}
+
 // Creates a normalized Duration from an almost-normalized (sec,ticks)
 // pair. sec may be positive or negative.  ticks must be in the range
 // -kTicksPerSecond < *ticks < kTicksPerSecond.  If ticks is negative it
@@ -1154,10 +1184,16 @@ constexpr Duration FromInt64(int64_t v, std::ratio<1, N>) {
       v / N, v % N * kTicksPerNanosecond * 1000 * 1000 * 1000 / N);
 }
 constexpr Duration FromInt64(int64_t v, std::ratio<60>) {
-  return Minutes(v);
+  return (v <= std::numeric_limits<int64_t>::max() / 60 &&
+          v >= std::numeric_limits<int64_t>::min() / 60)
+             ? MakeDuration(v * 60)
+             : v > 0 ? InfiniteDuration() : -InfiniteDuration();
 }
 constexpr Duration FromInt64(int64_t v, std::ratio<3600>) {
-  return Hours(v);
+  return (v <= std::numeric_limits<int64_t>::max() / 3600 &&
+          v >= std::numeric_limits<int64_t>::min() / 3600)
+             ? MakeDuration(v * 3600)
+             : v > 0 ? InfiniteDuration() : -InfiniteDuration();
 }
 
 // IsValidRep64<T>(0) is true if the expression `int64_t{std::declval<T>()}` is
@@ -1220,6 +1256,24 @@ T ToChronoDuration(Duration d) {
 }
 
 }  // namespace time_internal
+constexpr Duration Nanoseconds(int64_t n) {
+  return time_internal::FromInt64(n, std::nano{});
+}
+constexpr Duration Microseconds(int64_t n) {
+  return time_internal::FromInt64(n, std::micro{});
+}
+constexpr Duration Milliseconds(int64_t n) {
+  return time_internal::FromInt64(n, std::milli{});
+}
+constexpr Duration Seconds(int64_t n) {
+  return time_internal::FromInt64(n, std::ratio<1>{});
+}
+constexpr Duration Minutes(int64_t n) {
+  return time_internal::FromInt64(n, std::ratio<60>{});
+}
+constexpr Duration Hours(int64_t n) {
+  return time_internal::FromInt64(n, std::ratio<3600>{});
+}
 
 constexpr bool operator<(Duration lhs, Duration rhs) {
   return time_internal::GetRepHi(lhs) != time_internal::GetRepHi(rhs)
@@ -1259,39 +1313,6 @@ constexpr Duration operator-(Duration d) {
                              time_internal::GetRepHi(d)),
                          time_internal::kTicksPerSecond -
                              time_internal::GetRepLo(d));
-}
-
-constexpr Duration Nanoseconds(int64_t n) {
-  return time_internal::MakeNormalizedDuration(
-      n / (1000 * 1000 * 1000),
-      n % (1000 * 1000 * 1000) * time_internal::kTicksPerNanosecond);
-}
-
-constexpr Duration Microseconds(int64_t n) {
-  return time_internal::MakeNormalizedDuration(
-      n / (1000 * 1000),
-      n % (1000 * 1000) * (1000 * time_internal::kTicksPerNanosecond));
-}
-
-constexpr Duration Milliseconds(int64_t n) {
-  return time_internal::MakeNormalizedDuration(
-      n / 1000, n % 1000 * (1000 * 1000 * time_internal::kTicksPerNanosecond));
-}
-
-constexpr Duration Seconds(int64_t n) { return time_internal::MakeDuration(n); }
-
-constexpr Duration Minutes(int64_t n) {
-  return (n <= std::numeric_limits<int64_t>::max() / 60 &&
-          n >= std::numeric_limits<int64_t>::min() / 60)
-             ? time_internal::MakeDuration(n * 60)
-             : n > 0 ? InfiniteDuration() : -InfiniteDuration();
-}
-
-constexpr Duration Hours(int64_t n) {
-  return (n <= std::numeric_limits<int64_t>::max() / 3600 &&
-          n >= std::numeric_limits<int64_t>::min() / 3600)
-             ? time_internal::MakeDuration(n * 3600)
-             : n > 0 ? InfiniteDuration() : -InfiniteDuration();
 }
 
 constexpr Duration InfiniteDuration() {
