@@ -24,7 +24,7 @@
 // Unlike a `std::mutex`, the Abseil `Mutex` provides the following additional
 // features:
 //   * Conditional predicates intrinsic to the `Mutex` object
-//   * Reader/writer locks, in addition to standard exclusive/writer locks
+//   * Shared/reader locks, in addition to standard exclusive/writer locks
 //   * Deadlock detection and debug support.
 //
 // The following helper classes are also defined within this file:
@@ -290,7 +290,7 @@ class LOCKABLE Mutex {
   // Mutex::ReaderLockWhen()
   // Mutex::WriterLockWhen()
   //
-  // Blocks until simultaneously both `cond` is `true` and this` Mutex` can
+  // Blocks until simultaneously both `cond` is `true` and this `Mutex` can
   // be acquired, then atomically acquires this `Mutex`. `LockWhen()` is
   // logically equivalent to `*Lock(); Await();` though they may have different
   // performance characteristics.
@@ -558,7 +558,7 @@ class SCOPED_LOCKABLE ReaderMutexLock {
 // WriterMutexLock
 //
 // The `WriterMutexLock` is a helper class, like `MutexLock`, which acquires and
-// releases a write (exclusive) lock on a `Mutex` va RAII.
+// releases a write (exclusive) lock on a `Mutex` via RAII.
 class SCOPED_LOCKABLE WriterMutexLock {
  public:
   explicit WriterMutexLock(Mutex *mu) EXCLUSIVE_LOCK_FUNCTION(mu)
@@ -854,7 +854,7 @@ class SCOPED_LOCKABLE MutexLockMaybe {
   MutexLockMaybe& operator=(MutexLockMaybe&&) = delete;
 };
 
-// ReleaseableMutexLock
+// ReleasableMutexLock
 //
 // ReleasableMutexLock is like MutexLock, but permits `Release()` of its
 // mutex before destruction. `Release()` may be called at most once.
@@ -962,7 +962,7 @@ void RegisterMutexTracer(void (*fn)(const char *msg, const void *obj,
 //
 // The function pointer registered here will be called here on various CondVar
 // events.  The callback is given an opaque handle to the CondVar object and
-// a std::string identifying the event.  This is thread-safe, but only a single
+// a string identifying the event.  This is thread-safe, but only a single
 // tracer can be registered.
 //
 // Events that can be sent are "Wait", "Unwait", "Signal wakeup", and

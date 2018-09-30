@@ -17,6 +17,7 @@
 
 list(APPEND STRINGS_PUBLIC_HEADERS
   "ascii.h"
+  "charconv.h"
   "escaping.h"
   "match.h"
   "numbers.h"
@@ -31,8 +32,9 @@ list(APPEND STRINGS_PUBLIC_HEADERS
 
 
 list(APPEND STRINGS_INTERNAL_HEADERS
-  "internal/bits.h"
   "internal/char_map.h"
+  "internal/charconv_bigint.h"
+  "internal/charconv_parse.h"
   "internal/memutil.h"
   "internal/ostringstream.h"
   "internal/resize_uninitialized.h"
@@ -47,7 +49,10 @@ list(APPEND STRINGS_INTERNAL_HEADERS
 # add string library
 list(APPEND STRINGS_SRC
   "ascii.cc"
+  "charconv.cc"
   "escaping.cc"
+  "internal/charconv_bigint.cc"
+  "internal/charconv_parse.cc"
   "internal/memutil.cc"
   "internal/memutil.h"
   "internal/utf8.cc"
@@ -75,6 +80,56 @@ absl_library(
     strings
 )
 
+# add str_format library
+absl_header_library(
+  TARGET
+    absl_str_format
+  PUBLIC_LIBRARIES
+    str_format_internal
+  EXPORT_NAME
+    str_format
+)
+
+# str_format_internal
+absl_library(
+  TARGET
+    str_format_internal
+  SOURCES
+    "internal/str_format/arg.cc"
+    "internal/str_format/bind.cc"
+    "internal/str_format/extension.cc"
+    "internal/str_format/float_conversion.cc"
+    "internal/str_format/output.cc"
+    "internal/str_format/parser.cc"
+    "internal/str_format/arg.h"
+    "internal/str_format/bind.h"
+    "internal/str_format/checker.h"
+    "internal/str_format/extension.h"
+    "internal/str_format/float_conversion.h"
+    "internal/str_format/output.h"
+    "internal/str_format/parser.h"
+  PUBLIC_LIBRARIES
+    str_format_extension_internal
+    absl::strings
+    absl::base
+    absl::numeric
+    absl::container
+    absl::span
+)
+
+# str_format_extension_internal
+absl_library(
+  TARGET
+    str_format_extension_internal
+  SOURCES
+    "internal/str_format/extension.cc"
+    "internal/str_format/extension.h"
+    "internal/str_format/output.cc"
+    "internal/str_format/output.h"
+  PUBLIC_LIBRARIES
+    absl::base
+    absl::strings
+)
 
 #
 ## TESTS
@@ -301,5 +356,108 @@ absl_test(
 )
 
 
+# test charconv_test
+set(CHARCONV_TEST_SRC "charconv_test.cc")
+set(CHARCONV_TEST_PUBLIC_LIBRARIES absl::strings)
+
+absl_test(
+  TARGET
+    charconv_test
+  SOURCES
+    ${CHARCONV_TEST_SRC}
+  PUBLIC_LIBRARIES
+    ${CHARCONV_TEST_PUBLIC_LIBRARIES}
+)
+
+
+# test charconv_parse_test
+set(CHARCONV_PARSE_TEST_SRC "internal/charconv_parse_test.cc")
+set(CHARCONV_PARSE_TEST_PUBLIC_LIBRARIES absl::strings)
+
+absl_test(
+  TARGET
+    charconv_parse_test
+  SOURCES
+    ${CHARCONV_PARSE_TEST_SRC}
+  PUBLIC_LIBRARIES
+    ${CHARCONV_PARSE_TEST_PUBLIC_LIBRARIES}
+)
+
+
+# test charconv_bigint_test
+set(CHARCONV_BIGINT_TEST_SRC "internal/charconv_bigint_test.cc")
+set(CHARCONV_BIGINT_TEST_PUBLIC_LIBRARIES absl::strings)
+
+absl_test(
+  TARGET
+    charconv_bigint_test
+  SOURCES
+    ${CHARCONV_BIGINT_TEST_SRC}
+  PUBLIC_LIBRARIES
+    ${CHARCONV_BIGINT_TEST_PUBLIC_LIBRARIES}
+)
+# test str_format_test
+absl_test(
+  TARGET
+    str_format_test
+  SOURCES
+    "str_format_test.cc"
+  PUBLIC_LIBRARIES
+    absl::base
+    absl::str_format
+    absl::strings
+)
+
+# test str_format_bind_test
+absl_test(
+  TARGET
+    str_format_bind_test
+  SOURCES
+    "internal/str_format/bind_test.cc"
+  PUBLIC_LIBRARIES
+    str_format_internal
+)
+
+# test str_format_checker_test
+absl_test(
+  TARGET
+    str_format_checker_test
+  SOURCES
+    "internal/str_format/checker_test.cc"
+  PUBLIC_LIBRARIES
+    absl::str_format
+)
+
+# test str_format_convert_test
+absl_test(
+  TARGET
+    str_format_convert_test
+  SOURCES
+    "internal/str_format/convert_test.cc"
+  PUBLIC_LIBRARIES
+    str_format_internal
+    absl::numeric
+)
+
+# test str_format_output_test
+absl_test(
+  TARGET
+    str_format_output_test
+  SOURCES
+    "internal/str_format/output_test.cc"
+  PUBLIC_LIBRARIES
+    str_format_extension_internal
+)
+
+# test str_format_parser_test
+absl_test(
+  TARGET
+    str_format_parser_test
+  SOURCES
+    "internal/str_format/parser_test.cc"
+  PUBLIC_LIBRARIES
+    str_format_internal
+    absl::base
+)
 
 
