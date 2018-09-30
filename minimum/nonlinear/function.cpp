@@ -12,6 +12,8 @@
 #include <omp.h>
 #endif
 
+#include <absl/container/flat_hash_set.h>
+
 #include <minimum/core/check.h>
 #include <minimum/core/time.h>
 #include <minimum/nonlinear/function.h>
@@ -598,8 +600,7 @@ void Function::create_sparse_hessian(Eigen::SparseMatrix<double>* H) const {
 	double start_time = wall_time();
 
 	Implementation::SparseHessianStorage hessian_indices;
-	// std::set<std::pair<int, int>> hessian_indices_set;
-	std::unordered_set<std::pair<int, int>, IntPairHash> hessian_indices_set;
+	absl::flat_hash_set<std::pair<int, int>> hessian_indices_set;
 	impl->number_of_hessian_elements = 0;
 
 	for (const auto& added_term : impl->terms) {
@@ -617,18 +618,7 @@ void Function::create_sparse_hessian(Eigen::SparseMatrix<double>* H) const {
 							for (size_t j = 0; j < term->variable_dimension(var1); ++j) {
 								int global_i = static_cast<int>(i + global_offset0);
 								int global_j = static_cast<int>(j + global_offset1);
-
-// Fix for old versions of libstdc++ that do not have
-// emplace. Remove when continuous integration upgrades.
-#ifdef __GLIBCXX__
-#if __GLIBCXX__ <= 20120322
-								hessian_indices_set.insert(std::make_pair(global_i, global_j));
-#else
 								hessian_indices_set.emplace(global_i, global_j);
-#endif
-#else
-								hessian_indices_set.emplace(global_i, global_j);
-#endif
 							}
 						}
 					}
