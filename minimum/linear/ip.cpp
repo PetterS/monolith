@@ -7,6 +7,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include <absl/container/flat_hash_set.h>
+
 #include <minimum/core/check.h>
 #include <minimum/core/numeric.h>
 #include <minimum/core/range.h>
@@ -528,7 +530,7 @@ bool IP::check_invariants() const {
 	minimum_core_assert(impl->ip.variable_size() == impl->solution.primal_size());
 	minimum_core_assert(impl->ip.constraint_size() == impl->solution.dual_size());
 
-	std::unordered_set<int> vars;
+	absl::flat_hash_set<int> vars;
 	for (auto& constraint : impl->ip.constraint()) {
 		if (constraint.bound().lower() > constraint.bound().upper()) {
 			return false;
