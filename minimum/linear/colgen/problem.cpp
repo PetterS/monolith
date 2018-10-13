@@ -197,15 +197,6 @@ class Problem::Implementation {
 			ip->set_dual_solution(row_variables->back().get_index(), dual_solution[i]);
 		}
 
-		if (!FLAGS_save_ip_directory.empty()) {
-			Timer t("Saving IP");
-			static int ip_count = 0;
-			auto file_name = to_string(FLAGS_save_ip_directory, "/", ip_count++, ".ip");
-			ofstream fout(file_name, ios::binary);
-			check(ip->get().SerializeToOstream(&fout), "Save IP failed.");
-			t.OK();
-		}
-
 		return ip;
 	}
 
@@ -254,6 +245,26 @@ class Problem::Implementation {
 			auto lb = parent.pool.at(i).lower_bound();
 			auto ub = parent.pool.at(i).upper_bound();
 			parent.pool.at(i).solution_value = min(ub, max(lb, column_variables[j].value()));
+		}
+
+		if (!FLAGS_save_ip_directory.empty()) {
+			static int ip_count = 0;
+
+			Timer t("Saving IP proto");
+			ofstream fout(to_string(FLAGS_save_ip_directory, "/", ip_count, ".ip"), ios::binary);
+			check(ip->get().SerializeToOstream(&fout), "Save IP failed.");
+
+			t.next("Saving IP solution");
+			ofstream fout_sol(to_string(FLAGS_save_ip_directory, "/", ip_count, ".sol"),
+			                  ios::binary);
+			check(ip->get_solution().SerializeToOstream(&fout_sol), "Save solution failed.");
+
+			t.next("Saving MPS");
+			IPSolver solver;
+			solver.save_MPS(*ip, to_string(FLAGS_save_ip_directory, "/", ip_count));
+			t.OK();
+
+			ip_count++;
 		}
 
 		return objective;
