@@ -1,9 +1,8 @@
 //
-// Runs an IP saved in a proto file.
-//
-// For crash debugging of Coin solver.
+// Checks IP and solution protobuf files.
 //
 
+#include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
