@@ -175,6 +175,9 @@ class SetPartitioningProblem::Implementation {
 	// that constraint in all of their new columns.
 	// After calling this function with value = 0, the member can not have
 	// that constraint in any of their new columns.
+	//
+	// Returns the number of columns fixed (to zero, fixing always results in
+	// columns not fulfilling the criteria becoming zero).
 	int fix_constraint_to_member(int member, int constraint, int value) {
 		minimum_core_assert(value == 0 || value == 1);
 		if (fixes[member][constraint] == value) {
@@ -197,26 +200,26 @@ class SetPartitioningProblem::Implementation {
 				continue;
 			}
 
-			bool found = false;
+			bool column_has_constraint = false;
 			for (auto& entry : column) {
 				if (entry.row >= number_of_groups) {
 					int c = entry.row - number_of_groups;
 					if (c == constraint) {
-						found = true;
+						column_has_constraint = true;
 						break;
 					}
 				}
 			}
 
 			if (value == 1) {
-				if (found) {
+				if (column_has_constraint) {
 					at_least_one_column_left = true;
 				} else {
 					fixed_columns++;
 					column.fix(0);
 				}
 			} else {
-				if (found) {
+				if (column_has_constraint) {
 					fixed_columns++;
 					column.fix(0);
 				} else {
