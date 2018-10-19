@@ -48,14 +48,13 @@ class ColgenResults:
 		ax.set_ylabel("Number of roster columns in LP")
 
 	def data_frame(self):
-		return pd.DataFrame(
-		    {
-		        "Iteration": self.iteration,
-		        "Objective": self.objective,
-		        "IntegerObjective": self.int_objective,
-		        "ProblemSize": self.problem_size
-		    },
-		    index=pd.Series(self.time, name="Time"))
+		return pd.DataFrame({
+		    "Iteration": self.iteration,
+		    "Objective": self.objective,
+		    "IntegerObjective": self.int_objective,
+		    "ProblemSize": self.problem_size
+		},
+		                    index=pd.Series(self.time, name="Time"))
 
 
 def extract_colgen_results(s: str) -> ColgenResults:
@@ -94,7 +93,8 @@ def extract_colgen_results(s: str) -> ColgenResults:
 			results.objective.append(last_objective)
 			results.time.append(last_time)
 
-			if match.group(3) is not None and results.int_objective is not None:
+			if (match.group(3) is not None
+			    and results.int_objective is not None):
 				results.int_objective.append(float(match.group(3)))
 			else:
 				results.int_objective = None
@@ -227,10 +227,10 @@ def plot_data(results: ColgenResults, ax1, name="Colgen") -> None:
 	ax2.set_xlim([0, 1.05 * np.max(time)])
 	ax1.set_ylim([0.9 * np.min(objective), 2.0 * np.min(objective)])
 
-	ax1.plot([time[0], time[-1]], [np.min(objective), np.min(objective)], 'k:')
-
 	if results.int_objective is not None:
 		ax1.plot(time, results.int_objective, "o", color="#aaaaaa")
+		m = np.min(results.int_objective)
+		ax1.plot([time[0], time[-1]], [m, m], 'k:')
 
 	for event in results.events:
 		event.plot(ax1)
