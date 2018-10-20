@@ -41,12 +41,26 @@
 #include <complex>
 #include <deque>
 #include <queue>
+#include <cassert>
 #include <list>
 #if __cplusplus >= 201103L
 #include <random>
 #ifdef EIGEN_USE_THREADS
 #include <future>
 #endif
+#endif
+
+// Same for cuda_fp16.h
+#if defined(__CUDACC_VER_MAJOR__) && (__CUDACC_VER_MAJOR__ >= 9)
+#define EIGEN_TEST_CUDACC_VER  ((__CUDACC_VER_MAJOR__ * 10000) + (__CUDACC_VER_MINOR__ * 100))
+#elif defined(__CUDACC_VER__)
+#define EIGEN_TEST_CUDACC_VER __CUDACC_VER__
+#else
+#define EIGEN_TEST_CUDACC_VER 0
+#endif
+
+#if EIGEN_TEST_CUDACC_VER >= 70500
+#include <cuda_fp16.h>
 #endif
 
 // To test that all calls from Eigen code to std::min() and std::max() are
@@ -79,10 +93,12 @@
 #ifdef TEST_ENABLE_TEMPORARY_TRACKING
 
 static long int nb_temporaries;
+static long int nb_temporaries_on_assert = -1;
 
 inline void on_temporary_creation(long int size) {
   // here's a great place to set a breakpoint when debugging failures in this test!
   if(size!=0) nb_temporaries++;
+  if(nb_temporaries_on_assert>0) assert(nb_temporaries<nb_temporaries_on_assert);
 }
 
 #define EIGEN_DENSE_STORAGE_CTOR_PLUGIN { on_temporary_creation(size); }
@@ -159,6 +175,12 @@ namespace Eigen
       eigen_assert_exception(void) {}
       ~eigen_assert_exception() { Eigen::no_more_assert = false; }
     };
+
+    struct eigen_static_assert_exception
+    {
+      eigen_static_assert_exception(void) {}
+      ~eigen_static_assert_exception() { Eigen::no_more_assert = false; }
+    };
   }
   // If EIGEN_DEBUG_ASSERTS is defined and if no assertion is triggered while
   // one should have been, then the list of excecuted assertions is printed out.
@@ -222,6 +244,7 @@ namespace Eigen
         else                                  \
           EIGEN_THROW_X(Eigen::eigen_assert_exception()); \
       }
+
     #ifdef EIGEN_EXCEPTIONS
       #define VERIFY_RAISES_ASSERT(a) {                           \
         Eigen::no_more_assert = false;                            \
@@ -233,12 +256,38 @@ namespace Eigen
         catch (Eigen::eigen_assert_exception&) { VERIFY(true); }  \
         Eigen::report_on_cerr_on_assert_failure = true;           \
       }
-    #endif //EIGEN_EXCEPTIONS
+    #endif // EIGEN_EXCEPTIONS
   #endif // EIGEN_DEBUG_ASSERTS
+
+  #if defined(TEST_CHECK_STATIC_ASSERTIONS) && defined(EIGEN_EXCEPTIONS)
+    #define EIGEN_STATIC_ASSERT(a,MSG) \
+      if( (!Eigen::internal::copy_bool(a)) && (!no_more_assert) )\
+      {                                       \
+        Eigen::no_more_assert = true;         \
+        if(report_on_cerr_on_assert_failure)  \
+          eigen_plain_assert((a) && #MSG);      \
+        else                                  \
+          EIGEN_THROW_X(Eigen::eigen_static_assert_exception()); \
+      }
+    #define VERIFY_RAISES_STATIC_ASSERT(a) {                    \
+      Eigen::no_more_assert = false;                            \
+      Eigen::report_on_cerr_on_assert_failure = false;          \
+      try {                                                     \
+        a;                                                      \
+        VERIFY(Eigen::should_raise_an_assert && # a);           \
+      }                                                         \
+      catch (Eigen::eigen_static_assert_exception&) { VERIFY(true); }  \
+      Eigen::report_on_cerr_on_assert_failure = true;           \
+    }
+  #endif // TEST_CHECK_STATIC_ASSERTIONS
 
 #ifndef VERIFY_RAISES_ASSERT
   #define VERIFY_RAISES_ASSERT(a) \
     std::cout << "Can't VERIFY_RAISES_ASSERT( " #a " ) with exceptions disabled\n";
+#endif
+#ifndef VERIFY_RAISES_STATIC_ASSERT
+  #define VERIFY_RAISES_STATIC_ASSERT(a) \
+    std::cout << "Can't VERIFY_RAISES_STATIC_ASSERT( " #a " ) with exceptions disabled\n";
 #endif
     
   #if !defined(__CUDACC__)
@@ -248,9 +297,9 @@ namespace Eigen
 #else // EIGEN_NO_ASSERTION_CHECKING
 
   #define VERIFY_RAISES_ASSERT(a) {}
+  #define VERIFY_RAISES_STATIC_ASSERT(a) {}
 
 #endif // EIGEN_NO_ASSERTION_CHECKING
-
 
 #define EIGEN_INTERNAL_DEBUGGING
 #include <Eigen/QR> // required for createRandomPIMatrixOfRank
@@ -306,6 +355,17 @@ template<> inline long double test_precision<long double>() { return 1e-6l; }
 template<> inline float test_precision<std::complex<float> >() { return test_precision<float>(); }
 template<> inline double test_precision<std::complex<double> >() { return test_precision<double>(); }
 template<> inline long double test_precision<std::complex<long double> >() { return test_precision<long double>(); }
+
+inline bool test_isApprox(const short& a, const short& b)
+{ return internal::isApprox(a, b, test_precision<short>()); }
+inline bool test_isApprox(const unsigned short& a, const unsigned short& b)
+{ return internal::isApprox(a, b, test_precision<unsigned short>()); }
+inline bool test_isApprox(const unsigned int& a, const unsigned int& b)
+{ return internal::isApprox(a, b, test_precision<unsigned int>()); }
+inline bool test_isApprox(const long& a, const long& b)
+{ return internal::isApprox(a, b, test_precision<long>()); }
+inline bool test_isApprox(const unsigned long& a, const unsigned long& b)
+{ return internal::isApprox(a, b, test_precision<unsigned long>()); }
 
 inline bool test_isApprox(const int& a, const int& b)
 { return internal::isApprox(a, b, test_precision<int>()); }
@@ -372,10 +432,10 @@ inline bool test_isApproxOrLessThan(const half& a, const half& b)
 
 // test_relative_error returns the relative difference between a and b as a real scalar as used in isApprox.
 template<typename T1,typename T2>
-typename T1::RealScalar test_relative_error(const EigenBase<T1> &a, const EigenBase<T2> &b)
+typename NumTraits<typename T1::RealScalar>::NonInteger test_relative_error(const EigenBase<T1> &a, const EigenBase<T2> &b)
 {
   using std::sqrt;
-  typedef typename T1::RealScalar RealScalar;
+  typedef typename NumTraits<typename T1::RealScalar>::NonInteger RealScalar;
   typename internal::nested_eval<T1,2>::type ea(a.derived());
   typename internal::nested_eval<T2,2>::type eb(b.derived());
   return sqrt(RealScalar((ea-eb).cwiseAbs2().sum()) / RealScalar((std::min)(eb.cwiseAbs2().sum(),ea.cwiseAbs2().sum())));
@@ -433,9 +493,9 @@ typename T1::RealScalar test_relative_error(const SparseMatrixBase<T1> &a, const
 }
 
 template<typename T1,typename T2>
-typename NumTraits<T1>::Real test_relative_error(const T1 &a, const T2 &b, typename internal::enable_if<internal::is_arithmetic<typename NumTraits<T1>::Real>::value, T1>::type* = 0)
+typename NumTraits<typename NumTraits<T1>::Real>::NonInteger test_relative_error(const T1 &a, const T2 &b, typename internal::enable_if<internal::is_arithmetic<typename NumTraits<T1>::Real>::value, T1>::type* = 0)
 {
-  typedef typename NumTraits<T1>::Real RealScalar; 
+  typedef typename NumTraits<typename NumTraits<T1>::Real>::NonInteger RealScalar;
   return numext::sqrt(RealScalar(numext::abs2(a-b))/RealScalar((numext::mini)(numext::abs2(a),numext::abs2(b))));
 }
 

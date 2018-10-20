@@ -27,16 +27,17 @@ class Norm {
 // yi * (w^T * xi + b) ≤ -1.0.
 class SVMConstraint {
    public:
-	SVMConstraint(int y_, const Eigen::Vector2d& x_) : y{y_}, x{x_} {}
+	SVMConstraint(int y_, const Eigen::Vector2d& x) : y{y_}, x0{x[0]}, x1{x[1]} {}
 
 	template <typename R>
 	R operator()(const R* const w, const R* const b) const {
-		return R(y) * (w[0] * x(0) + w[1] * x[1] + *b) + 1.0;
+		return R(y) * (w[0] * x0 + w[1] * x1 + *b) + 1.0;
 	}
 
    private:
 	const int y;
-	const Eigen::Vector2d x;
+	const double x0;
+	const double x1;
 };
 
 int main_function() {

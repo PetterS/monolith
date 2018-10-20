@@ -19,9 +19,11 @@ template<typename MatrixType> void permutationmatrices(const MatrixType& m)
   enum { Rows = MatrixType::RowsAtCompileTime, Cols = MatrixType::ColsAtCompileTime,
          Options = MatrixType::Options };
   typedef PermutationMatrix<Rows> LeftPermutationType;
+  typedef Transpositions<Rows> LeftTranspositionsType;
   typedef Matrix<int, Rows, 1> LeftPermutationVectorType;
   typedef Map<LeftPermutationType> MapLeftPerm;
   typedef PermutationMatrix<Cols> RightPermutationType;
+  typedef Transpositions<Cols> RightTranspositionsType;
   typedef Matrix<int, Cols, 1> RightPermutationVectorType;
   typedef Map<RightPermutationType> MapRightPerm;
 
@@ -35,10 +37,11 @@ template<typename MatrixType> void permutationmatrices(const MatrixType& m)
   RightPermutationVectorType rv;
   randomPermutationVector(rv, cols);
   RightPermutationType rp(rv);
+  LeftTranspositionsType lt(lv);
+  RightTranspositionsType rt(rv);
   MatrixType m_permuted = MatrixType::Random(rows,cols);
   
-  const int one_if_dynamic = MatrixType::SizeAtCompileTime==Dynamic ? 1 : 0;
-  VERIFY_EVALUATION_COUNT(m_permuted = lp * m_original * rp, one_if_dynamic); // 1 temp for sub expression "lp * m_original"
+  VERIFY_EVALUATION_COUNT(m_permuted = lp * m_original * rp, 1); // 1 temp for sub expression "lp * m_original"
 
   for (int i=0; i<rows; i++)
     for (int j=0; j<cols; j++)
@@ -50,7 +53,7 @@ template<typename MatrixType> void permutationmatrices(const MatrixType& m)
   VERIFY_IS_APPROX(m_permuted, lm*m_original*rm);
   
   m_permuted = m_original;
-  VERIFY_EVALUATION_COUNT(m_permuted = lp * m_permuted * rp, one_if_dynamic);
+  VERIFY_EVALUATION_COUNT(m_permuted = lp * m_permuted * rp, 1);
   VERIFY_IS_APPROX(m_permuted, lm*m_original*rm);
   
   VERIFY_IS_APPROX(lp.inverse()*m_permuted*rp.inverse(), m_original);
@@ -75,19 +78,19 @@ template<typename MatrixType> void permutationmatrices(const MatrixType& m)
   
   // check inplace permutations
   m_permuted = m_original;
-  VERIFY_EVALUATION_COUNT(m_permuted.noalias()= lp.inverse() * m_permuted, one_if_dynamic); // 1 temp to allocate the mask
+  VERIFY_EVALUATION_COUNT(m_permuted.noalias()= lp.inverse() * m_permuted, 1); // 1 temp to allocate the mask
   VERIFY_IS_APPROX(m_permuted, lp.inverse()*m_original);
   
   m_permuted = m_original;
-  VERIFY_EVALUATION_COUNT(m_permuted.noalias() = m_permuted * rp.inverse(), one_if_dynamic); // 1 temp to allocate the mask
+  VERIFY_EVALUATION_COUNT(m_permuted.noalias() = m_permuted * rp.inverse(), 1); // 1 temp to allocate the mask
   VERIFY_IS_APPROX(m_permuted, m_original*rp.inverse());
   
   m_permuted = m_original;
-  VERIFY_EVALUATION_COUNT(m_permuted.noalias() = lp * m_permuted, one_if_dynamic); // 1 temp to allocate the mask
+  VERIFY_EVALUATION_COUNT(m_permuted.noalias() = lp * m_permuted, 1); // 1 temp to allocate the mask
   VERIFY_IS_APPROX(m_permuted, lp*m_original);
   
   m_permuted = m_original;
-  VERIFY_EVALUATION_COUNT(m_permuted.noalias() = m_permuted * rp, one_if_dynamic); // 1 temp to allocate the mask
+  VERIFY_EVALUATION_COUNT(m_permuted.noalias() = m_permuted * rp, 1); // 1 temp to allocate the mask
   VERIFY_IS_APPROX(m_permuted, m_original*rp);
 
   if(rows>1 && cols>1)
@@ -108,7 +111,22 @@ template<typename MatrixType> void permutationmatrices(const MatrixType& m)
     rm = rp;
     rm.col(i).swap(rm.col(j));
     VERIFY_IS_APPROX(rm, rp2.toDenseMatrix().template cast<Scalar>());
-  }  
+  }
+
+  {
+    // simple compilation check
+    Matrix<Scalar, Cols, Cols> A = rp;
+    Matrix<Scalar, Cols, Cols> B = rp.transpose();
+    VERIFY_IS_APPROX(A, B.transpose());
+  }
+
+  m_permuted = m_original;
+  lp = lt;
+  rp = rt;
+  VERIFY_EVALUATION_COUNT(m_permuted = lt * m_permuted * rt, 1);
+  VERIFY_IS_APPROX(m_permuted, lp*m_original*rp.transpose());
+  
+  VERIFY_IS_APPROX(lt.inverse()*m_permuted*rt.inverse(), m_original);
 }
 
 template<typename T>

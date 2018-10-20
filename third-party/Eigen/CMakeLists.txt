@@ -41,10 +41,13 @@ string(REGEX MATCH "define[ \t]+EIGEN_MINOR_VERSION[ \t]+([0-9]+)" _eigen_minor_
 set(EIGEN_MINOR_VERSION "${CMAKE_MATCH_1}")
 set(EIGEN_VERSION_NUMBER ${EIGEN_WORLD_VERSION}.${EIGEN_MAJOR_VERSION}.${EIGEN_MINOR_VERSION})
 
-# if the mercurial program is absent, this will leave the EIGEN_HG_CHANGESET string empty,
-# but won't stop CMake.
-execute_process(COMMAND hg tip -R ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE EIGEN_HGTIP_OUTPUT)
-execute_process(COMMAND hg branch -R ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE EIGEN_BRANCH_OUTPUT)
+# if we are not in a mercurial clone
+if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/.hg)
+  # if the mercurial program is absent or this will leave the EIGEN_HG_CHANGESET string empty,
+  # but won't stop CMake.
+  execute_process(COMMAND hg tip -R ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE EIGEN_HGTIP_OUTPUT)
+  execute_process(COMMAND hg branch -R ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE EIGEN_BRANCH_OUTPUT)
+endif()
 
 # if this is the default (aka development) branch, extract the mercurial changeset number from the hg tip output...
 if(EIGEN_BRANCH_OUTPUT MATCHES "default")
@@ -416,16 +419,15 @@ add_subdirectory(Eigen)
 
 add_subdirectory(doc EXCLUDE_FROM_ALL)
 
-include(EigenConfigureTesting)
+option(BUILD_TESTING "Enable creation of Eigen tests." ON)
+if(BUILD_TESTING)
+  include(EigenConfigureTesting)
 
-# fixme, not sure this line is still needed:
-enable_testing() # must be called from the root CMakeLists, see man page
-
-
-if(EIGEN_LEAVE_TEST_IN_ALL_TARGET)
-  add_subdirectory(test) # can't do EXCLUDE_FROM_ALL here, breaks CTest
-else()
-  add_subdirectory(test EXCLUDE_FROM_ALL)
+  if(EIGEN_LEAVE_TEST_IN_ALL_TARGET)
+    add_subdirectory(test) # can't do EXCLUDE_FROM_ALL here, breaks CTest
+  else()
+    add_subdirectory(test EXCLUDE_FROM_ALL)
+  endif()
 endif()
 
 if(EIGEN_LEAVE_TEST_IN_ALL_TARGET)
@@ -461,7 +463,9 @@ endif(NOT WIN32)
 
 configure_file(scripts/cdashtesting.cmake.in cdashtesting.cmake @ONLY)
 
-ei_testing_print_summary()
+if(BUILD_TESTING)
+  ei_testing_print_summary()
+endif()
 
 message(STATUS "")
 message(STATUS "Configured Eigen ${EIGEN_VERSION_NUMBER}")
@@ -541,7 +545,8 @@ if (NOT CMAKE_VERSION VERSION_LESS 3.0)
   set (_Eigen3_CMAKE_SIZEOF_VOID_P ${CMAKE_SIZEOF_VOID_P})
   unset (CMAKE_SIZEOF_VOID_P)
   write_basic_package_version_file (Eigen3ConfigVersion.cmake
-    VERSION ${EIGEN_VERSION_NUMBER} COMPATIBILITY SameMajorVersion)
+                                    VERSION ${EIGEN_VERSION_NUMBER}
+                                    COMPATIBILITY SameMajorVersion)
   set (CMAKE_SIZEOF_VOID_P ${_Eigen3_CMAKE_SIZEOF_VOID_P})
 
   # The Eigen target will be located in the Eigen3 namespace. Other CMake
@@ -551,13 +556,8 @@ if (NOT CMAKE_VERSION VERSION_LESS 3.0)
   # CMake even if it has not been installed to a standard directory.
   export (PACKAGE Eigen3)
 
-  install (EXPORT Eigen3Targets NAMESPACE Eigen3:: DESTINATION
-    ${CMAKEPACKAGE_INSTALL_DIR})
-  install (FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/Eigen3Config.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/Eigen3ConfigVersion.cmake
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/UseEigen3.cmake
-    DESTINATION ${CMAKEPACKAGE_INSTALL_DIR})
+  install (EXPORT Eigen3Targets NAMESPACE Eigen3:: DESTINATION ${CMAKEPACKAGE_INSTALL_DIR})
+
 else (NOT CMAKE_VERSION VERSION_LESS 3.0)
   # Fallback to legacy Eigen3Config.cmake without the imported target
   
@@ -581,15 +581,19 @@ else (NOT CMAKE_VERSION VERSION_LESS 3.0)
     set(PACKAGE_EIGEN_ROOT_DIR ${EIGEN_ROOT_DIR})
     configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Eigen3ConfigLegacy.cmake.in
                      ${CMAKE_CURRENT_BINARY_DIR}/Eigen3Config.cmake
-                     @ONLY ESCAPE_QUOTES
-                   )
+                     @ONLY ESCAPE_QUOTES )
   endif()
 
-  install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/UseEigen3.cmake
-                  ${CMAKE_CURRENT_BINARY_DIR}/Eigen3Config.cmake
-            DESTINATION ${CMAKEPACKAGE_INSTALL_DIR}
-          )
+  write_basic_package_version_file( Eigen3ConfigVersion.cmake
+                                    VERSION ${EIGEN_VERSION_NUMBER}
+                                    COMPATIBILITY SameMajorVersion )
+
 endif (NOT CMAKE_VERSION VERSION_LESS 3.0)
+
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/UseEigen3.cmake
+                ${CMAKE_CURRENT_BINARY_DIR}/Eigen3Config.cmake
+                ${CMAKE_CURRENT_BINARY_DIR}/Eigen3ConfigVersion.cmake
+          DESTINATION ${CMAKEPACKAGE_INSTALL_DIR} )
 
 # Add uninstall target
 add_custom_target ( uninstall
