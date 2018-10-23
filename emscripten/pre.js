@@ -16,16 +16,12 @@ var custom_message_handler = function(event) {
     // When we are done executing, post a completion message.
     postMessage({ target: "custom", command: "callMainComplete" });
   } else if (data.command == "FS_unlink") {
-    Module["FS_unlink"](data.filename);
+    FS.unlink(data.filename);
     console.warn("Removed file " + data.filename);
   } else if (data.command == "FS_createDataFile") {
-    Module["FS_createDataFile"](
-      data.dir,
-      data.filename,
-      data.content,
-      true,
-      true
-    );
+    FS.writeFile(data.dir + "/" + data.filename, data.content, {
+      encoding: "utf-8"
+    });
     console.warn("Created file " + data.filename + " in " + data.dir);
   } else if (data.command == "custom-init") {
     if (ENVIRONMENT_IS_NODE) {

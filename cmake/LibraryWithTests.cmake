@@ -29,7 +29,7 @@ function (library_with_tests NAME)
 		if (EMSCRIPTEN OR DEFINED PROTOC)
 			add_custom_command(
 				OUTPUT ${output_cc_file} ${output_h_file}
-				COMMAND ${PROTOC} ${PROTO_NAME} --cpp_out=dllexport_decl=${library_name_uppercase}_API:${CMAKE_BINARY_DIR} --python_out=${CMAKE_BINARY_DIR} --proto_path=${CMAKE_SOURCE_DIR}
+				COMMAND ${PROTOC} ${PROTO_NAME} --cpp_out=dllexport_decl=${library_name_uppercase}_API:${CMAKE_BINARY_DIR} --python_out=${CMAKE_BINARY_DIR} --proto_path=${CMAKE_SOURCE_DIR} --proto_path=${CMAKE_SOURCE_DIR}/third-party/protobuf/src
 				DEPENDS ${PROTO_NAME}
 				WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 			)

@@ -210,7 +210,9 @@ if (protobuf_BUILD_TESTS)
   include(tests.cmake)
 endif (protobuf_BUILD_TESTS)
 
-include(install.cmake)
+if (NOT EMSCRIPTEN)
+  include(install.cmake)
+endif()
 
 if (protobuf_BUILD_EXAMPLES)
   include(examples.cmake)
