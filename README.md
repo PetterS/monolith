@@ -1,7 +1,7 @@
 # Monolith
 Monolith is a monorepo with several optimization projects. Some of the code was originally written for research or as hobby projects in other repositories (e.g. [spii](https://github.com/PetterS/spii) and [easy-IP](https://github.com/PetterS/easy-IP)).
 
-One of the highlights is a state-of-the-art scheduler using column generation, which significantly outperforms all other optimizers at [schedulingbenchmarks.org](http://www.schedulingbenchmarks.org/).
+One of the highlights is a state-of-the-art scheduler using column generation, which significantly outperforms all other optimizers at [schedulingbenchmarks.org](http://www.schedulingbenchmarks.org/). **Try it in the browser (wasm) [here](https://www.strandmark.net/wasm/shift_scheduling_colgen_page.html)!**
 
 
 ## Why a monorepo?
