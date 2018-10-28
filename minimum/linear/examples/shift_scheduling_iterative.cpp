@@ -32,6 +32,7 @@ using namespace minimum::linear;
 
 DEFINE_string(table, "solution", "Queries solution from this table. Default: solution.");
 DEFINE_int32(start_day, 0, "Starts the refinement on this day.");
+DEFINE_int32(start_solution, -1, "Starts the local solver from this solution.");
 
 std::mt19937_64 rng;
 
@@ -168,11 +169,20 @@ int main_program(int num_args, char* args[]) {
 	double start_time = minimum::core::wall_time();
 
 	Timer t("Reading initial solution from DB");
-	auto initial_solution =
-	    db.make_statement<string>(
-	          to_string("SELECT solution FROM ", FLAGS_table, " ORDER BY objective ASC LIMIT 1;"))
-	        .execute()
-	        .get<0>();
+	std::string initial_solution;
+	if (FLAGS_start_solution < 0) {
+		initial_solution = db.make_statement<string>(to_string("SELECT solution FROM ",
+		                                                       FLAGS_table,
+		                                                       " ORDER BY objective ASC LIMIT 1;"))
+		                       .execute()
+		                       .get<0>();
+	} else {
+		initial_solution =
+		    db.make_statement<string>(
+		          to_string("SELECT solution FROM ", FLAGS_table, " WHERE objective = ?1 LIMIT 1;"))
+		        .execute(FLAGS_start_solution)
+		        .get<0>();
+	}
 	istringstream solution_file(initial_solution);
 	auto current_solution = load_solution(solution_file, problem);
 	auto start_objective = objective_value(problem, current_solution);
