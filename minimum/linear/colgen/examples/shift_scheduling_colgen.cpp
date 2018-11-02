@@ -187,7 +187,7 @@ int main_program(int num_args, char* args[]) {
 		auto fixes = make_grid<int>(problem.num_days(), problem.shift_size(), minus_one);
 		auto solution = make_grid<int>(problem.num_days(), problem.shift_size());
 		Timer t("Benchmarking pricing for one staff member");
-		minimum_core_assert(create_roster_cspp(problem, initial_duals, 0, fixes, &solution));
+		minimum_core_assert(create_roster_cspp(problem, initial_duals, 0, fixes, &solution, &rng));
 		t.OK();
 		return 0;
 	}

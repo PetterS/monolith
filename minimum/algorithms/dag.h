@@ -12,7 +12,6 @@
 #include <minimum/core/check.h>
 #include <minimum/core/grid.h>
 #include <minimum/core/range.h>
-using namespace minimum::core;
 
 namespace minimum {
 namespace algorithms {
@@ -78,18 +77,18 @@ class SortedDAG {
 
 	void add_edge(int i, int j, T cost = 0) {
 		minimum_core_assert(i >= 0 && j >= 0 && i < nodes.size() && j < nodes.size());
-		check(i < j, "Graph needs to be topologically sorted.");
+		minimum::core::check(i < j, "Graph needs to be topologically sorted.");
 		nodes[i].edges.emplace_back(j, cost);
 	}
 
 	std::string str() const {
 		std::string out;
-		for (int i : range(nodes.size())) {
+		for (int i : minimum::core::range(nodes.size())) {
 			std::vector<int> dest;
 			for (auto& e : nodes[i].edges) {
 				dest.push_back(e.to);
 			}
-			out += to_string(i, ": ", dest, "\n");
+			out += minimum::core::to_string(i, ": ", dest, "\n");
 		}
 		return out;
 	}
@@ -155,7 +154,7 @@ class SortedDAG {
 		translator.made_changes = true;
 		translator.old_to_new.resize(nodes.size(), -1);
 		std::vector<Node> new_nodes;
-		for (int i : range(nodes.size())) {
+		for (int i : minimum::core::range(nodes.size())) {
 			if (forward_reachable[i] == 1 && backward_reachable[i] == 1) {
 				translator.old_to_new[i] = new_nodes.size();
 				new_nodes.emplace_back(std::move(nodes[i]));
@@ -175,7 +174,7 @@ class SortedDAG {
 		}
 
 		translator.new_to_old.resize(nodes.size());
-		for (int i : range(translator.old_to_new.size())) {
+		for (int i : minimum::core::range(translator.old_to_new.size())) {
 			if (translator.old_to_new[i] >= 0) {
 				minimum_core_assert(translator.new_to_old[translator.old_to_new[i]].empty());
 				translator.new_to_old[translator.old_to_new[i]].push_back(i);
@@ -192,7 +191,7 @@ class SortedDAG {
 		Translator translator;
 
 		std::vector<int> mergeable(nodes.size(), 1);
-		for (int i : range(size())) {
+		for (int i : minimum::core::range(size())) {
 			for (auto& edge : nodes[i].edges) {
 				for (int j = i + 1; j < edge.to; ++j) {
 					mergeable[j] = 0;
@@ -243,7 +242,7 @@ class SortedDAG {
 		}
 
 		translator.new_to_old.resize(nodes.size());
-		for (int i : range(translator.old_to_new.size())) {
+		for (int i : minimum::core::range(translator.old_to_new.size())) {
 			if (translator.old_to_new[i] >= 0) {
 				translator.new_to_old[translator.old_to_new[i]].push_back(i);
 			}
@@ -257,20 +256,20 @@ class SortedDAG {
 	               std::function<std::string(int)> node_color,
 	               std::function<int(int)> rank = nullptr) const {
 		out << "digraph dag {\n";
-		for (auto i : range(nodes.size())) {
+		for (auto i : minimum::core::range(nodes.size())) {
 			for (auto& edge : nodes[i].edges) {
 				out << i << " -> " << edge.to << ";\n";
 			}
 		}
 
-		for (auto i : range(nodes.size())) {
+		for (auto i : minimum::core::range(nodes.size())) {
 			out << i << "[label=\"" << node_name(i)
 			    << "\", style=filled, fillcolor=" << node_color(i) << "];\n";
 		}
 
 		if (rank) {
 			std::map<int, vector<int>> ranks;
-			for (auto i : range(nodes.size())) {
+			for (auto i : minimum::core::range(nodes.size())) {
 				ranks[rank(i)].push_back(i);
 			}
 			out << "edge[style=invis,dir=none];\n";
@@ -308,7 +307,7 @@ T solution_cost(const SortedDAG<T, num_weights>& dag, const std::vector<int>& so
 		return 0;
 	}
 	auto cost = dag.get_node(solution[0]).cost;
-	for (auto i : range(std::size_t(1), solution.size())) {
+	for (auto i : minimum::core::range(std::size_t(1), solution.size())) {
 		auto from = solution[i - 1];
 		auto to = solution[i];
 		for (auto& edge : dag.get_node(from).edges) {
@@ -323,6 +322,8 @@ T solution_cost(const SortedDAG<T, num_weights>& dag, const std::vector<int>& so
 
 template <typename T, int num_weights>
 T shortest_path(const SortedDAG<T, num_weights>& dag, std::vector<SolutionEntry<T>>* solution_ptr) {
+	using minimum::core::range;
+
 	auto& solution = *solution_ptr;
 	solution.clear();
 	if (dag.size() == 0) {
@@ -348,6 +349,8 @@ template <typename T, int num_weights>
 T resource_constrained_shortest_path(SortedDAG<T, num_weights> dag,
                                      std::array<T, num_weights> upper_bounds,
                                      std::vector<std::vector<SolutionEntry<T>>>* solutions) {
+	using minimum::core::range;
+
 	constexpr bool verbose = false;
 	if (verbose) {
 		cerr << "\n\n";
@@ -427,7 +430,8 @@ T resource_constrained_shortest_path(SortedDAG<T, num_weights> dag,
 
 		if (verbose) {
 			std::cerr << "dual=" << solution_value - lambda_sum << ", " << lhs
-			          << " <= " << upper_bounds << ", updated lambda=" << to_string(lambda);
+			          << " <= " << upper_bounds
+			          << ", updated lambda=" << minimum::core::to_string(lambda);
 			if (feasible) {
 				T cost = 0;
 				int i = dag.size() - 1;
@@ -483,6 +487,8 @@ T resource_constrained_shortest_path(const SortedDAG<T, num_weights>& dag,
                                      int upper_bound,
                                      std::vector<int>* solution_ptr) {
 	static_assert(num_weights >= 1, "Need weights for resource constraints.");
+	using minimum::core::check;
+	using minimum::core::range;
 
 	auto& solution = *solution_ptr;
 	solution.clear();
@@ -497,7 +503,7 @@ T resource_constrained_shortest_path(const SortedDAG<T, num_weights>& dag,
 
 	// partial[i][c] is the smallest cost to reach node i consuming c
 	// resource.
-	auto partial = make_grid<SolutionEntry<T>>(dag.size(), upper_bound + 1);
+	auto partial = minimum::core::make_grid<SolutionEntry<T>>(dag.size(), upper_bound + 1);
 
 	partial[0][dag.get_node(0).weights[0]].cost = dag.get_node(0).cost;
 
@@ -575,6 +581,8 @@ T resource_constrained_shortest_path(const SortedDAG<T, num_weights>& dag,
                                      int max_consecutive,
                                      std::vector<int>* solution_ptr) {
 	static_assert(num_weights >= 2, "Need weights for resource and consecutive constraints.");
+	using minimum::core::check;
+	using minimum::core::range;
 
 	auto& solution = *solution_ptr;
 	solution.clear();
@@ -593,7 +601,8 @@ T resource_constrained_shortest_path(const SortedDAG<T, num_weights>& dag,
 
 	// partial(i, c, d) is the smallest cost to reach node i consuming c
 	// resource ending in d consecutive active nodes.
-	Grid3D<internal::Entry<T>, int> partial(dag.size(), upper_bound + 1, max_consecutive + 1);
+	minimum::core::Grid3D<internal::Entry<T>, int> partial(
+	    dag.size(), upper_bound + 1, max_consecutive + 1);
 
 	partial(0, dag.get_node(0).weights[0], 0).cost = dag.get_node(0).cost;
 
@@ -694,7 +703,7 @@ void resource_constrained_shortest_path_partial(const SortedDAG<T, num_weights>&
                                                 int max_consecutive,
                                                 int num_splits,
                                                 std::vector<int>* solution_ptr) {
-	check(
+	minimum::core::check(
 	    1 <= num_splits && 5 * num_splits <= dag.size(), "Can not split problem into ", num_splits);
 	if (num_splits == 1) {
 		resource_constrained_shortest_path(

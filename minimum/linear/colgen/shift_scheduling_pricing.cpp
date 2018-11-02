@@ -1,12 +1,27 @@
 #include <fstream>
+#include <random>
 #include <vector>
 using namespace std;
 
 #include <gflags/gflags.h>
 
 #include <minimum/algorithms/dag.h>
+#include <minimum/core/enum.h>
+#include <minimum/core/string.h>
 #include <minimum/linear/colgen/shift_scheduling_pricing.h>
 #include <minimum/linear/proto.h>
+
+using minimum::core::check;
+using minimum::core::make_grid;
+using minimum::core::range;
+
+MAKE_ENUM(PricingHeuristic, DUALS, RANDOM);
+DEFINE_enum_flag(PricingHeuristic,
+                 pricing_heuristic,
+                 PricingHeuristic::DUALS,
+                 "A heuristic method is used for max number of weekends and max number of shifts "
+                 "of a certain type. DUALS = keep the best duals. RANDOM = sometimes keep the "
+                 "best duals and sometimes keep randomly.");
 
 namespace minimum {
 namespace linear {
@@ -30,7 +45,6 @@ class ScheduleGraph {
 		for (auto d : range(problem.num_days())) {
 			for (auto s : range(problem.shift_size())) {
 				auto i = node(d, s);
-				;
 				if (i >= 0) {
 					node_to_day[i] = d;
 					node_to_shift[i] = s;
@@ -106,11 +120,11 @@ class ScheduleGraph {
 
 			auto day_off = find(day_off_node_indices.begin(), day_off_node_indices.end(), node);
 			if (day_off != day_off_node_indices.end()) {
-				return to_string("Off ", day_off - day_off_node_indices.begin());
+				return minimum::core::to_string("Off ", day_off - day_off_node_indices.begin());
 			}
 
 			auto s = node_to_shift[node];
-			return to_string(problem.shift(s).id(), " ", node_to_day[node]);
+			return minimum::core::to_string(problem.shift(s).id(), " ", node_to_day[node]);
 		};
 		auto color = [&](int node) -> string {
 			if (node == source) {
@@ -194,6 +208,7 @@ bool create_roster_cspp(const minimum::linear::proto::SchedulingProblem& problem
                         int p,
                         const vector<vector<int>>& fixes,
                         vector<vector<int>>* solution_for_staff,
+                        std::mt19937_64* rng,
                         const std::string& graph_output_file_name) {
 	auto& staff = problem.worker(p);
 
@@ -368,6 +383,7 @@ bool create_roster_cspp(const minimum::linear::proto::SchedulingProblem& problem
 	// until feasible.
 	vector<int> solution;
 	bool is_feasible = false;
+	std::uniform_int_distribution<int> coin(0, 1);
 	int repetitions = 0;
 	do {
 		solution.clear();
@@ -429,9 +445,14 @@ bool create_roster_cspp(const minimum::linear::proto::SchedulingProblem& problem
 			}
 
 			if (working_shifts > staff.shift_limit(s).max()) {
-				sort(active_node_costs.begin(), active_node_costs.end(), [](auto& a, auto& b) {
-					return a.second > b.second;
-				});
+				if (FLAGS_pricing_heuristic == to_string(PricingHeuristic::DUALS)
+				    || coin(*rng) == 0) {
+					sort(active_node_costs.begin(), active_node_costs.end(), [](auto& a, auto& b) {
+						return a.second > b.second;
+					});
+				} else {
+					shuffle(active_node_costs.begin(), active_node_costs.end(), *rng);
+				}
 				minimum_core_assert(staff.shift_limit(s).max() > 0,
 				                    "Disallowed shift should already have been taken care of.");
 
@@ -535,10 +556,13 @@ bool create_roster_cspp(const minimum::linear::proto::SchedulingProblem& problem
 		if (staff.has_working_weekends_limit()
 		    && working_weekends > staff.working_weekends_limit().max()) {
 			is_feasible = false;
-			sort(active_weekends.begin(),
-			     active_weekends.end(),
-			     [](const Weekend& a, const Weekend& b) { return a.cost > b.cost; });
-
+			if (FLAGS_pricing_heuristic == to_string(PricingHeuristic::DUALS) || coin(*rng) == 0) {
+				sort(active_weekends.begin(),
+				     active_weekends.end(),
+				     [](const Weekend& a, const Weekend& b) { return a.cost > b.cost; });
+			} else {
+				shuffle(active_weekends.begin(), active_weekends.end(), *rng);
+			}
 			int need_to_drop = working_weekends - staff.working_weekends_limit().max();
 
 			// cerr << to_string(p, " has ", working_weekends, " weekends, limit is ",

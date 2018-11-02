@@ -39,12 +39,14 @@ minimum::linear::proto::SchedulingProblem basic_problem() {
 	return problem;
 }
 
+std::mt19937_64 rng;
+
 TEST_CASE("basic") {
 	auto problem = basic_problem();
 	auto fixes = make_grid<int>(problem.num_days(), 1, []() { return -1; });
 	auto solution = make_grid<int>(problem.num_days(), 1);
 	vector<double> duals(problem.worker_size() + problem.num_days(), 0);
-	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution));
+	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution, &rng));
 }
 
 TEST_CASE("time_limit") {
@@ -63,7 +65,7 @@ TEST_CASE("time_limit") {
 	auto limit = problem.mutable_worker(0)->mutable_time_limit();
 	limit->set_min(4);
 	limit->set_max(4);
-	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution));
+	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution, &rng));
 	int assigned = 0;
 	for (int d : range(problem.num_days())) {
 		assigned += solution[d][0];
@@ -88,7 +90,7 @@ TEST_CASE("consequtive_limit") {
 	duals[1 + 7] = -1;
 	duals[1 + 8] = -2;
 
-	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution));
+	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution, &rng));
 	CHECK(solution[3][0] == 0);
 	CHECK(solution[4][0] == 0);
 	CHECK(solution[5][0] == 1);
@@ -99,7 +101,7 @@ TEST_CASE("consequtive_limit") {
 	auto limit = problem.mutable_worker(0)->mutable_consecutive_shifts_limit();
 	limit->set_min(4);
 	limit->set_max(10000);
-	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution));
+	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution, &rng));
 	CHECK(solution[3][0] == 0);
 	CHECK(solution[4][0] == 1);
 	CHECK(solution[5][0] == 1);
@@ -122,13 +124,13 @@ TEST_CASE("consequtive_days_off") {
 	duals[1 + 8] = 2;
 	duals[1 + 9] = 2;
 
-	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution));
+	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution, &rng));
 	CHECK(solution[6][0] == 0);
 
 	auto limit = problem.mutable_worker(0)->mutable_consecutive_days_off_limit();
 	limit->set_min(2);
 	limit->set_max(10000);
-	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution));
+	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution, &rng));
 	CHECK(solution[6][0] == 1);
 }
 
@@ -138,13 +140,13 @@ TEST_CASE("max_weekends") {
 	auto solution = make_grid<int>(problem.num_days(), 1);
 	vector<double> duals(problem.worker_size() + problem.num_days(), 1);
 
-	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution));
+	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution, &rng));
 	CHECK(solution[5][0] == 1);      // Saturday
 	CHECK(solution[7 + 5][0] == 1);  // Saturday
 
 	auto limit = problem.mutable_worker(0)->mutable_working_weekends_limit();
 	limit->set_max(1);
-	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution));
+	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution, &rng));
 	CHECK((solution[5][0] == 0 || solution[7 + 5][0] == 0));  // Saturdays
 	CHECK(solution[5][0] == solution[6][0]);
 	CHECK(solution[7 + 5][0] == solution[7 + 6][0]);  // Sundays
@@ -156,7 +158,7 @@ TEST_CASE("shift_limit") {
 	auto solution = make_grid<int>(problem.num_days(), 1);
 	vector<double> duals(problem.worker_size() + problem.num_days(), 1);
 
-	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution));
+	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution, &rng));
 	int assigned = 0;
 	for (int d : range(problem.num_days())) {
 		assigned += solution[d][0];
@@ -166,7 +168,7 @@ TEST_CASE("shift_limit") {
 	auto limit = problem.mutable_worker(0)->mutable_shift_limit(0);
 	limit->set_min(0);
 	limit->set_max(5);
-	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution));
+	REQUIRE(create_roster_cspp(problem, duals, 0, fixes, &solution, &rng));
 	assigned = 0;
 	for (int d : range(problem.num_days())) {
 		assigned += solution[d][0];

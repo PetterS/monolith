@@ -21,6 +21,7 @@ TEST_CASE("from_string") {
 TEST_CASE("from_int") {
 	CHECK(MyEnum_from_int(1) == MyEnum::BAR);
 	CHECK_THROWS(MyEnum_from_int(12));
+	MyEnum_enum_names;
 }
 
 DEFINE_enum_flag(MyEnum, my_flag, MyEnum::BAR, "My enum flag 2.");

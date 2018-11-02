@@ -68,6 +68,8 @@ class MINIMUM_LINEAR_COLGEN_API ShiftShedulingColgenProblem : public SetPartitio
 
 	std::vector<std::vector<std::vector<int>>> solution;
 
+	mutable std::vector<std::mt19937_64> random_engines;
+
 	std::vector<std::vector<int>> day_shift_to_constraint;
 
 	bool loaded_pool_from_file = false;

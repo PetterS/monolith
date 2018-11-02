@@ -8,6 +8,7 @@ using namespace std;
 #include <minimum/core/flamegraph.h>
 #include <minimum/core/grid.h>
 #include <minimum/core/openmp.h>
+#include <minimum/core/random.h>
 #include <minimum/core/range.h>
 #include <minimum/core/time.h>
 #include <minimum/linear/colgen/shift_scheduling_pricing.h>
@@ -118,6 +119,10 @@ ShiftShedulingColgenProblem::ShiftShedulingColgenProblem(
 	// Create scratch arrays.
 	solution = make_grid<int>(problem.worker_size(), problem.num_days(), problem.shift_size());
 
+	for (auto i : range(problem.worker_size())) {
+		random_engines.emplace_back(repeatably_seeded_engine<std::mt19937_64>(i));
+	}
+
 	timer.OK();
 
 	// Create and add initial bad roster to make problem feasible.
@@ -139,8 +144,8 @@ ShiftShedulingColgenProblem::ShiftShedulingColgenProblem(
 #pragma omp parallel for
 	for (int p = 0; p < problem.worker_size(); ++p) {
 		try {
-			minimum_core_assert(
-			    create_roster_cspp(problem, initial_duals[p], p, no_fixes, &solution[p]));
+			minimum_core_assert(create_roster_cspp(
+			    problem, initial_duals[p], p, no_fixes, &solution[p], &random_engines[p]));
 
 		} catch (...) {
 			exception_store.store();
@@ -185,7 +190,7 @@ bool ShiftShedulingColgenProblem::generate_for_staff(
 	}
 
 	return create_roster_cspp(
-	    problem, dual_variables, p, fixes, solution_for_staff, graph_file_name);
+	    problem, dual_variables, p, fixes, solution_for_staff, &random_engines[p], graph_file_name);
 }
 
 double ShiftShedulingColgenProblem::integral_solution_value() {
