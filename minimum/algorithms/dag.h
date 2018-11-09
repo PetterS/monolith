@@ -429,8 +429,9 @@ T resource_constrained_shortest_path(SortedDAG<T, num_weights> dag,
 		}
 
 		if (verbose) {
-			std::cerr << "dual=" << solution_value - lambda_sum << ", " << lhs
-			          << " <= " << upper_bounds
+			std::cerr << "dual=" << solution_value - lambda_sum << ", "
+			          << minimum::core::to_string(lhs)
+			          << " <= " << minimum::core::to_string(upper_bounds)
 			          << ", updated lambda=" << minimum::core::to_string(lambda);
 			if (feasible) {
 				T cost = 0;
