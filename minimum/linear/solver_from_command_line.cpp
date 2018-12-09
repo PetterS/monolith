@@ -45,7 +45,7 @@ std::unique_ptr<Solver> create_solver_from_command_line() {
 	} else if (FLAGS_solver == "glpk") {
 		return std::make_unique<GlpkSolver>();
 	} else if (FLAGS_solver == "minisat") {
-		return std::make_unique<IpToSatSolver>(bind(minisat_solver, FLAGS_solver_verbose));
+		return std::make_unique<IpToSatSolver>(bind(minisat_solver, !FLAGS_solver_verbose));
 	} else if (FLAGS_solver == "scs") {
 		return std::make_unique<ScsSolver>();
 	} else if (FLAGS_solver == "primal-dual") {
