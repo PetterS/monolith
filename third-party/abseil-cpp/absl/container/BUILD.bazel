@@ -15,7 +15,7 @@
 #
 
 load(
-    "//absl:copts.bzl",
+    "//absl:copts/configure_copts.bzl",
     "ABSL_DEFAULT_COPTS",
     "ABSL_TEST_COPTS",
     "ABSL_EXCEPTIONS_FLAG",
@@ -41,6 +41,8 @@ cc_test(
     copts = ABSL_TEST_COPTS,
     deps = [
         ":compressed_tuple",
+        "//absl/memory",
+        "//absl/utility",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -67,6 +69,7 @@ cc_test(
     deps = [
         ":fixed_array",
         "//absl/base:exception_testing",
+        "//absl/hash:hash_testing",
         "//absl/memory",
         "@com_google_googletest//:gtest_main",
     ],
@@ -79,6 +82,7 @@ cc_test(
     deps = [
         ":fixed_array",
         "//absl/base:exception_testing",
+        "//absl/hash:hash_testing",
         "//absl/memory",
         "@com_google_googletest//:gtest_main",
     ],
@@ -130,6 +134,7 @@ cc_test(
         "//absl/base",
         "//absl/base:core_headers",
         "//absl/base:exception_testing",
+        "//absl/hash:hash_testing",
         "//absl/memory",
         "//absl/strings",
         "@com_google_googletest//:gtest_main",
@@ -146,6 +151,7 @@ cc_test(
         "//absl/base",
         "//absl/base:core_headers",
         "//absl/base:exception_testing",
+        "//absl/hash:hash_testing",
         "//absl/memory",
         "//absl/strings",
         "@com_google_googletest//:gtest_main",
@@ -208,6 +214,7 @@ cc_library(
         ":container_memory",
         ":hash_function_defaults",
         ":raw_hash_map",
+        "//absl/algorithm:container",
         "//absl/memory",
     ],
 )
@@ -236,6 +243,7 @@ cc_library(
         ":container_memory",
         ":hash_function_defaults",
         ":raw_hash_set",
+        "//absl/algorithm:container",
         "//absl/base:core_headers",
         "//absl/memory",
     ],
@@ -267,6 +275,7 @@ cc_library(
         ":hash_function_defaults",
         ":node_hash_policy",
         ":raw_hash_map",
+        "//absl/algorithm:container",
         "//absl/memory",
     ],
 )
@@ -292,10 +301,10 @@ cc_library(
     hdrs = ["node_hash_set.h"],
     copts = ABSL_DEFAULT_COPTS,
     deps = [
-        ":container_memory",
         ":hash_function_defaults",
         ":node_hash_policy",
         ":raw_hash_set",
+        "//absl/algorithm:container",
         "//absl/memory",
     ],
 )

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.8)
 project(Minimum C CXX)
 
 include(CheckCCompilerFlag)
@@ -17,7 +17,14 @@ else()
 endif ()
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
-include(cmake/EnableModernCPP.cmake)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+if (MSVC)
+  # Use the latest C++ standard.
+  add_definitions("/std:c++latest")	
+endif()
+
 include(cmake/LibraryWithTests.cmake)
 include(cmake/OneTargetPerFile.cmake)
 

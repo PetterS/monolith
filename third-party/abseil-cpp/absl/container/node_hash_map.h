@@ -40,6 +40,7 @@
 #include <type_traits>
 #include <utility>
 
+#include "absl/algorithm/container.h"
 #include "absl/container/internal/container_memory.h"
 #include "absl/container/internal/hash_function_defaults.h"  // IWYU pragma: export
 #include "absl/container/internal/node_hash_policy.h"
@@ -71,7 +72,7 @@ class NodeHashMapPolicy;
 // By default, `node_hash_map` uses the `absl::Hash` hashing framework.
 // All fundamental and Abseil types that support the `absl::Hash` framework have
 // a compatible equality operator for comparing insertions into `node_hash_map`.
-// If your type is not yet supported by the `asbl::Hash` framework, see
+// If your type is not yet supported by the `absl::Hash` framework, see
 // absl/hash/hash.h for information on extending Abseil hashing to user-defined
 // types.
 //
@@ -91,7 +92,7 @@ class NodeHashMapPolicy;
 //  std::string search_key = "b";
 //  auto result = ducks.find(search_key);
 //  if (result != ducks.end()) {
-//    std::cout << "Result: " << search_key->second << std::endl;
+//    std::cout << "Result: " << result->second << std::endl;
 //  }
 template <class Key, class Value,
           class Hash = absl::container_internal::hash_default_hash<Key>,
@@ -104,6 +105,46 @@ class node_hash_map
   using Base = typename node_hash_map::raw_hash_map;
 
  public:
+  // Constructors and Assignment Operators
+  //
+  // A node_hash_map supports the same overload set as `std::unordered_map`
+  // for construction and assignment:
+  //
+  // *  Default constructor
+  //
+  //    // No allocation for the table's elements is made.
+  //    absl::node_hash_map<int, std::string> map1;
+  //
+  // * Initializer List constructor
+  //
+  //   absl::node_hash_map<int, std::string> map2 =
+  //       {{1, "huey"}, {2, "dewey"}, {3, "louie"},};
+  //
+  // * Copy constructor
+  //
+  //   absl::node_hash_map<int, std::string> map3(map2);
+  //
+  // * Copy assignment operator
+  //
+  //  // Hash functor and Comparator are copied as well
+  //  absl::node_hash_map<int, std::string> map4;
+  //  map4 = map3;
+  //
+  // * Move constructor
+  //
+  //   // Move is guaranteed efficient
+  //   absl::node_hash_map<int, std::string> map5(std::move(map4));
+  //
+  // * Move assignment operator
+  //
+  //   // May be efficient if allocators are compatible
+  //   absl::node_hash_map<int, std::string> map6;
+  //   map6 = std::move(map5);
+  //
+  // * Range constructor
+  //
+  //   std::vector<std::pair<int, std::string>> v = {{1, "a"}, {2, "b"}};
+  //   absl::node_hash_map<int, std::string> map7(v.begin(), v.end());
   node_hash_map() {}
   using Base::Base;
 
@@ -201,7 +242,7 @@ class node_hash_map
   //   insertion) and a `bool` denoting whether the insertion took place.
   //
   // std::pair<iterator,bool> insert(T&& value):
-  // std::pair<iterator,bool> insert(init_type&& value ):
+  // std::pair<iterator,bool> insert(init_type&& value):
   //
   //   Inserts a moveable value into the `node_hash_map`. Returns a `std::pair`
   //   consisting of an iterator to the inserted element (or to the element that
@@ -210,14 +251,14 @@ class node_hash_map
   //
   // iterator insert(const_iterator hint, const init_type& value):
   // iterator insert(const_iterator hint, T&& value):
-  // iterator insert(const_iterator hint, init_type&& value );
+  // iterator insert(const_iterator hint, init_type&& value);
   //
   //   Inserts a value, using the position of `hint` as a non-binding suggestion
   //   for where to begin the insertion search. Returns an iterator to the
   //   inserted element, or to the existing element that prevented the
   //   insertion.
   //
-  // void insert(InputIterator first, InputIterator last ):
+  // void insert(InputIterator first, InputIterator last):
   //
   //   Inserts a range of values [`first`, `last`).
   //
@@ -225,7 +266,7 @@ class node_hash_map
   //   multiple keys compare equivalently, for `node_hash_map` we guarantee the
   //   first match is inserted.
   //
-  // void insert(std::initializer_list<init_type> ilist ):
+  // void insert(std::initializer_list<init_type> ilist):
   //
   //   Inserts the elements within the initializer list `ilist`.
   //
@@ -413,12 +454,12 @@ class node_hash_map
   // all iterators are invalidated. Otherwise iterators are not affected and
   // references are not invalidated. Overloads are listed below.
   //
-  // T& operator[](const Key& key ):
+  // T& operator[](const Key& key):
   //
   //   Inserts an init_type object constructed in-place if the element with the
   //   given key does not exist.
   //
-  // T& operator[]( Key&& key ):
+  // T& operator[](Key&& key):
   //
   //   Inserts an init_type object constructed in-place provided that an element
   //   with the given key does not exist.
@@ -526,5 +567,16 @@ class NodeHashMapPolicy
   static const Value& value(const value_type* elem) { return elem->second; }
 };
 }  // namespace container_internal
+
+namespace container_algorithm_internal {
+
+// Specialization of trait in absl/algorithm/container.h
+template <class Key, class T, class Hash, class KeyEqual, class Allocator>
+struct IsUnorderedContainer<
+    absl::node_hash_map<Key, T, Hash, KeyEqual, Allocator>> : std::true_type {};
+
+}  // namespace container_algorithm_internal
+
 }  // namespace absl
+
 #endif  // ABSL_CONTAINER_NODE_HASH_MAP_H_
