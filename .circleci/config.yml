@@ -26,7 +26,7 @@ jobs:
             cd ..
             mkdir build
             cd build
-            /opt/cmake/bin/cmake ../source
+            /opt/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Release ../source
 
       - run:
           name: Compile
@@ -40,11 +40,11 @@ jobs:
           command: |
             cd ..
             cd build
-            ctest -R minimum_core
+            /opt/cmake/bin/ctest -R minimum_core
 
       - run:
           name: Test Linear
           command: |
             cd ..
             cd build
-            ctest -R minimum_linear
+            /opt/cmake/bin/ctest -R minimum_linear
