@@ -12,8 +12,13 @@ jobs:
       - run:
           name: Install CMake
           command: |
-            apt-get update
-            apt-get install -y cmake
+            version=3.13
+            build=3
+            mkdir ~/temp
+            cd ~/temp
+            wget https://github.com/Kitware/CMake/releases/download/v3.13.3/cmake-3.13.3-Linux-x86_64.sh 
+            sudo mkdir /opt/cmake
+            sudo sh cmake-3.13.3-Linux-x86_64.sh --prefix=/opt/cmake
 
       - run:
           name: Run CMake
