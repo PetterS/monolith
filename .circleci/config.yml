@@ -18,7 +18,7 @@ jobs:
             cd ~/temp
             wget https://github.com/Kitware/CMake/releases/download/v3.13.3/cmake-3.13.3-Linux-x86_64.sh 
             mkdir /opt/cmake
-            sh cmake-3.13.3-Linux-x86_64.sh --prefix=/opt/cmake
+            sh cmake-3.13.3-Linux-x86_64.sh --prefix=/opt/cmake --skip-license
 
       - run:
           name: Run CMake
