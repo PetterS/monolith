@@ -9,6 +9,7 @@ __pycache__
 minimum/cluster
 misc/*.py
 misc/*.cpp
+misc/extra
 vision/surveillance_camera.cpp
 vision/vision_demo.cpp
 
