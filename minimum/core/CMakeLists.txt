@@ -1,10 +1,8 @@
 
 library_with_tests("minimum_core"
-	"absl_container"
-	"absl_failure_signal_handler"
-	"absl_hash"
-	"absl_strings"
-	"absl_symbolize"
+	"absl::failure_signal_handler"
+	"absl::strings"
+	"absl::symbolize"
 	"gflags_shared"
 	"sqlite3"
 	"version")

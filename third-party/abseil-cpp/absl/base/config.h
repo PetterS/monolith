@@ -5,7 +5,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//      https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -118,7 +118,7 @@
 // Checks whether `std::is_trivially_copy_assignable<T>` is supported.
 
 // Notes: Clang with libc++ supports these features, as does gcc >= 5.1 with
-// either libc++ or libstdc++, and Visual Studio.
+// either libc++ or libstdc++, and Visual Studio (but not NVCC).
 #if defined(ABSL_HAVE_STD_IS_TRIVIALLY_CONSTRUCTIBLE)
 #error ABSL_HAVE_STD_IS_TRIVIALLY_CONSTRUCTIBLE cannot be directly set
 #elif defined(ABSL_HAVE_STD_IS_TRIVIALLY_ASSIGNABLE)
@@ -127,7 +127,7 @@
     (!defined(__clang__) && defined(__GNUC__) &&                 \
      (__GNUC__ > 5 || (__GNUC__ == 5 && __GNUC_MINOR__ >= 1)) && \
      (defined(_LIBCPP_VERSION) || defined(__GLIBCXX__))) ||      \
-    defined(_MSC_VER)
+    (defined(_MSC_VER) && !defined(__NVCC__))
 #define ABSL_HAVE_STD_IS_TRIVIALLY_CONSTRUCTIBLE 1
 #define ABSL_HAVE_STD_IS_TRIVIALLY_ASSIGNABLE 1
 #endif
@@ -191,15 +191,13 @@
 // * On Clang:
 //   * Building using Clang for Windows, where the Clang runtime library has
 //     128-bit support only on LP64 architectures, but Windows is LLP64.
-//   * Building for aarch64, where __int128 exists but has exhibits a sporadic
-//     compiler crashing bug.
 // * On Nvidia's nvcc:
 //   * nvcc also defines __GNUC__ and __SIZEOF_INT128__, but not all versions
 //     actually support __int128.
 #ifdef ABSL_HAVE_INTRINSIC_INT128
 #error ABSL_HAVE_INTRINSIC_INT128 cannot be directly set
 #elif defined(__SIZEOF_INT128__)
-#if (defined(__clang__) && !defined(_WIN32) && !defined(__aarch64__)) || \
+#if (defined(__clang__) && !defined(_WIN32)) || \
     (defined(__CUDACC__) && __CUDACC_VER_MAJOR__ >= 9) ||                \
     (defined(__GNUC__) && !defined(__clang__) && !defined(__CUDACC__))
 #define ABSL_HAVE_INTRINSIC_INT128 1
@@ -371,10 +369,10 @@
 // https://developer.apple.com/documentation/xcode_release_notes/xcode_10_release_notes
 #if defined(__APPLE__) && defined(_LIBCPP_VERSION) && \
     defined(__MAC_OS_X_VERSION_MIN_REQUIRED__) &&     \
-    __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ >= 101400
-#define ABSL_INTERNAL_MACOS_HAS_CXX_17_TYPES 1
+    __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ < 101400
+#define ABSL_INTERNAL_MACOS_CXX17_TYPES_UNAVAILABLE 1
 #else
-#define ABSL_INTERNAL_MACOS_HAS_CXX_17_TYPES 0
+#define ABSL_INTERNAL_MACOS_CXX17_TYPES_UNAVAILABLE 0
 #endif
 
 // ABSL_HAVE_STD_ANY
@@ -386,7 +384,7 @@
 
 #ifdef __has_include
 #if __has_include(<any>) && __cplusplus >= 201703L && \
-    ABSL_INTERNAL_MACOS_HAS_CXX_17_TYPES
+    !ABSL_INTERNAL_MACOS_CXX17_TYPES_UNAVAILABLE
 #define ABSL_HAVE_STD_ANY 1
 #endif
 #endif
@@ -400,7 +398,7 @@
 
 #ifdef __has_include
 #if __has_include(<optional>) && __cplusplus >= 201703L && \
-    ABSL_INTERNAL_MACOS_HAS_CXX_17_TYPES
+    !ABSL_INTERNAL_MACOS_CXX17_TYPES_UNAVAILABLE
 #define ABSL_HAVE_STD_OPTIONAL 1
 #endif
 #endif
@@ -414,7 +412,7 @@
 
 #ifdef __has_include
 #if __has_include(<variant>) && __cplusplus >= 201703L && \
-    ABSL_INTERNAL_MACOS_HAS_CXX_17_TYPES
+    !ABSL_INTERNAL_MACOS_CXX17_TYPES_UNAVAILABLE
 #define ABSL_HAVE_STD_VARIANT 1
 #endif
 #endif
