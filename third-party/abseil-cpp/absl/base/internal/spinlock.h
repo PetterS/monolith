@@ -5,7 +5,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//      https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,6 +32,7 @@
 
 #include <stdint.h>
 #include <sys/types.h>
+
 #include <atomic>
 
 #include "absl/base/attributes.h"
@@ -57,8 +58,10 @@ class LOCKABLE SpinLock {
   //
   //    static SpinLock lock(base_internal::kLinkerInitialized);
   //
-  // When intialized using this constructor, we depend on the fact
-  // that the linker has already initialized the memory appropriately.
+  // When initialized using this constructor, we depend on the fact
+  // that the linker has already initialized the memory appropriately. The lock
+  // is initialized in non-cooperative mode.
+  //
   // A SpinLock constructed like this can be freely used from global
   // initializers without worrying about the order in which global
   // initializers run.

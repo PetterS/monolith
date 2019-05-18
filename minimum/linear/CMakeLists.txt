@@ -1,5 +1,7 @@
 
 library_with_tests("minimum_linear"
+	"absl::flat_hash_map"
+	"absl::flat_hash_set"
 	"cleaneling"
 	"glpk"
 	"glucose"
