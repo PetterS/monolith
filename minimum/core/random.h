@@ -16,14 +16,14 @@ Engine seeded_engine() {
 	std::generate(std::begin(seed_data), std::end(seed_data), std::ref(source));
 	std::seed_seq seeds(std::begin(seed_data), std::end(seed_data));
 	Engine engine(seeds);
-	return std::move(engine);
+	engine;
 }
 
 template <class Engine, typename... Ts>
 Engine repeatably_seeded_engine(Ts... is) {
 	std::seed_seq seeds = {is...};
 	Engine engine(seeds);
-	return std::move(engine);
+	engine;
 }
 }  // namespace core
 }  // namespace minimum
