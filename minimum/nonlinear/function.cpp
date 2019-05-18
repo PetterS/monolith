@@ -140,7 +140,7 @@ class Function::Implementation {
 	// was created.
 	mutable size_t number_of_hessian_elements;
 
-	Function* interface;
+	Function* parent;
 };
 
 Function::Function() : impl{new Function::Implementation{this}} {}
@@ -148,7 +148,7 @@ Function::Function() : impl{new Function::Implementation{this}} {}
 Function::Function(const Function& org) : impl{new Function::Implementation{this}} { *this = org; }
 
 Function::Implementation::Implementation(Function* function_interface)
-    : interface{function_interface} {
+    : parent{function_interface} {
 	clear();
 }
 
@@ -486,7 +486,7 @@ void Function::Implementation::allocate_local_storage() const {
 		}
 	}
 
-	if (interface->hessian_is_enabled) {
+	if (parent->hessian_is_enabled) {
 		this->thread_hessian_scratch.resize(this->number_of_threads);
 		for (int t = 0; t < this->number_of_threads; ++t) {
 			auto& hessian = this->thread_hessian_scratch[t];
@@ -503,7 +503,7 @@ void Function::Implementation::allocate_local_storage() const {
 
 	this->local_storage_allocated = true;
 
-	interface->allocation_time += wall_time() - start_time;
+	parent->allocation_time += wall_time() - start_time;
 }
 
 void Function::print_timing_information(std::ostream& out) const {
@@ -521,7 +521,7 @@ void Function::print_timing_information(std::ostream& out) const {
 double Function::Implementation::evaluate_from_local_storage() const {
 	minimum_core_assert(this->local_storage_allocated);
 
-	interface->evaluations_without_gradient++;
+	parent->evaluations_without_gradient++;
 	double start_time = wall_time();
 
 	double value = this->constant;
@@ -568,7 +568,7 @@ double Function::Implementation::evaluate_from_local_storage() const {
 	}
 #endif
 
-	interface->evaluate_time += wall_time() - start_time;
+	parent->evaluate_time += wall_time() - start_time;
 	return value;
 }
 
@@ -669,7 +669,7 @@ void Function::Implementation::copy_global_to_local(const Eigen::VectorXd& x) co
 		}
 	}
 
-	interface->copy_time += wall_time() - start_time;
+	parent->copy_time += wall_time() - start_time;
 }
 
 void Function::copy_user_to_global(Eigen::VectorXd* x) const { impl->copy_user_to_global(x); }
@@ -694,7 +694,7 @@ void Function::Implementation::copy_user_to_global(Eigen::VectorXd* x) const {
 		}
 	}
 
-	interface->copy_time += wall_time() - start_time;
+	parent->copy_time += wall_time() - start_time;
 }
 
 void Function::copy_global_to_user(const Eigen::VectorXd& x) const { impl->copy_global_to_user(x); }
@@ -716,7 +716,7 @@ void Function::Implementation::copy_global_to_user(const Eigen::VectorXd& x) con
 		}
 	}
 
-	interface->copy_time += wall_time() - start_time;
+	parent->copy_time += wall_time() - start_time;
 }
 
 void Function::Implementation::copy_user_to_local() const {
@@ -734,7 +734,7 @@ void Function::Implementation::copy_user_to_local() const {
 		}
 	}
 
-	interface->copy_time += wall_time() - start_time;
+	parent->copy_time += wall_time() - start_time;
 }
 
 double Function::evaluate(const Eigen::VectorXd& x, Eigen::VectorXd* gradient) const {
@@ -750,9 +750,9 @@ double Function::evaluate(const Eigen::VectorXd& x,
 double Function::Implementation::evaluate(const Eigen::VectorXd& x,
                                           Eigen::VectorXd* gradient,
                                           Eigen::MatrixXd* hessian) const {
-	interface->evaluations_with_gradient++;
+	parent->evaluations_with_gradient++;
 
-	minimum_core_assert(!hessian || interface->hessian_is_enabled,
+	minimum_core_assert(!hessian || parent->hessian_is_enabled,
 	                    "Function::evaluate: Hessian computation is not enabled.");
 
 	if (!this->local_storage_allocated) {
@@ -772,7 +772,7 @@ double Function::Implementation::evaluate(const Eigen::VectorXd& x,
 			thread_dense_hessian_storage[t].setZero();
 		}
 	}
-	interface->allocation_time += wall_time() - start_time;
+	parent->allocation_time += wall_time() - start_time;
 
 	// Copy values from the global vector x to the temporary storage
 	// used for evaluating the term.
@@ -892,7 +892,7 @@ double Function::Implementation::evaluate(const Eigen::VectorXd& x,
 	}
 #endif
 
-	interface->evaluate_with_hessian_time += wall_time() - start_time;
+	parent->evaluate_with_hessian_time += wall_time() - start_time;
 	start_time = wall_time();
 
 	// Create the global gradient.
@@ -915,7 +915,7 @@ double Function::Implementation::evaluate(const Eigen::VectorXd& x,
 		}
 	}
 
-	interface->write_gradient_hessian_time += wall_time() - start_time;
+	parent->write_gradient_hessian_time += wall_time() - start_time;
 	return value;
 }
 
@@ -928,10 +928,10 @@ double Function::evaluate(const Eigen::VectorXd& x,
 double Function::Implementation::evaluate(const Eigen::VectorXd& x,
                                           Eigen::VectorXd* gradient,
                                           Eigen::SparseMatrix<double>* hessian) const {
-	interface->evaluations_with_gradient++;
+	parent->evaluations_with_gradient++;
 
 	minimum_core_assert(hessian);
-	minimum_core_assert(interface->hessian_is_enabled,
+	minimum_core_assert(parent->hessian_is_enabled,
 	                    "Function::evaluate: Hessian computation is not enabled.");
 
 	if (!this->local_storage_allocated) {
@@ -951,7 +951,7 @@ double Function::Implementation::evaluate(const Eigen::VectorXd& x,
 	}
 	this->number_of_hessian_elements = 0;
 
-	interface->allocation_time += wall_time() - start_time;
+	parent->allocation_time += wall_time() - start_time;
 
 	// Copy values from the global vector x to the temporary storage
 	// used for evaluating the term.
@@ -959,7 +959,7 @@ double Function::Implementation::evaluate(const Eigen::VectorXd& x,
 
 	start_time = wall_time();
 
-	interface->write_gradient_hessian_time += wall_time() - start_time;
+	parent->write_gradient_hessian_time += wall_time() - start_time;
 	start_time = wall_time();
 
 	// Initialize each thread's global gradient.
@@ -1053,7 +1053,7 @@ double Function::Implementation::evaluate(const Eigen::VectorXd& x,
 	}
 #endif
 
-	interface->evaluate_with_hessian_time += wall_time() - start_time;
+	parent->evaluate_with_hessian_time += wall_time() - start_time;
 	start_time = wall_time();
 
 	// Create the global gradient.
@@ -1076,7 +1076,7 @@ double Function::Implementation::evaluate(const Eigen::VectorXd& x,
 	                         thread_sparse_hessian_storage[0].end());
 	// hessian->makeCompressed();
 
-	interface->write_gradient_hessian_time += wall_time() - start_time;
+	parent->write_gradient_hessian_time += wall_time() - start_time;
 
 	return value;
 }
@@ -1094,7 +1094,7 @@ Interval<double> Function::Implementation::evaluate(const std::vector<Interval<d
 
 	minimum_core_assert(x.size() == this->number_of_scalars);
 
-	interface->evaluations_without_gradient++;
+	parent->evaluations_without_gradient++;
 	double start_time = wall_time();
 
 	std::vector<std::vector<const Interval<double>*>> scratch_space;
@@ -1180,7 +1180,7 @@ Interval<double> Function::Implementation::evaluate(const std::vector<Interval<d
 #endif
 
 	Interval<double> value(lower, upper);
-	interface->evaluate_time += wall_time() - start_time;
+	parent->evaluate_time += wall_time() - start_time;
 	return value;
 }
 
