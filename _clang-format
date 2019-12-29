@@ -12,4 +12,5 @@ BinPackArguments: false
 BinPackParameters: false
 BreakBeforeBinaryOperators: NonAssignment
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
+IncludeBlocks: Preserve
 Standard: Cpp11

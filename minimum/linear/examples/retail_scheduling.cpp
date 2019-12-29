@@ -1,14 +1,19 @@
-#include <gflags/gflags.h>
-#include <minimum/core/check.h>
-#include <minimum/core/main.h>
-#include <minimum/core/string.h>
-
 #include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <string>
 #include <string_view>
+
+#include <gflags/gflags.h>
+
+#include <minimum/core/check.h>
+#include <minimum/core/main.h>
+#include <minimum/core/string.h>
+#include <minimum/linear/ip.h>
+#include <minimum/linear/scheduling_util.h>
+#include <minimum/linear/scs.h>
+#include <minimum/linear/solver.h>
 
 using namespace minimum::core;
 
