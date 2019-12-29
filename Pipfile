@@ -1,0 +1,15 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+colorama = "*"
+mypy = "*"
+pytest = "*"
+pytest-cov = "*"
+
+[packages]
+aiohttp = "*"
+numpy = "*"
+protobuf = "*"
