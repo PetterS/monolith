@@ -12,6 +12,11 @@
 #include <minimum/core/check.h>
 #include <minimum/core/export.h>
 
+#ifdef _MSC_VER
+// We need unnamed objects with constructors in this library.
+#pragma warning(disable : 26444)
+#endif
+
 namespace minimum::core {
 
 // There are two main classes in the API:
