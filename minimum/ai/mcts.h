@@ -74,6 +74,7 @@ typename State::Move compute_move(const State root_state,
 //
 
 #include <algorithm>
+#include <chrono>
 #include <cstdlib>
 #include <future>
 #include <iomanip>
@@ -87,10 +88,6 @@ typename State::Move compute_move(const State root_state,
 #include <thread>
 #include <vector>
 
-#ifdef USE_OPENMP
-#include <omp.h>
-#endif
-
 #include <minimum/core/check.h>
 
 namespace minimum {
@@ -99,6 +96,7 @@ using std::cerr;
 using std::endl;
 using std::size_t;
 using std::vector;
+using FpSecond = std::chrono::duration<double, std::chrono::seconds::period>;
 
 //
 // This class is used to build the game tree. The root is created by the users and
@@ -281,19 +279,12 @@ std::unique_ptr<Node<State>> compute_tree(const State root_state,
 	std::mt19937_64 random_engine(initial_seed);
 
 	minimum_core_assert(options.max_iterations >= 0 || options.max_time >= 0);
-	if (options.max_time >= 0) {
-#ifndef USE_OPENMP
-		throw std::runtime_error("ComputeOptions::max_time requires OpenMP.");
-#endif
-	}
 	// Will support more players later.
 	minimum_core_assert(root_state.player_to_move == 1 || root_state.player_to_move == 2);
 	auto root = std::unique_ptr<Node<State>>(new Node<State>(root_state));
 
-#ifdef USE_OPENMP
-	double start_time = ::omp_get_wtime();
-	double print_time = start_time;
-#endif
+	auto start_time = std::chrono::steady_clock::now();
+	auto print_time = start_time;
 
 	for (int iter = 1; iter <= options.max_iterations || options.max_iterations < 0; ++iter) {
 		auto node = root.get();
@@ -325,20 +316,21 @@ std::unique_ptr<Node<State>> compute_tree(const State root_state,
 			node = node->parent;
 		}
 
-#ifdef USE_OPENMP
 		if (options.verbose || options.max_time >= 0) {
-			double time = ::omp_get_wtime();
-			if (options.verbose && (time - print_time >= 1.0 || iter == options.max_iterations)) {
-				std::cerr << iter << " games played (" << double(iter) / (time - start_time)
+			auto time = std::chrono::steady_clock::now();
+			auto time_taken = std::chrono::duration_cast<FpSecond>(time - start_time);
+			auto print_time_taken = std::chrono::duration_cast<FpSecond>(time - print_time);
+			if (options.verbose
+			    && (print_time_taken.count() >= 1.0 || iter == options.max_iterations)) {
+				std::cerr << iter << " games played (" << double(iter) / time_taken.count()
 				          << " / second)." << endl;
 				print_time = time;
 			}
 
-			if (time - start_time >= options.max_time) {
+			if (time_taken.count() >= options.max_time) {
 				break;
 			}
 		}
-#endif
 	}
 
 	return root;
@@ -357,9 +349,7 @@ typename State::Move compute_move(const State root_state, const ComputeOptions o
 		return moves[0];
 	}
 
-#ifdef USE_OPENMP
-	double start_time = ::omp_get_wtime();
-#endif
+	auto start_time = std::chrono::steady_clock::now();
 
 	// Start all jobs to compute trees.
 	vector<future<unique_ptr<Node<State>>>> root_futures;
@@ -423,14 +413,13 @@ typename State::Move compute_move(const State root_state, const ComputeOptions o
 		     << " (" << 100.0 * best_wins / best_visits << "% wins)" << endl;
 	}
 
-#ifdef USE_OPENMP
 	if (options.verbose) {
-		double time = ::omp_get_wtime();
-		std::cerr << games_played << " games played in " << double(time - start_time) << " s. "
-		          << "(" << double(games_played) / (time - start_time) << " / second, "
+		auto time = std::chrono::steady_clock::now();
+		auto time_taken = std::chrono::duration_cast<FpSecond>(time - start_time);
+		std::cerr << games_played << " games played in " << time_taken.count() << " s. "
+		          << "(" << double(games_played) / time_taken.count() << " / second, "
 		          << options.number_of_threads << " parallel jobs)." << endl;
 	}
-#endif
 
 	return best_move;
 }
