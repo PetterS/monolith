@@ -225,7 +225,8 @@ Node<State>* Node<State>::add_child(const Move& move, const State& state) {
 	for (; itr != moves.end() && *itr != move; ++itr)
 		;
 	minimum_core_assert(itr != moves.end());
-	moves.erase(itr);
+	std::iter_swap(itr, moves.end() - 1);
+	moves.pop_back();
 	return node;
 }
 
