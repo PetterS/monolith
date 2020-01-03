@@ -74,7 +74,6 @@ typename State::Move compute_move(const State root_state,
 //
 
 #include <algorithm>
-#include <chrono>
 #include <cstdlib>
 #include <future>
 #include <iomanip>
@@ -89,6 +88,7 @@ typename State::Move compute_move(const State root_state,
 #include <vector>
 
 #include <minimum/core/check.h>
+#include <minimum/core/time.h>
 
 namespace minimum {
 namespace ai {
@@ -96,7 +96,6 @@ using std::cerr;
 using std::endl;
 using std::size_t;
 using std::vector;
-using FpSecond = std::chrono::duration<double, std::chrono::seconds::period>;
 
 //
 // This class is used to build the game tree. The root is created by the users and
@@ -283,8 +282,8 @@ std::unique_ptr<Node<State>> compute_tree(const State root_state,
 	minimum_core_assert(root_state.player_to_move == 1 || root_state.player_to_move == 2);
 	auto root = std::unique_ptr<Node<State>>(new Node<State>(root_state));
 
-	auto start_time = std::chrono::steady_clock::now();
-	auto print_time = start_time;
+	double start_time = core::wall_time();
+	double print_time = start_time;
 
 	for (int iter = 1; iter <= options.max_iterations || options.max_iterations < 0; ++iter) {
 		auto node = root.get();
@@ -317,17 +316,14 @@ std::unique_ptr<Node<State>> compute_tree(const State root_state,
 		}
 
 		if (options.verbose || options.max_time >= 0) {
-			auto time = std::chrono::steady_clock::now();
-			auto time_taken = std::chrono::duration_cast<FpSecond>(time - start_time);
-			auto print_time_taken = std::chrono::duration_cast<FpSecond>(time - print_time);
-			if (options.verbose
-			    && (print_time_taken.count() >= 1.0 || iter == options.max_iterations)) {
-				std::cerr << iter << " games played (" << double(iter) / time_taken.count()
+			double time = core::wall_time();
+			if (options.verbose && (time - print_time >= 1.0 || iter == options.max_iterations)) {
+				std::cerr << iter << " games played (" << double(iter) / (time - start_time)
 				          << " / second)." << endl;
 				print_time = time;
 			}
 
-			if (time_taken.count() >= options.max_time) {
+			if (time - start_time >= options.max_time) {
 				break;
 			}
 		}
@@ -349,7 +345,7 @@ typename State::Move compute_move(const State root_state, const ComputeOptions o
 		return moves[0];
 	}
 
-	auto start_time = std::chrono::steady_clock::now();
+	double start_time = core::wall_time();
 
 	// Start all jobs to compute trees.
 	vector<future<unique_ptr<Node<State>>>> root_futures;
@@ -414,10 +410,9 @@ typename State::Move compute_move(const State root_state, const ComputeOptions o
 	}
 
 	if (options.verbose) {
-		auto time = std::chrono::steady_clock::now();
-		auto time_taken = std::chrono::duration_cast<FpSecond>(time - start_time);
-		std::cerr << games_played << " games played in " << time_taken.count() << " s. "
-		          << "(" << double(games_played) / time_taken.count() << " / second, "
+		double time = core::wall_time();
+		std::cerr << games_played << " games played in " << double(time - start_time) << " s. "
+		          << "(" << double(games_played) / (time - start_time) << " / second, "
 		          << options.number_of_threads << " parallel jobs)." << endl;
 	}
 
