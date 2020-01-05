@@ -6,8 +6,10 @@ verify_ssl = true
 [dev-packages]
 colorama = "*"
 mypy = "*"
+pyflakes = "*"
 pytest = "*"
 pytest-cov = "*"
+yapf = "*"
 
 [packages]
 aiohttp = "*"
