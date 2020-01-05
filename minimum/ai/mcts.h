@@ -87,11 +87,8 @@ typename State::Move compute_move(const State root_state,
 #include <thread>
 #include <vector>
 
-#ifdef USE_OPENMP
-#include <omp.h>
-#endif
-
 #include <minimum/core/check.h>
+#include <minimum/core/time.h>
 
 namespace minimum {
 namespace ai {
@@ -282,19 +279,12 @@ std::unique_ptr<Node<State>> compute_tree(const State root_state,
 	std::mt19937_64 random_engine(initial_seed);
 
 	minimum_core_assert(options.max_iterations >= 0 || options.max_time >= 0);
-	if (options.max_time >= 0) {
-#ifndef USE_OPENMP
-		throw std::runtime_error("ComputeOptions::max_time requires OpenMP.");
-#endif
-	}
 	// Will support more players later.
 	minimum_core_assert(root_state.player_to_move == 1 || root_state.player_to_move == 2);
 	auto root = std::unique_ptr<Node<State>>(new Node<State>(root_state));
 
-#ifdef USE_OPENMP
-	double start_time = ::omp_get_wtime();
+	double start_time = core::wall_time();
 	double print_time = start_time;
-#endif
 
 	for (int iter = 1; iter <= options.max_iterations || options.max_iterations < 0; ++iter) {
 		auto node = root.get();
@@ -326,9 +316,8 @@ std::unique_ptr<Node<State>> compute_tree(const State root_state,
 			node = node->parent;
 		}
 
-#ifdef USE_OPENMP
 		if (options.verbose || options.max_time >= 0) {
-			double time = ::omp_get_wtime();
+			double time = core::wall_time();
 			if (options.verbose && (time - print_time >= 1.0 || iter == options.max_iterations)) {
 				std::cerr << iter << " games played (" << double(iter) / (time - start_time)
 				          << " / second)." << endl;
@@ -339,7 +328,6 @@ std::unique_ptr<Node<State>> compute_tree(const State root_state,
 				break;
 			}
 		}
-#endif
 	}
 
 	return root;
@@ -358,9 +346,7 @@ typename State::Move compute_move(const State root_state, const ComputeOptions o
 		return moves[0];
 	}
 
-#ifdef USE_OPENMP
-	double start_time = ::omp_get_wtime();
-#endif
+	double start_time = core::wall_time();
 
 	// Start all jobs to compute trees.
 	vector<future<unique_ptr<Node<State>>>> root_futures;
@@ -424,14 +410,12 @@ typename State::Move compute_move(const State root_state, const ComputeOptions o
 		     << " (" << 100.0 * best_wins / best_visits << "% wins)" << endl;
 	}
 
-#ifdef USE_OPENMP
 	if (options.verbose) {
-		double time = ::omp_get_wtime();
+		double time = core::wall_time();
 		std::cerr << games_played << " games played in " << double(time - start_time) << " s. "
 		          << "(" << double(games_played) / (time - start_time) << " / second, "
 		          << options.number_of_threads << " parallel jobs)." << endl;
 	}
-#endif
 
 	return best_move;
 }
