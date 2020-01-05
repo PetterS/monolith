@@ -36,36 +36,38 @@ colorama.init()
 
 class PrecommitFailure(Exception):
 	"""Means that a precommit failed and the program will terminate."""
-
 	def __init__(self, message: str) -> None:
 		self.message = message
 
 
 class PrecommitWarning(Exception):
 	"""Issues a warning and the program will continue."""
-
 	def __init__(self, message: str) -> None:
 		self.message = message
 
 
 class Precommit:
 	"""Base class that describes a precommit."""
-
 	def run(self) -> None:
 		"""Runs the precommit and raises PrecommitFailure on failure."""
 		pass
 
-	def check_for_modifications(self, message: str) -> None:
+	def check_for_modifications(self, files: List[str], message: str) -> None:
 		"""Fails the test with an error if there are local modifications."""
 		run = subprocess.run(["git", "ls-files", "-m"], stdout=subprocess.PIPE)
 		assert run.returncode == 0
-		if len(run.stdout) > 0:
+		stdout = run.stdout.decode("utf-8")
+		modified_files = filter(None, stdout.split("\n"))  # type: ignore
+
+		# We don't allow any file in files to be modified.
+		if set(modified_files) & set(files):
 			raise PrecommitFailure(message)
 
 	def run_with_check(self, args: List[str], errormessage: str) -> None:
 		"""Runs the list of arguments and exits the current process on failure."""
-		run = subprocess.run(
-		    args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+		run = subprocess.run(args,
+		                     stdout=subprocess.PIPE,
+		                     stderr=subprocess.STDOUT)
 		if run.returncode != 0:
 			raise PrecommitFailure(
 			    run.stdout.decode("utf-8") + "\n\n" + errormessage)
@@ -76,15 +78,17 @@ class NoModifiedFiles(Precommit):
 
 	The presubmit script assumes that files are either staged or unmodified.
 	"""
+	def __init__(self, files):
+		self.files = files
 
 	def run(self):
 		self.check_for_modifications(
-		    "There are local modifications. Please stage/stash them.")
+		    self.files, "There are local modifications to the added files. "
+		    "Please stage/stash them.")
 
 
 class LineEndings(Precommit):
 	"""Checks that all files do not contain CRLF line endings."""
-
 	def __init__(self, files):
 		self.files = files
 
@@ -106,7 +110,6 @@ class LineEndings(Precommit):
 
 class ValidUtf8(Precommit):
 	"""Checks that all files decode as UTF-8."""
-
 	def __init__(self, files):
 		self.files = files
 
@@ -121,7 +124,6 @@ class ValidUtf8(Precommit):
 
 class UnixLineEndings(Precommit):
 	"""Checks that all files decode as UTF-8."""
-
 	def __init__(self, files):
 		self.files = files
 
@@ -134,8 +136,9 @@ class UnixLineEndings(Precommit):
 				with open(name, "rb") as f:
 					f.write(unix_data)
 
-		self.check_for_modifications("Line endings have been changed to UNIX. "
-		                             + "Please stage them if OK.")
+		self.check_for_modifications(
+		    self.files, "Line endings have been changed to UNIX. " +
+		    "Please stage them if OK.")
 
 
 class Pyflakes(Precommit):
@@ -143,7 +146,6 @@ class Pyflakes(Precommit):
 
 	Pyflakes is very fast and has essentially zero false positives.
 	"""
-
 	def __init__(self, files):
 		self.files = files
 
@@ -154,28 +156,24 @@ class Pyflakes(Precommit):
 
 class MyPy(Precommit):
 	"""Runs the type-checker Mypy on the provided Python files."""
-
 	def __init__(self, files):
 		self.files = files
 
 	def run(self):
 		self.run_with_check(
-		    [sys.executable, "-m", "mypy", "--ignore-missing-imports"
-		     ] + self.files, "Mypy failed.")
+		    [sys.executable, "-m", "mypy", "--ignore-missing-imports"] +
+		    self.files, "Mypy failed.")
 
 
 class PyTest(Precommit):
 	"""Runs the Python unit tests in the code base."""
-
 	def run(self):
-		self.run_with_check(
-		    [sys.executable, "-m", "pytest", "-v"] + SOURCE_TO_CHECK,
-		    "Pytest failed.")
+		self.run_with_check([sys.executable, "-m", "pytest", "-v"] +
+		                    SOURCE_TO_CHECK, "Pytest failed.")
 
 
 class Yapf(Precommit):
 	"""Checks that all provided Python files are unmodifed by the formatter."""
-
 	def __init__(self, files):
 		self.files = files
 
@@ -186,8 +184,9 @@ class Yapf(Precommit):
 		] + self.files, "Yapf failed.")
 		# If Yapf made any changes, we fail the precommit to let the user review
 		# them.
-		self.check_for_modifications("Python formatter made modifications. " +
-		                             "Please stage them if OK.")
+		self.check_for_modifications(
+		    self.files, "Python formatter made modifications. " +
+		    "Please stage them if OK.")
 
 
 class Prettier(Precommit):
@@ -195,41 +194,39 @@ class Prettier(Precommit):
 		self.files = files
 
 	def run(self):
-		subprocess.run(
-		    ["prettier", "--write", "--loglevel", "log"] + self.files,
-		    check=True,
-		    shell=True)
+		subprocess.run(["prettier", "--write", "--loglevel", "log"] +
+		               self.files,
+		               check=True,
+		               shell=True)
 		self.check_for_modifications(
-		    "Javascript formatter made modifications.")
+		    self.files, "Javascript formatter made modifications.")
 
 
 class ClangFormat(Precommit):
 	"""Checks that all provided C++ files are unmodifed by the formatter."""
-
 	def __init__(self, files):
 		self.files = files
 
 	def run(self):
 		try:
-			self.run_with_check(
-			    ["clang-format", "-i", "-style=file"] + self.files,
-			    "Clang-format failed.")
+			self.run_with_check(["clang-format", "--version"], "Version")
+			self.run_with_check(["clang-format", "-i", "-style=file"] +
+			                    self.files, "Clang-format failed.")
 		except FileNotFoundError:
 			raise PrecommitWarning("clang-format not found.")
 		# If Clang made any changes, we fail the precommit to let the user review
 		# them.
-		self.check_for_modifications("C++ formatter made modifications. " +
-		                             "Please stage them if OK.")
+		self.check_for_modifications(
+		    self.files,
+		    "C++ formatter made modifications. " + "Please stage them if OK.")
 
 
 def get_staged_files(pattern: str) -> List[str]:
 	"""Returns all staged files about to be committed."""
-	run = subprocess.run(
-	    [
-	        "git", "diff", "--cached", "--name-only", "--diff-filter=ACM",
-	        pattern
-	    ],
-	    stdout=subprocess.PIPE)
+	run = subprocess.run([
+	    "git", "diff", "--cached", "--name-only", "--diff-filter=ACM", pattern
+	],
+	                     stdout=subprocess.PIPE)
 	assert run.returncode == 0
 	return [
 	    file for file in run.stdout.decode("utf-8").split("\n")
@@ -248,18 +245,15 @@ def print_files(name: str, files: List[str]) -> None:
 
 
 def install_if_needed() -> None:
-	precommit_hook = os.path.join(
-	    os.path.dirname(__file__), ".git", "hooks", "pre-commit")
+	precommit_hook = os.path.join(os.path.dirname(__file__), ".git", "hooks",
+	                              "pre-commit")
 	if os.path.isfile(precommit_hook):
 		return
 
-	interpreter = "python3"
-	if os.name == "nt":
-		interpreter = "py -3"
 	with open(precommit_hook, "w") as f:
 		print("#!/bin/bash", file=f)
 		print("set -e", file=f)
-		print("{} precommit.py".format(interpreter), file=f)
+		print("pipenv run python precommit.py", file=f)
 
 	# Make the script executable. Required on Linux.
 	st = os.stat(precommit_hook)
@@ -284,11 +278,11 @@ def main():
 	js_files = get_staged_files("*.js")
 	txt_files = get_staged_files("*.txt")
 	cmake_files = get_staged_files("*.cmake")
-	all_text_files = (
-	    python_files + cpp_files + js_files + txt_files + cmake_files)
+	all_text_files = (python_files + cpp_files + js_files + txt_files +
+	                  cmake_files)
 
 	precommits: List[Precommit] = [
-	    NoModifiedFiles(),
+	    NoModifiedFiles(all_files),
 	    LineEndings(all_text_files),
 	    ValidUtf8(all_text_files),
 	    UnixLineEndings(all_text_files),
