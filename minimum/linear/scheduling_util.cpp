@@ -61,6 +61,9 @@ string remove_space(string in) {
 }
 }  // namespace
 
+namespace minimum {
+namespace linear {
+
 MINIMUM_LINEAR_API void verify_scheduling_problem(
     const minimum::linear::proto::SchedulingProblem& problem) {
 	minimum_core_assert(problem.worker_size() > 0);
@@ -971,3 +974,293 @@ int objective_value(const minimum::linear::proto::SchedulingProblem& problem,
 
 	return objective.value();
 }
+
+std::string quick_solution_improvement(const proto::SchedulingProblem& problem,
+                                       vector<vector<vector<int>>>& current_solution) {
+	vector<vector<int>> current_assignment;
+	vector<int> zero_shifts(problem.shift_size(), 0);
+	current_assignment.resize(problem.num_days(), zero_shifts);
+	auto wanted_assignment = current_assignment;
+	auto over_cost = current_assignment;
+	auto under_cost = current_assignment;
+
+	for (auto& requirement : problem.requirement()) {
+		wanted_assignment[requirement.day()][requirement.shift()] = requirement.wanted();
+		over_cost[requirement.day()][requirement.shift()] = requirement.over_cost();
+		under_cost[requirement.day()][requirement.shift()] = requirement.under_cost();
+	}
+
+	vector<vector<int>> working_on_day;
+	vector<int> zero_days(problem.num_days(), 0);
+	working_on_day.resize(problem.worker_size(), zero_days);
+	vector<int> working_weekends(problem.worker_size(), 0);
+	vector<int> working_minutes(problem.worker_size(), 0);
+	vector<vector<int>> working_shift(problem.worker_size(), zero_shifts);
+
+	for (int p : range(problem.worker_size())) {
+		for (int d : range(problem.num_days())) {
+			for (int s : range(problem.shift_size())) {
+				if (current_solution[p][d][s] > 0) {
+					working_on_day[p][d] = 1;
+					working_minutes[p] += problem.shift(s).duration();
+					working_shift[p][s] += 1;
+					current_assignment[d][s] += 1;
+				}
+			}
+		}
+
+		for (int d = 5; d < problem.num_days(); d += 7) {
+			if (working_on_day[p][d] || working_on_day[p][d + 1]) {
+				working_weekends[p] += 1;
+			}
+		}
+	}
+
+	for (const int d : range(problem.num_days())) {
+		for (const int s : range(problem.shift_size())) {
+			if (wanted_assignment[d][s] - current_assignment[d][s] > 0) {
+				// We would like this shift assigned. Can we find someone for it?
+
+				for (const int p : range(problem.worker_size())) {
+					// Would it be feasible and good to assign this shift to this worker?
+					// If so, do that and return.
+
+					int prev_shift = -1;
+					if (working_on_day[p][d]) {
+						for (int s2 : range(problem.shift_size())) {
+							if (current_solution[p][d][s2] > 0) {
+								prev_shift = s2;
+								break;
+							}
+						}
+					}
+					if (prev_shift == s) {
+						continue;
+					}
+
+					if (prev_shift < 0 && problem.worker(p).has_consecutive_shifts_limit()) {
+						int consecutive = 1;
+						for (int d2 = d - 1; d2 >= 0 && working_on_day[p][d2]; --d2, consecutive++)
+							;
+						for (int d2 = d + 1; d2 < problem.num_days() && working_on_day[p][d2];
+						     ++d2, consecutive++)
+							;
+						if (consecutive > problem.worker(p).consecutive_shifts_limit().max()) {
+							continue;
+						}
+						if (consecutive < problem.worker(p).consecutive_shifts_limit().min()) {
+							continue;
+						}
+					}
+
+					if (prev_shift < 0 && problem.worker(p).has_consecutive_days_off_limit()) {
+						int min_consecutive = problem.worker(p).consecutive_days_off_limit().min();
+						int consecutive = 0;
+						for (int d2 = d - 1; d2 >= 0 && !working_on_day[p][d2]; --d2, consecutive++)
+							;
+						if (consecutive > 0 && consecutive < min_consecutive) {
+							continue;
+						}
+						consecutive = 0;
+						for (int d2 = d + 1; d2 < problem.num_days() && !working_on_day[p][d2];
+						     ++d2, consecutive++)
+							;
+						if (consecutive > 0 && consecutive < min_consecutive) {
+							continue;
+						}
+					}
+
+					if (prev_shift >= 0
+					    && working_shift[p][prev_shift] - 1
+					           < problem.worker(p).shift_limit(prev_shift).min()) {
+						continue;
+					}
+					if (working_shift[p][s] + 1 > problem.worker(p).shift_limit(s).max()) {
+						continue;
+					}
+
+					if (problem.shift(s).has_consecutive_limit()) {
+						minimum_core_assert(false, "Not implemented.");
+					}
+					if (prev_shift >= 0 && problem.shift(prev_shift).has_consecutive_limit()) {
+						minimum_core_assert(false, "Not implemented.");
+					}
+
+					if (prev_shift < 0 && problem.worker(p).has_working_weekends_limit()) {
+						bool new_weekend = false;
+						if (d % 7 == 5) {
+							if (!working_on_day[p][d] && !working_on_day[p][d + 1]) {
+								new_weekend = true;
+							}
+						}
+						if (d % 7 == 6) {
+							if (!working_on_day[p][d - 1] && !working_on_day[p][d]) {
+								new_weekend = true;
+							}
+						}
+						if (new_weekend
+						    && working_weekends[p]
+						           >= problem.worker(p).working_weekends_limit().max()) {
+							continue;
+						}
+					}
+
+					if (problem.worker(p).has_time_limit()) {
+						int new_duration = working_minutes[p] + problem.shift(s).duration();
+						if (prev_shift >= 0) {
+							new_duration -= problem.shift(prev_shift).duration();
+						}
+						if (new_duration > problem.worker(p).time_limit().max()) {
+							continue;
+						} else if (new_duration < problem.worker(p).time_limit().min()) {
+							continue;
+						}
+					}
+
+					if (prev_shift < 0) {
+						bool feasible_day_off = true;
+						for (int day_off : problem.worker(p).required_day_off()) {
+							if (day_off == d) {
+								feasible_day_off = false;
+								break;
+							}
+						}
+						if (!feasible_day_off) {
+							continue;
+						}
+					}
+
+					if (d > 0 && working_on_day[p][d - 1]) {
+						int s1 = 0;
+						for (; s1 < problem.shift_size(); ++s1) {
+							if (current_solution[p][d - 1][s1] > 0) {
+								break;
+							}
+						}
+
+						bool feasible_shift_combination = true;
+						for (int s2 : problem.shift(s1).forbidden_after()) {
+							if (s2 == s) {
+								feasible_shift_combination = false;
+								break;
+							}
+						}
+						if (!feasible_shift_combination) {
+							continue;
+						}
+					}
+
+					if (d < problem.num_days() - 1 && working_on_day[p][d + 1]) {
+						int s1 = 0;
+						for (; s1 < problem.shift_size(); ++s1) {
+							if (current_solution[p][d + 1][s1] > 0) {
+								break;
+							}
+						}
+
+						bool feasible_shift_combination = true;
+						for (int s2 : problem.shift(s).forbidden_after()) {
+							if (s2 == s1) {
+								feasible_shift_combination = false;
+								break;
+							}
+						}
+						if (!feasible_shift_combination) {
+							continue;
+						}
+					}
+
+					double delta_objective = -under_cost[d][s];
+					for (const auto& pref : problem.worker(p).shift_preference()) {
+						if (pref.day() == d && pref.shift() == s) {
+							delta_objective += pref.cost();
+						}
+					}
+
+					std::string operation;
+					if (prev_shift >= 0) {
+						int diff =
+						    current_assignment[d][prev_shift] - wanted_assignment[d][prev_shift];
+						if (diff > 0) {
+							delta_objective -= over_cost[d][prev_shift];
+						} else {
+							delta_objective += under_cost[d][prev_shift];
+						}
+
+						for (const auto& pref : problem.worker(p).shift_preference()) {
+							if (pref.day() == d && pref.shift() == prev_shift) {
+								delta_objective -= pref.cost();
+							}
+						}
+
+						operation = to_string("Changing shift ",
+						                      problem.shift(prev_shift).id(),
+						                      " to ",
+						                      problem.shift(s).id(),
+						                      " for ",
+						                      problem.worker(p).id(),
+						                      " on day ",
+						                      d,
+						                      " (",
+						                      delta_objective,
+						                      ").");
+					} else {
+						for (const auto& pref : problem.worker(p).day_off_preference()) {
+							if (pref.day() == d) {
+								delta_objective += pref.cost();
+							}
+						}
+
+						operation = to_string("Assigning shift ",
+						                      problem.shift(s).id(),
+						                      " for ",
+						                      problem.worker(p).id(),
+						                      " on day ",
+						                      d,
+						                      " (",
+						                      delta_objective,
+						                      ").");
+					}
+
+					if (delta_objective < 0) {
+						// This change is feasible and will improve the objective.
+						// Do it and return.
+						current_solution[p][d][s] = 1;
+						if (prev_shift >= 0) {
+							current_solution[p][d][prev_shift] = 0;
+						}
+						return operation;
+					}
+				}
+			}
+		}
+	}
+
+	for (const int p : range(problem.worker_size())) {
+		for (const auto& pref : problem.worker(p).day_off_preference()) {
+			int d = pref.day();
+			int s = 0;
+			for (; current_solution[p][d][s] == 0; ++s)
+				;
+			minimum_core_assert(s < problem.shift_size());
+			if (working_on_day[p][d] && wanted_assignment[d][s] - current_assignment[d][s] >= 0) {
+				// Maybe we can deassign this?
+
+				minimum_core_assert(false, "Constraints for deassigning are not implemented.");
+
+				current_solution[p][d][s] = 0;
+				return to_string("Deassigning shift ",
+				                 problem.shift(s).id(),
+				                 " for ",
+				                 problem.worker(p).id(),
+				                 " on day ",
+				                 d,
+				                 ".");
+			}
+		}
+	}
+	return "";
+}
+
+}  // namespace linear
+}  // namespace minimum

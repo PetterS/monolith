@@ -85,7 +85,8 @@ int optimize_single_window(const proto::SchedulingProblem& problem,
 			for (int s = 0; s < problem.shift_size(); ++s) {
 				if (find(begin(current_staff_indices), end(current_staff_indices), p)
 				        != end(current_staff_indices)
-				    && start_day <= d && d < end_day) {
+				    && start_day <= d && d < end_day
+				    && problem.worker(p).shift_limit(s).max() > 0) {
 					x.back().back().emplace_back(ip.add_boolean());
 				} else {
 					x.back().back().emplace_back(current_solution[p][d][s]);
@@ -122,7 +123,7 @@ int perform_sliding_window_optimization(const proto::SchedulingProblem& problem,
 		for (int p = 0; p < problem.worker_size(); ++p) {
 			staff_indices.push_back(p);
 		}
-		shuffle(begin(staff_indices), end(staff_indices), rng);
+		// shuffle(begin(staff_indices), end(staff_indices), rng);
 
 		for (size_t start_index = 0; start_index < staff_indices.size();
 		     start_index += max_num_staff) {
@@ -183,22 +184,19 @@ int main_program(int num_args, char* args[]) {
 		        .execute(FLAGS_start_solution)
 		        .get<0>();
 	}
+	t.next("Loading solution");
 	istringstream solution_file(initial_solution);
 	auto current_solution = load_solution(solution_file, problem);
+	t.next("Computing objective");
 	auto start_objective = objective_value(problem, current_solution);
 	t.OK();
+	clog << "-- Starting solution is " << start_objective << "\n";
 
-	bool first_solution = true;
 	auto print_solution = [&]() {
 		double elapsed_time = minimum::core::wall_time() - start_time;
 		auto obj = objective_value(problem, current_solution);
 
-		if (!first_solution) {
-			cout << "======<" << obj << ", " << elapsed_time << " >" << endl;
-		}
-		first_solution = false;
-
-		clog << "-- Objective value is " << obj << endl << endl;
+		clog << "-- Objective value is " << obj << endl;
 
 		Timer t("Writing output to DB");
 		stringstream sout;
@@ -213,6 +211,18 @@ int main_program(int num_args, char* args[]) {
 	if (problem.shift_size() >= 16) {
 		max_num_staff = 5;
 	}
+
+	for (int iter = 1; iter <= 100000; ++iter) {
+		Timer t("Trying to improve solution quickly");
+		auto result = quick_solution_improvement(problem, current_solution);
+		t.OK();
+		if (result.empty()) {
+			break;
+		}
+		clog << "-- " << result << endl;
+	}
+
+	print_solution();
 
 	auto previous_best = numeric_limits<int>::max();
 	for (int iter = 1; iter <= 1000; ++iter) {

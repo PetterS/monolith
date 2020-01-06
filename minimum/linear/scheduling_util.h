@@ -6,6 +6,9 @@
 #include <minimum/linear/ip.h>
 #include <minimum/linear/proto.h>
 
+namespace minimum {
+namespace linear {
+
 // Verifies that a SchedulingProblem is valid. Throws if any error is discovered.
 MINIMUM_LINEAR_API void verify_scheduling_problem(
     const minimum::linear::proto::SchedulingProblem& problem);
@@ -54,3 +57,11 @@ MINIMUM_LINEAR_API minimum::linear::Sum create_ip(
     const std::vector<std::vector<std::vector<minimum::linear::Sum>>>& x,
     const std::vector<int>& staff_indices,
     const std::vector<int>& day_indices);
+
+// Tries to improve the solution by simply assigning more shifts to personnel.
+// Returns a description of the operation if successdul, otherwise an empty string.
+MINIMUM_LINEAR_API std::string quick_solution_improvement(
+    const proto::SchedulingProblem& problem, vector<vector<vector<int>>>& current_solution);
+
+}  // namespace linear
+}  // namespace minimum
