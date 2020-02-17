@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: gcc:latest
+      - image: teeks99/clang-ubuntu:10
 
     working_directory: ~/source
 
@@ -26,7 +26,7 @@ jobs:
             cd ..
             mkdir build
             cd build
-            /opt/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Release ../source
+            CC=clang-10 CXX=clang++-10 /opt/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Release ../source
 
       - run:
           name: Compile

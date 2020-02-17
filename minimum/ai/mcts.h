@@ -97,6 +97,11 @@ using std::endl;
 using std::size_t;
 using std::vector;
 
+template <typename State>
+concept GameState = requires {
+	typename State::Move;
+};
+
 //
 // This class is used to build the game tree. The root is created by the users and
 // the rest of the tree is created by add_node.
