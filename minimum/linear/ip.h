@@ -58,8 +58,6 @@ class ExistsIterator {
 
 	ExistsIterator& operator++();
 
-	bool operator==(const ExistsIterator& rhs) { return iterator == rhs.iterator; }
-
 	bool operator!=(const ExistsIterator& rhs) { return iterator != rhs.iterator; }
 
 	auto operator*() { return *iterator; }
