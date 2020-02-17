@@ -16,6 +16,8 @@ jobs:
             build=3
             mkdir ~/temp
             cd ~/temp
+            sudo apt update
+            sudo apt install -y wget
             wget https://github.com/Kitware/CMake/releases/download/v3.13.3/cmake-3.13.3-Linux-x86_64.sh 
             mkdir /opt/cmake
             sh cmake-3.13.3-Linux-x86_64.sh --prefix=/opt/cmake --skip-license
