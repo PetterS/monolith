@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: gcc:latest
+      - image: teeks99/clang-ubuntu:10
 
     working_directory: ~/source
 
@@ -16,6 +16,8 @@ jobs:
             build=3
             mkdir ~/temp
             cd ~/temp
+            apt update
+            apt install -y wget
             wget https://github.com/Kitware/CMake/releases/download/v3.13.3/cmake-3.13.3-Linux-x86_64.sh 
             mkdir /opt/cmake
             sh cmake-3.13.3-Linux-x86_64.sh --prefix=/opt/cmake --skip-license
@@ -26,7 +28,7 @@ jobs:
             cd ..
             mkdir build
             cd build
-            /opt/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Release ../source
+            CC=clang-10 CXX=clang++-10 /opt/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Release ../source
 
       - run:
           name: Compile

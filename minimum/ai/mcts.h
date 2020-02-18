@@ -1,9 +1,6 @@
 #ifndef MCTS_HEADER_PETTER
 #define MCTS_HEADER_PETTER
 //
-// Petter Strandmark 2013
-// petter.strandmark@gmail.com
-//
 // Monte Carlo Tree Search for finite games.
 //
 // Originally based on Python code at
@@ -11,6 +8,9 @@
 //
 // Uses the "root parallelization" technique [1].
 //
+namespace minimum {
+namespace ai {
+
 // This game engine can play any game defined by a state like this:
 /*
 
@@ -39,14 +39,24 @@ private:
 };
 
 */
+template <typename State>
+concept GameState = requires(State state, const State cstate) {
+	typename State::Move;
+	State::no_move;
+
+	state.do_move(State::no_move);
+	cstate.has_moves();
+	cstate.get_moves();
+	cstate.get_result(0);
+	cstate.player_to_move;
+};
+
 //
 // See the examples for more details. Given a suitable State, the
 // following function (tries to) compute the best move for the
 // player to move.
 //
 
-namespace minimum {
-namespace ai {
 struct ComputeOptions {
 	int number_of_threads;
 	int max_iterations;
@@ -60,7 +70,7 @@ struct ComputeOptions {
 	      verbose(false) {}
 };
 
-template <typename State>
+template <GameState State>
 typename State::Move compute_move(const State root_state,
                                   const ComputeOptions options = ComputeOptions());
 }  // namespace ai
@@ -101,7 +111,7 @@ using std::vector;
 // This class is used to build the game tree. The root is created by the users and
 // the rest of the tree is created by add_node.
 //
-template <typename State>
+template <GameState State>
 class Node {
    public:
 	typedef typename State::Move Move;
@@ -149,7 +159,7 @@ class Node {
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
 
-template <typename State>
+template <GameState State>
 Node<State>::Node(const State& state)
     : move(State::no_move),
       parent(nullptr),
@@ -159,7 +169,7 @@ Node<State>::Node(const State& state)
       moves(state.get_moves()),
       UCT_score(0) {}
 
-template <typename State>
+template <GameState State>
 Node<State>::Node(const State& state, const Move& move_, Node* parent_)
     : move(move_),
       parent(parent_),
@@ -169,19 +179,19 @@ Node<State>::Node(const State& state, const Move& move_, Node* parent_)
       moves(state.get_moves()),
       UCT_score(0) {}
 
-template <typename State>
+template <GameState State>
 Node<State>::~Node() {
 	for (auto child : children) {
 		delete child;
 	}
 }
 
-template <typename State>
+template <GameState State>
 bool Node<State>::has_untried_moves() const {
 	return !moves.empty();
 }
 
-template <typename State>
+template <GameState State>
 template <typename RandomEngine>
 typename State::Move Node<State>::get_untried_move(RandomEngine* engine) const {
 	minimum_core_assert(!moves.empty());
@@ -189,7 +199,7 @@ typename State::Move Node<State>::get_untried_move(RandomEngine* engine) const {
 	return moves[moves_distribution(*engine)];
 }
 
-template <typename State>
+template <GameState State>
 Node<State>* Node<State>::best_child() const {
 	minimum_core_assert(moves.empty());
 	minimum_core_assert(!children.empty());
@@ -199,7 +209,7 @@ Node<State>* Node<State>::best_child() const {
 	;
 }
 
-template <typename State>
+template <GameState State>
 Node<State>* Node<State>::select_child_UCT() const {
 	minimum_core_assert(!children.empty());
 	for (auto child : children) {
@@ -212,7 +222,7 @@ Node<State>* Node<State>::select_child_UCT() const {
 	});
 }
 
-template <typename State>
+template <GameState State>
 Node<State>* Node<State>::add_child(const Move& move, const State& state) {
 	auto node = new Node(state, move, this);
 	children.push_back(node);
@@ -227,7 +237,7 @@ Node<State>* Node<State>::add_child(const Move& move, const State& state) {
 	return node;
 }
 
-template <typename State>
+template <GameState State>
 void Node<State>::update(double result) {
 	visits++;
 
@@ -236,7 +246,7 @@ void Node<State>::update(double result) {
 	// while ( ! wins.compare_exchange_strong(my_wins, my_wins + result));
 }
 
-template <typename State>
+template <GameState State>
 std::string Node<State>::to_string() const {
 	std::stringstream sout;
 	sout << "["
@@ -247,7 +257,7 @@ std::string Node<State>::to_string() const {
 	return sout.str();
 }
 
-template <typename State>
+template <GameState State>
 std::string Node<State>::tree_to_string(int max_depth, int indent) const {
 	if (indent >= max_depth) {
 		return "";
@@ -260,7 +270,7 @@ std::string Node<State>::tree_to_string(int max_depth, int indent) const {
 	return s;
 }
 
-template <typename State>
+template <GameState State>
 std::string Node<State>::indent_string(int indent) const {
 	std::string s = "";
 	for (int i = 1; i <= indent; ++i) {
@@ -272,7 +282,7 @@ std::string Node<State>::indent_string(int indent) const {
 /////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////
 
-template <typename State>
+template <GameState State>
 std::unique_ptr<Node<State>> compute_tree(const State root_state,
                                           const ComputeOptions options,
                                           std::mt19937_64::result_type initial_seed) {
@@ -333,7 +343,7 @@ std::unique_ptr<Node<State>> compute_tree(const State root_state,
 	return root;
 }
 
-template <typename State>
+template <GameState State>
 typename State::Move compute_move(const State root_state, const ComputeOptions options) {
 	using namespace std;
 
