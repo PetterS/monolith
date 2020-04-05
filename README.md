@@ -14,12 +14,16 @@ Petter Strandmark, petter.strandmark@gmail.com
 ## Modules
 
 ### Column generation
+Implements the algorithm described in [_First-order Linear Programming in a Column Generation-Based Heuristic Approach to the Nurse Rostering Problem_](https://www.strandmark.net/papers/first-order-scheduling.pdf) (2020) [doi link](https://doi.org/10.1016/j.cor.2020.104945).
+
 The `minimum::linear::colgen` module contains code for solving scheduling problems. It significantly outperforms all other optimizers at [schedulingbenchmarks.org](http://www.schedulingbenchmarks.org/).
 
 Some of the reasons it is fast:
 - It uses a first-order LP solver based on papers by Chambolle and Pock.
 - The [Ryan-Foster rule](https://strandmark.wordpress.com/2018/01/24/visualizing-the-ryan-foster-rule/) is used to iteratively work towards an integer solution. There is no time to branch and bound for big problems.
 - The pricing problem uses highly optimized dynamic programming in a DAG (in `minimum::algorithms`).
+
+See the [README in the module itself](minimum/linear/colgen/README.md) for more info.
 
 ### Minimum/AI
 The `minimum::ai` module contains code originally from my [Monte-Carlo tree search](https://github.com/PetterS/monte-carlo-tree-search) repository. It is very fast – some years ago it evaluated almost 2 million *complete* games per second when playing 4 in a row.
