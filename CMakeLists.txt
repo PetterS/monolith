@@ -161,6 +161,10 @@ if (EMSCRIPTEN)
 	set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s DISABLE_EXCEPTION_CATCHING=0")
 	# We want Webassembly.
 	set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s WASM=1 -s ALLOW_MEMORY_GROWTH=1")
+	# Filesystem support.
+	set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s FORCE_FILESYSTEM=1 -lidbfs.js")
+	# Expose callMain since we use it in our client.
+	set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -s EXTRA_EXPORTED_RUNTIME_METHODS='[\"callMain\"]'")
 	if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
 		# Do not remove whitespace etc. in the JS parts (easier debugging).
 		set(EMSCRIPTEN_FEATURES "${EMSCRIPTEN_FEATURES} -g1")
