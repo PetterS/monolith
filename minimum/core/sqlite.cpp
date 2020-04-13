@@ -117,7 +117,11 @@ void SqliteDb::create_table(std::string_view name, const std::vector<Column>& co
 	make_statement(to_string("BEGIN TRANSACTION;")).execute();
 	auto rollback = make_scope_guard([this]() { make_statement("ROLLBACK;").execute(); });
 
-	make_statement(to_string("ALTER TABLE ", name, " RENAME TO create_table_tmp;")).execute();
+	// No idea what the output column of this statement is supposed to be, but recent version of
+	// sqlite started providing it. Since we assert that the expected number of output parameter
+	// match, we declare it here.
+	make_statement<std::string>(to_string("ALTER TABLE ", name, " RENAME TO create_table_tmp;"))
+	    .execute();
 	make_statement(create_sql).execute();
 	auto existing_columns_str = join(",", existing_columns);
 	make_statement(to_string("INSERT INTO ",
