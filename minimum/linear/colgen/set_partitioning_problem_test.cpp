@@ -365,7 +365,7 @@ TEST_CASE("make_solution_integer") {
 
 	vector<size_t> indices(problem.pool.size());
 	iota(indices.begin(), indices.end(), 0);
-	auto cost = problem.integral_solution_value(indices);
+	problem.integral_solution_value(indices);
 
 	CHECK(problem.fractional_solution(0, 11) == Approx(1));
 	CHECK(problem.fractional_solution(0, 12) == Approx(0));
@@ -389,12 +389,12 @@ TEST_CASE("integral_solution_value") {
 	int num_groups = 2;
 	TestSetPartitioningProblem problem(num_groups, 20);
 
-	problem.initialize_constraint(11, 1, 100.0, 1000.0);
-	problem.initialize_constraint(12, 1, 100.0, 1000.0);
-	problem.initialize_constraint(13, 1, 100.0, 1000.0);
-	problem.initialize_constraint(14, 1, 100.0, 1000.0);
-	problem.initialize_constraint(15, 1, 100.0, 1000.0);
-	problem.initialize_constraint(16, 1, 100.0, 1000.0);
+	problem.initialize_constraint(11, 1, 1, 100.0, 1000.0);
+	problem.initialize_constraint(12, 1, 1, 100.0, 1000.0);
+	problem.initialize_constraint(13, 1, 1, 100.0, 1000.0);
+	problem.initialize_constraint(14, 1, 1, 100.0, 1000.0);
+	problem.initialize_constraint(15, 1, 1, 100.0, 1000.0);
+	problem.initialize_constraint(16, 1, 1, 100.0, 1000.0);
 
 	auto add_column = [&](int p, vector<int> constraints, double value) {
 		Column column(1.0, 0, 1);
