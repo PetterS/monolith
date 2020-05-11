@@ -55,8 +55,8 @@ Read 210 shift on requests.
 Read 74 shift off requests.
 Read 140 cover constraints.
 Dividing all minutes by 120
-Setting up colgen problem...             [  OK  ]
-Creating initial rosters...              [  OK  ]
+Setting up colgen problem...[  OK  ]
+Creating initial rosters...[  OK  ]
 -- Objective for initial columns: 16575
   Iter |       Objective      |    Problem   |    Pool   | Fixed  |                  Time                  | Frac. |
        |    frac.     rounded |   size  diff | size gen. |        |    fix       gen     solve   tot. cum. |       |

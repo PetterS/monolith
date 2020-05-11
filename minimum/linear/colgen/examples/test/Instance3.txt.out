@@ -23,14 +23,14 @@ Final solution (checked for feasibility): 1005
 -- Roster costs : 5
   A:  . .D=D=D=D=D= . .D=D=D= . .
   B: D=D=D=D=D= . .L=L= . . .D=L=
-  C:  . .D=D=D= . .D=D=L= . .E=E=
+  C:  . .D=D=D=D=L= . .E=E=L= . .
   D:  .E=E=E=L= . .E=E=L= . .E=E=
   E: E=E= . .E=E=E= . .E=E=E= . .
-  F:  .E=E=E=D= . .E=E=E= . .D=D=
+  F:  .E=E=D=D= . .E=E=E= . .D=D=
   G: E=L=L= . .E=E=D= . .L=L= . .
   H:  . .E=E=L=L=L= . .D=D=L= . .
-  I: D=D=D=D= . . . . .E=E=L=L=L=
-  J:  . . .D=D= . .E=D=D= . .D=D=
+  I: D=D=D=D= . . .D=D=L= . .D=D=
+  J:  . . .E=D= . .E=D=D= . .E=E=
   K: D=D= . . .D=D=D=D=D=D= . . .
   L: L=L= . . .D=D=L=L=L= . . . .
   M:  . .L=L=L= . . .E=E=D=D=L=L=

@@ -19,8 +19,8 @@ Read 52 shift on requests.
 Read 19 shift off requests.
 Read 56 cover constraints.
 Dividing all minutes by 480
-Setting up colgen problem...             [  OK  ]
-Creating initial rosters...              [  OK  ]
+Setting up colgen problem...[  OK  ]
+Creating initial rosters...[  OK  ]
 -- Objective for initial columns: 4518
   Iter |       Objective      |    Problem   |    Pool   | Fixed  |                  Time                  | Frac. |
        |    frac.     rounded |   size  diff | size gen. |        |    fix       gen     solve   tot. cum. |       |
@@ -41,7 +41,7 @@ Creating initial rosters...              [  OK  ]
      15    1753.29       2960      114   -2     431   24      0        n/a       n/a     n/a     n/a          2%
      16    1749.44       2653      116    2     451   20      0        n/a       n/a     n/a     n/a          2%
      17    1745.12       2854      121    5     476   25      0        n/a       n/a     n/a     n/a          0%
-     18    1743.76       2955      110  -11     498   22      0        n/a       n/a     n/a     n/a          3%
+     18    1743.76       2955      110  -11     498   22      0        n/a       n/a     n/a     n/a          2%
      19    1743.51       2651      104   -6     520   22      0        n/a       n/a     n/a     n/a          5%
 -- Fixed for [A: 7, B: 11, C: 11, D: 11, E: 6, F: 15, G: 6, H: 17, I: 18, J: 11] at level 0.75.
 -- Members remaining: (A, 2) (B, 3) (C, 2) (D, 2) (E, 2) (F, 2) (G, 2) (J, 2) and total is 8.

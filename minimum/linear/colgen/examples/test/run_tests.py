@@ -7,12 +7,11 @@ from typing import List, Union
 import minimum.linear.data.util
 
 parser = argparse.ArgumentParser(description='Run colgen scheduling tests.')
-parser.add_argument(
-    '--more',
-    default=False,
-    action='store_const',
-    const=True,
-    help='Run more tests')
+parser.add_argument('--more',
+                    default=False,
+                    action='store_const',
+                    const=True,
+                    help='Run more tests')
 args = parser.parse_args()
 
 gent = "Gent"
@@ -29,12 +28,12 @@ for i in tests_to_run:
 
 	name = "Instance" + str(i)
 	full_name = os.path.join(dir, "shift_scheduling", name + ".txt")
-	output_file_name = os.path.join(
-	    os.path.dirname(__file__), file_name + ".out")
-	error_file_name = os.path.join(
-	    os.path.dirname(__file__), file_name + ".err")
-	org_error_file_name = os.path.join(
-	    os.path.dirname(__file__), file_name + "-org.err")
+	output_file_name = os.path.join(os.path.dirname(__file__),
+	                                file_name + ".out")
+	error_file_name = os.path.join(os.path.dirname(__file__),
+	                               file_name + ".err")
+	org_error_file_name = os.path.join(os.path.dirname(__file__),
+	                                   file_name + "-org.err")
 
 	start_args = [
 	    "shift_scheduling_colgen", "--nosave_solution", "--num_solutions=2",
@@ -43,16 +42,23 @@ for i in tests_to_run:
 	if i == gent:
 		start_args += ["--read_gent_instance"]
 
-	completed = subprocess.run(
-	    start_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	completed = subprocess.run(start_args,
+	                           stdout=subprocess.PIPE,
+	                           stderr=subprocess.PIPE)
 	stdout = completed.stdout
 	stderr = completed.stderr
 
 	with open(org_error_file_name, "wb") as f:
 		f.write(stderr)
 
-	stderr = re.sub(
-	    br"\[ WAIT \].*  OK  \].*$", b"[  OK  ]", stderr, flags=re.MULTILINE)
+	stderr = re.sub(br"^(Setting up colgen problem...).* OK .*$",
+	                br"\1[  OK  ]",
+	                stderr,
+	                flags=re.MULTILINE)
+	stderr = re.sub(br"^(Creating initial rosters...).* OK .*$",
+	                br"\1[  OK  ]",
+	                stderr,
+	                flags=re.MULTILINE)
 
 	stderr = re.sub(
 	    br"^( *\d+ *\d+\.?\d* *\d+ *\d+ *-?\d+ *\d+ *\d+ *\d+).+( *\d+%)",
@@ -60,11 +66,10 @@ for i in tests_to_run:
 	    stderr,
 	    flags=re.MULTILINE)
 
-	stderr = re.sub(
-	    br"^Elapsed time : \d+\.?\d*s\.",
-	    b"Elapsed time : n/a.",
-	    stderr,
-	    flags=re.MULTILINE)
+	stderr = re.sub(br"^Elapsed time : \d+\.?\d*s\.",
+	                b"Elapsed time : n/a.",
+	                stderr,
+	                flags=re.MULTILINE)
 
 	stderr = stderr.replace(b"\r\n", b"\n")
 	stdout = stdout.replace(b"\r\n", b"\n")
