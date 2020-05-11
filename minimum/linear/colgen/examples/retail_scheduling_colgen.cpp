@@ -22,13 +22,14 @@ class ShiftShedulingColgenProblem : public SetPartitioningProblem {
 
 		// Covering constraints with slack variables.
 		for (auto d : range(problem.periods.size())) {
+			auto& period = problem.periods[d];
 			for (auto s : range(problem.num_tasks)) {
-				auto& period = problem.periods[d];
 				int c = constraint_index(d, s);
 				// Initialize this constraint.
+				initialize_constraint(
+				    c, period.min_cover.at(s), period.max_cover.at(s), 1000.0, 1000.0);
 			}
 		}
-
 		timer.OK();
 	}
 
@@ -43,9 +44,7 @@ class ShiftShedulingColgenProblem : public SetPartitioningProblem {
 	}
 
    private:
-	int constraint_index(int period, int task) const {
-		return period * problem.periods.size() + task;
-	}
+	int constraint_index(int period, int task) const { return period * problem.num_tasks + task; }
 
 	const minimum::linear::RetailProblem problem;
 	std::vector<std::vector<std::vector<int>>> solution;
