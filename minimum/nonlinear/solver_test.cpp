@@ -436,7 +436,7 @@ TEST_CASE("LBFGS_exact_Wolfe_interpolation") {
 
 		solver.solve(f, &results);
 		double fval = f.evaluate();
-		CAPTURE(i)
+		CAPTURE(i);
 		REQUIRE((std::abs(fval - fvals[i]) / std::abs(fval)) < 1e-4);
 	}
 }
