@@ -48,7 +48,7 @@ class RetailProblem {
 		int max_minutes = -1;
 	};
 
-	std::map<std::string, Staff> staff;
+	std::vector<Staff> staff;
 
 	struct Period {
 		std::string human_readable_time;
@@ -59,6 +59,8 @@ class RetailProblem {
 	};
 
 	std::vector<Period> periods;
+
+	int num_constraints() const { return num_tasks * periods.size(); }
 
 	void expect_line(std::istream& file, std::string_view expected) {
 		std::string tag;
@@ -87,10 +89,11 @@ class RetailProblem {
 			auto parts = minimum::core::split(line, ',');
 			minimum::core::check(parts.size() == 3, "Invalid staff line: ", line);
 			auto id = parts[0];
-			auto& person = staff[id];
+			Staff person;
 			person.id = parts[0];
 			person.min_minutes = minimum::core::from_string<int>(parts[1]);
 			person.max_minutes = minimum::core::from_string<int>(parts[2]);
+			staff.emplace_back(person);
 		}
 
 		int num_periods = num_days * 24 * 4;
@@ -158,6 +161,8 @@ class RetailProblem {
 		std::cerr << "Number of periods: " << periods.size() << '\n';
 		std::cerr << "Number of tasks: " << num_tasks << '\n';
 		std::cerr << "Number of staff: " << staff.size() << '\n';
+		std::cerr << "Number of cover constaints: " << num_tasks << " * " << periods.size() << " = "
+		          << num_constraints() << '\n';
 	}
 };
 
