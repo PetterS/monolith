@@ -9,156 +9,14 @@
 
 #include <minimum/core/check.h>
 #include <minimum/core/main.h>
-#include <minimum/core/string.h>
 #include <minimum/linear/ip.h>
+#include <minimum/linear/retail_scheduling.h>
 #include <minimum/linear/scheduling_util.h>
 #include <minimum/linear/scs.h>
 #include <minimum/linear/solver.h>
 
 using namespace minimum::core;
-
-std::string read_line(std::istream& file) {
-	std::string line;
-	std::getline(file, line);
-	if (!file) {
-		return "";
-	}
-
-	// Check for comment.
-	for (auto ch : line) {
-		if (ch == '#') {
-			return read_line(file);
-		} else if (::isspace(ch)) {
-			break;
-		}
-	}
-
-	if (!line.empty() && line[line.size() - 1] == '\r') {
-		line = line.substr(0, line.size() - 1);
-	}
-
-	return line;
-}
-
-std::string remove_space(std::string in) {
-	in.erase(std::remove_if(in.begin(), in.end(), ::isspace), in.end());
-	return in;
-}
-
-class RetailProblem {
-   public:
-	int num_days = 0;
-	int num_tasks = 0;
-	int num_periods = -1;
-
-	struct Staff {
-		std::string id;
-		int min_minutes = -1;
-		int max_minutes = -1;
-	};
-
-	std::map<std::string, Staff> staff;
-
-	struct Period {
-		std::string human_readable_time;
-		int day = -1;
-		std::vector<int> min_cover;
-		std::vector<int> max_cover;
-	};
-
-	std::vector<Period> periods;
-
-	void expect_line(std::istream& file, std::string_view expected) {
-		std::string tag;
-		if (!expected.empty()) {
-			for (int i = 0; i < 1000 && tag.empty(); ++i) {
-				tag = remove_space(read_line(file));
-			}
-		}
-		check(tag == expected, "Expected ", expected, " but got \"", tag, "\".");
-	}
-
-	RetailProblem(std::istream& file) {
-		expect_line(file, "SECTION_HORIZON");
-		num_days = from_string<int>(read_line(file));
-
-		expect_line(file, "SECTION_TASKS");
-		num_tasks = from_string<int>(read_line(file));
-
-		expect_line(file, "SECTION_STAFF");
-		while (true) {
-			auto line = read_line(file);
-			if (line.empty()) {
-				break;
-			}
-			auto parts = split(line, ',');
-			check(parts.size() == 3, "Invalid staff line: ", line);
-			auto id = parts[0];
-			auto& person = staff[id];
-			person.id = parts[0];
-			person.min_minutes = from_string<int>(parts[1]);
-			person.max_minutes = from_string<int>(parts[2]);
-		}
-
-		num_periods = num_days * 24 * 4;
-		Period period;
-		period.min_cover.resize(num_tasks, 0);
-		period.max_cover.resize(num_tasks, 0);
-		periods.resize(num_periods, period);
-
-		expect_line(file, "SECTION_COVER");
-		while (true) {
-			auto line = read_line(file);
-			if (line.empty()) {
-				break;
-			}
-			auto parts = split(line, ',');
-			check(parts.size() == 5, "Invalid cover line: ", line);
-			int day = from_string<int>(parts[0]) - 1;
-			auto time = parts[1];
-			int task = from_string<int>(parts[2]) - 1;
-			minimum_core_assert(0 <= task && task < num_tasks);
-
-			int p = time_to_period(day, time);
-			auto& period = periods.at(p);
-			minimum_core_assert(period.human_readable_time == ""
-			                    || period.human_readable_time == time);
-			minimum_core_assert(period.day < 0 || period.day == day);
-			period.human_readable_time = time;
-			period.day = day;
-			period.min_cover[task] = from_string<int>(parts[3]);
-			period.max_cover[task] = from_string<int>(parts[4]);
-		}
-
-		for (int i = 0; i < 10; ++i) {
-			expect_line(file, "");
-		}
-	}
-
-	int time_to_period(int day, const std::string& s) {
-		auto parts = split(s, '-');
-		check(parts.size() == 2, "Invalid period: ", s);
-		auto hm_parts = split(parts[0], ':');
-		check(parts.size() == 2, "Invalid period: ", s);
-		int hour = from_string<int>(hm_parts[0]);
-		int minute = from_string<int>(hm_parts[1]);
-		check(minute == 0 || minute == 15 || minute == 30 || minute == 45, "Invalid period: ", s);
-
-		int hour4 = 4 * hour + minute / 15;
-
-		// First day starts at 06:00.
-		int period = (hour4 - 6 * 4) + (day * 24 * 4);
-		minimum_core_assert(0 <= period && period < num_periods);
-		return period;
-	}
-
-	void print_info() const {
-		std::cerr << "Number of days: " << num_days << '\n';
-		std::cerr << "Number of periods: " << num_periods << '\n';
-		std::cerr << "Number of tasks: " << num_tasks << '\n';
-		std::cerr << "Number of staff: " << staff.size() << '\n';
-	}
-};
+using namespace minimum::linear;
 
 int main_program(int num_args, char* args[]) {
 	using namespace std;
@@ -167,8 +25,107 @@ int main_program(int num_args, char* args[]) {
 		return 1;
 	}
 	ifstream input(args[1]);
-	RetailProblem problem(input);
+	const RetailProblem problem(input);
 	problem.print_info();
+
+	IP ip;
+	auto working =
+	    ip.add_boolean_cube(problem.staff.size(), problem.periods.size(), problem.num_tasks);
+	for (int s = 0; s < problem.staff.size(); ++s) {
+		for (int p = 0; p < problem.periods.size(); ++p) {
+			Sum task_sum = 0;
+			for (int t = 0; t < problem.num_tasks; ++t) {
+				task_sum += working[s][p][t];
+			}
+			ip.add_constraint(task_sum <= 1);
+		}
+	}
+
+	for (int s = 0; s < problem.staff.size(); ++s) {
+		vector<Sum> working_any_shift(problem.periods.size(), 0);
+		for (int p = 0; p < problem.periods.size(); ++p) {
+			for (int t = 0; t < problem.num_tasks; ++t) {
+				working_any_shift[p] += working[s][p][t];
+			}
+		}
+
+		auto starting_shift = ip.add_boolean_vector(problem.periods.size());
+		for (int p = 1; p < problem.periods.size(); ++p) {
+			const auto& yesterday = working_any_shift[p - 1];
+			const auto& today = working_any_shift[p];
+			// today ∧ ¬yesterday ⇔ starting_shift[p]
+			ip.add_constraint(today >= starting_shift[p]);
+			ip.add_constraint(1 - yesterday >= starting_shift[p]);
+			ip.add_constraint(starting_shift[p] + 1 >= today + (1 - yesterday));
+		}
+
+		vector<Sum> day_constraints(problem.num_days + 1, 0);
+		for (int p = 1; p < problem.periods.size(); ++p) {
+			auto& period = problem.periods.at(p);
+			day_constraints[period.day] += starting_shift[p];
+			if (!period.can_start) {
+				ip.add_constraint(starting_shift[p] == 0);
+			}
+		}
+
+		// Can only start a single shift each day.
+		for (int day = 0; day < problem.num_days; ++day) {
+			ip.add_constraint(day_constraints[day] <= 1);
+		}
+		ip.add_constraint(day_constraints.back() == 0);
+
+		// Minimum shift duration is 6 hours.
+		for (int p = 1; p < problem.periods.size(); ++p) {
+			for (int p2 = p + 1; p2 < p + 6 * 4 && p2 < problem.periods.size(); ++p2) {
+				ip.add_constraint(working_any_shift[p2] >= starting_shift[p]);
+			}
+		}
+	}
+
+	Sum objective;
+	for (int p = 0; p < problem.periods.size(); ++p) {
+		auto& period = problem.periods.at(p);
+		for (int t = 0; t < problem.num_tasks; ++t) {
+			Sum num_workers = 0;
+			for (int s = 0; s < problem.staff.size(); ++s) {
+				num_workers += working[s][p][t];
+			}
+			auto slack = ip.add_variable(IP::Real);
+			ip.add_constraint(slack >= 0);
+			ip.add_objective(slack);
+			ip.add_constraint(period.min_cover[t] <= num_workers);
+			ip.add_constraint(num_workers == period.max_cover[t] + slack);
+		}
+	}
+
+	IPSolver solver;
+	clog << "Starting search." << endl;
+	auto solutions = solver.solutions(&ip);
+	if (solutions->get()) {
+		clog << "Objective " << objective.value() << " proven optimal.\n";
+	} else {
+		clog << "IP was not solved." << endl;
+		return 2;
+	}
+
+	for (int p = 0; p < problem.periods.size(); ++p) {
+		auto& period = problem.periods.at(p);
+		cout << period.human_readable_time << ": ";
+		for (int s = 0; s < problem.staff.size(); ++s) {
+			bool printed = false;
+			for (int t = 0; t < problem.num_tasks; ++t) {
+				if (working[s][p][t].bool_value()) {
+					minimum_core_assert(!printed);
+					cout << t;
+					printed = true;
+				}
+			}
+			if (!printed) {
+				cout << ".";
+			}
+		}
+		cout << "\n";
+	}
 
 	return 0;
 }
