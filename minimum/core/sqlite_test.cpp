@@ -203,6 +203,12 @@ TEST_CASE("SqliteStatement_read_only") {
 	CHECK_THROWS(cdb.make_statement(insert));
 }
 
+TEST_CASE("SqliteDb_move_assignment") {
+	SqliteDb db = SqliteDb::inMemory();
+	// Checks for memory leaks in move assignment with sanitizers.
+	db = SqliteDb::inMemory();
+}
+
 TEST_CASE("SqliteDb_invalid_file") {
 	// Checks that no resources are leaked when the SqliteDb
 	// throws an exception. (Use e.g. valgrind.)
