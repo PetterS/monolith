@@ -211,8 +211,8 @@ class MINIMUM_CORE_API SqliteDb {
 	static SqliteDb sharedInMemory() { return SqliteDb("file::memory:?cache=shared"); }
 
 	SqliteDb(SqliteDb&& other);
-	SqliteDb& operator=(SqliteDb&& other);
-	~SqliteDb();
+	SqliteDb& operator=(SqliteDb&& other) noexcept;
+	~SqliteDb() noexcept;
 
 	// Compiles an SQL statement. The only way to interact with the database.
 	template <typename... OutputTypes>
