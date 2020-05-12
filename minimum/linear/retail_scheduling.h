@@ -60,7 +60,11 @@ class RetailProblem {
 
 	std::vector<Period> periods;
 
-	int num_constraints() const { return num_tasks * periods.size(); }
+	int num_cover_constraints() const { return num_tasks * periods.size(); }
+
+	int cover_constraint_index(int period, int task) const { return period * num_tasks + task; }
+	int cover_constraint_to_period(int c) const { return c / num_tasks; }
+	int cover_constraint_to_task(int c) const { return c % num_tasks; }
 
 	void expect_line(std::istream& file, std::string_view expected) {
 		std::string tag;
@@ -162,7 +166,7 @@ class RetailProblem {
 		std::cerr << "Number of tasks: " << num_tasks << '\n';
 		std::cerr << "Number of staff: " << staff.size() << '\n';
 		std::cerr << "Number of cover constaints: " << num_tasks << " * " << periods.size() << " = "
-		          << num_constraints() << '\n';
+		          << num_cover_constraints() << '\n';
 	}
 };
 
