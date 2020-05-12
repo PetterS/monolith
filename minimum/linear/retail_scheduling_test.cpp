@@ -7,7 +7,8 @@
 
 minimum::linear::RetailProblem get_problem(std::string name) {
 	auto base_dir = minimum::linear::data::get_directory();
-	return {std::ifstream{base_dir + "/retail/" + name + ".txt"}};
+	std::ifstream file{base_dir + "/retail/" + name + ".txt"};
+	return {file};
 }
 
 TEST_CASE("1_7_10_1") {
