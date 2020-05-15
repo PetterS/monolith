@@ -1,5 +1,7 @@
 
 one_target_per_file(
+    absl_strings
+	absl_str_format
 	minimum_algorithms
 	minimum_core
 	minimum_linear
