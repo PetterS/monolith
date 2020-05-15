@@ -514,6 +514,7 @@ T resource_constrained_shortest_path(const SortedDAG<T, num_weights, num_edge_we
 	using minimum::core::check;
 	using minimum::core::range;
 
+	check(lower_bound <= upper_bound, "Invalid bounds: ", lower_bound, " > ", upper_bound);
 	auto& solution = *solution_ptr;
 	solution.clear();
 	if (dag.size() == 0) {
@@ -580,9 +581,19 @@ T resource_constrained_shortest_path(const SortedDAG<T, num_weights, num_edge_we
 		if (partial[i][current_c].prev < 0) {
 			break;
 		}
-		solution.push_back(partial[i][current_c].prev);
-		current_c -= dag.get_node(i).weights[0];
-		i = solution.back();
+
+		int i_prev = i;
+		i = partial[i][current_c].prev;
+		current_c -= dag.get_node(i_prev).weights[0];
+		if constexpr (num_edge_weights > 0) {
+			for (auto& edge : dag.get_node(i).edges) {
+				if (edge.to == i_prev) {
+					current_c -= edge.weights[0];
+					break;
+				}
+			}
+		}
+		solution.push_back(i);
 	}
 	reverse(solution.begin(), solution.end());
 	return partial.back()[best_c].cost;

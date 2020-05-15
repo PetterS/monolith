@@ -446,8 +446,10 @@ TEST_CASE("shortest_path_1_resource_constraint_with_edge_weights") {
 	std::vector<int> solution;
 	auto value = resource_constrained_shortest_path(dag, 0, 10, &solution);
 	CHECK(value == -n);
+	CHECK(solution.size() == n);
 	value = resource_constrained_shortest_path(dag, 0, 7, &solution);
 	CHECK(value == -8);
+	CHECK(solution.size() == 8);
 	CHECK_THROWS(resource_constrained_shortest_path(dag, 0, 3, &solution));
 
 	// Now all nodes instead cost 1.
@@ -457,7 +459,9 @@ TEST_CASE("shortest_path_1_resource_constraint_with_edge_weights") {
 
 	value = resource_constrained_shortest_path(dag, 0, 10, &solution);
 	CHECK(value == 6);
+	CHECK(solution.size() == 6);
 	value = resource_constrained_shortest_path(dag, 8, 10, &solution);
 	CHECK(value == 9);
+	CHECK(solution.size() == 9);
 	CHECK_THROWS(resource_constrained_shortest_path(dag, 11, 14, &solution));
 }
