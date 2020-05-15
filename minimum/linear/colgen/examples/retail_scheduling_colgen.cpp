@@ -100,37 +100,46 @@ class GraphBuilder {
 		for (int day = 0; day < problem.num_days; ++day) {
 			int day_end = problem.day_start(day + 1);
 			for (int p = problem.day_start(day); p < day_end; ++p) {
+				auto& period = problem.periods.at(p);
 				// Edges from one "not worked" to the next "not worked" span days.
 				if (p < problem.periods.size() - 1) {
 					dag.add_edge(not_worked_node(p), not_worked_node(p + 1));
 				}
 
-				for (int shift_length = 6 * 4; shift_length <= 10 * 4; ++shift_length) {
-					if (p + shift_length >= day_end) {
-						break;
+				// Shifts can only start between the following times: 06:00-10:00, 14:00-18:00 and
+				// 20:00-00:00
+				int start_on_day_hour4 = problem.time_to_hour4(period.human_readable_time);
+				if ((6 * 4 <= start_on_day_hour4 && start_on_day_hour4 <= 10 * 4)
+				    || (14 * 4 <= start_on_day_hour4 && start_on_day_hour4 <= 18 * 4)
+				    || (20 * 4 <= start_on_day_hour4 && start_on_day_hour4 <= 24 * 4)) {
+					for (int shift_length = 6 * 4; shift_length <= 10 * 4; ++shift_length) {
+						if (p + shift_length >= day_end) {
+							break;
+						}
+
+						int last_node_in_shift = p + shift_length - 1;
+						double shift_cost = subset_sum[last_node_in_shift];
+						if (p > 0) {
+							shift_cost -= subset_sum[p - 1];
+						}
+
+						auto& edge = dag.add_edge(
+						    not_worked_node(p), have_worked_node(last_node_in_shift), shift_cost);
+						edge.weights[0] = shift_length;
 					}
 
-					int last_node_in_shift = p + shift_length - 1;
-					double shift_cost = subset_sum[last_node_in_shift];
-					if (p > 0) {
-						shift_cost -= subset_sum[p - 1];
+					int next_day_in_14_hours = p + 14 * 4;
+					if (next_day_in_14_hours < day_end) {
+						next_day_in_14_hours = day_end;
 					}
-					auto& edge = dag.add_edge(
-					    not_worked_node(p), have_worked_node(last_node_in_shift), shift_cost);
-					edge.weights[0] = shift_length;
+					int target_node;
+					if (next_day_in_14_hours < problem.periods.size()) {
+						target_node = not_worked_node(next_day_in_14_hours);
+					} else {
+						target_node = sink();
+					}
+					dag.add_edge(have_worked_node(p), target_node);
 				}
-
-				int next_day_in_14_hours = p + 14 * 4;
-				if (next_day_in_14_hours < day_end) {
-					next_day_in_14_hours = day_end;
-				}
-				int target_node;
-				if (next_day_in_14_hours < problem.periods.size()) {
-					target_node = not_worked_node(next_day_in_14_hours);
-				} else {
-					target_node = sink();
-				}
-				dag.add_edge(have_worked_node(p), target_node);
 			}
 		}
 
@@ -147,271 +156,81 @@ bool create_roster_graph(const RetailProblem& problem,
                          const vector<vector<int>>& fixes,
                          vector<vector<int>>* solution,
                          mt19937* rng) {
-	GraphBuilder builder(problem);
-	auto dag = builder.build(duals, staff_index, fixes, rng);
-
-	vector<int> graph_solution;
-	resource_constrained_shortest_path(dag,
-	                                   problem.staff.at(staff_index).min_minutes / 15,
-	                                   problem.staff.at(staff_index).max_minutes / 15,
-	                                   &graph_solution);
-
-	minimum_core_assert(problem.num_tasks == 1, "Need code for this.");
-	for (int i = 0; i + 1 < graph_solution.size(); ++i) {
-		int node1 = graph_solution[i];
-		int node2 = graph_solution[i + 1];
-		if (builder.is_not_worked(node1) && builder.is_have_worked(node2)) {
-			int p1 = builder.get_period(node1);
-			int p2 = builder.get_period(node2);
-			for (int p = p1; p <= p2; ++p) {
-				(*solution)[p][0] = 1;
-			}
-		}
-	}
-	return true;
-}
-
-bool create_roster_heuristic(const RetailProblem& problem,
-                             const vector<double>& duals,
-                             int staff_index,
-                             const vector<vector<int>>& fixes,
-                             vector<vector<int>>* solution,
-                             mt19937* rng) {
-	uniform_int_distribution random_day(0, problem.num_days - 1);
-
 	for (auto p : range(problem.periods.size())) {
 		for (auto t : range(problem.num_tasks)) {
 			(*solution)[p][t] = 0;
 		}
 	}
 
-	vector<int> best_task(problem.periods.size());
-	vector<double> best_dual(problem.periods.size());
-	vector<int> local_solution(problem.periods.size(), 0);
+	GraphBuilder builder(problem);
+	auto dag = builder.build(duals, staff_index, fixes, rng);
 
-	for (auto p : range(problem.periods.size())) {
-		best_dual[p] = numeric_limits<double>::min();
-		for (auto t : range(problem.num_tasks)) {
-			int c = problem.cover_constraint_index(p, t);
-			int row = problem.staff.size() + c;
-			double dual = duals.at(row);
-			if (dual > best_dual[p]) {
-				best_dual[p] = dual;
-				best_task[p] = t;
+	vector<int> graph_solution;
+	bool feasible = false;
+	for (int attempts = 0; attempts <= 10; ++attempts) {
+		resource_constrained_shortest_path(dag,
+		                                   problem.staff.at(staff_index).min_minutes / 15,
+		                                   problem.staff.at(staff_index).max_minutes / 15,
+		                                   &graph_solution);
+		feasible = true;
+
+		//
+		// Check consecutive working days.
+		//
+		vector<int> working_on_day(problem.num_days + 1, 0);
+		for (int i = 0; i + 1 < graph_solution.size(); ++i) {
+			int node1 = graph_solution[i];
+			int node2 = graph_solution[i + 1];
+			if (builder.is_not_worked(node1) && builder.is_have_worked(node2)) {
+				int p1 = builder.get_period(node1);
+				int day = problem.periods.at(p1).day;
+				working_on_day[day] = 1;
 			}
 		}
-	}
-
-	vector<double> subset_sum(problem.periods.size());
-	subset_sum[0] = best_dual[0];
-	for (auto p : range(size_t{1}, problem.periods.size())) {
-		subset_sum[p] = subset_sum[p - 1] + best_dual[p];
-	}
-
-	vector<int> shift_start(problem.num_days, -1);
-	vector<int> shift_end(problem.num_days, -1);
-
-	for (int day = 0; day < problem.num_days; ++day) {
-		double best_value = numeric_limits<double>::min();
-		int best_start = -1;
-		int best_end = -1;
-
-		int initial_p = problem.day_start(day);
-		if (day > 0 && shift_end[day - 1] >= 0) {
-			initial_p = max(initial_p, shift_end[day - 1] + 14 * 4 + 1);
-		}
-
-		for (int p_start = initial_p;
-		     p_start < problem.day_start(day + 1) && problem.periods[p_start].day == day;
-		     ++p_start) {
-			if (!problem.periods[p_start].can_start) {
-				continue;
-			}
-
-			for (int p_end = problem.day_start(day) + problem.min_shift_length - 1;
-			     p_end < problem.day_start(day + 1)
-			     && (p_end - p_start + 1) <= problem.max_shift_length;
-			     ++p_end) {
-				double value = subset_sum[p_end];
-				if (p_start > 0) {
-					value -= subset_sum[p_start - 1];
-				}
-
-				if (value > best_value) {
-					best_value = value;
-					best_start = p_start;
-					best_end = p_end;
-				}
-			}
-		}
-
-		shift_start[day] = best_start;
-		shift_end[day] = best_end;
-	}
-
-	for (int iteration = 1; iteration <= 100; iteration++) {
-		bool feasible = true;
-
-		int working_minutes = 0;
-		for (int day : range(problem.num_days)) {
-			if (shift_start[day] >= 0) {
-				working_minutes += (shift_end[day] - shift_start[day] + 1) * 15;
-			}
-		}
-
-		if (working_minutes < problem.staff[staff_index].min_minutes) {
-			feasible = false;
-
-			// TODO: Go through the days in random order.
-			for (int day : range(problem.num_days)) {
-				// TODO: Will violate shift length constraints.
-				if (shift_start[day] > problem.day_start(day)) {
-					shift_start[day]--;
-				}
-				if (shift_end[day] < problem.day_start(day + 1)) {
-					shift_end[day]++;
-				}
-
-				if (working_minutes >= problem.staff[staff_index].min_minutes) {
-					break;
-				}
-			}
-		} else if (working_minutes > problem.staff[staff_index].max_minutes) {
-			feasible = false;
-			int delta = working_minutes - problem.staff[staff_index].max_minutes;
-
-			int day = random_day(*rng);
-			shift_start[day] = -1;
-			shift_end[day] = -2;
-		}
-
-		if (feasible) {
-			for (int day : range(problem.num_days)) {
-				if (shift_start[day] >= 0) {
-					for (int p = shift_start[day]; p < shift_end[day]; ++p) {
-						(*solution)[p][best_task[p]] = 1;
+		int consecutive = 0;
+		vector<int> consecutive_working_days;
+		consecutive_working_days.reserve(problem.num_days);
+		for (int day : range(problem.num_days + 1)) {
+			if (working_on_day[day] == 1) {
+				consecutive_working_days.push_back(day);
+			} else {
+				if (consecutive_working_days.size() > 5) {
+					feasible = false;
+					uniform_int_distribution<int> random_index(0,
+					                                           consecutive_working_days.size() - 1);
+					int day = consecutive_working_days[random_index(*rng)];
+					for (int p : range(problem.periods.size())) {
+						if (problem.periods[p].day == day) {
+							dag.disconnect_node(builder.have_worked_node(p));
+						}
 					}
 				}
+				consecutive_working_days.clear();
 			}
-			return true;
+		}
+		if (feasible) {
+			break;
 		}
 	}
 
-	return false;
-}
-
-bool create_roster_dummy(const RetailProblem& problem,
-                         const vector<double>& duals,
-                         int staff_index,
-                         const vector<vector<int>>& fixes,
-                         vector<vector<int>>* solution,
-                         mt19937* rng) {
-	uniform_real_distribution<double> rand(0, 1);
-
-	// TODO: Implement this method with something reasonable.
-
-	for (auto d : range(problem.periods.size())) {
-		for (auto s : range(problem.num_tasks)) {
-			if (fixes[d][s] >= 0) {
-				(*solution)[d][s] = fixes[d][s];
-				continue;
-			}
-
-			int c = problem.cover_constraint_index(d, s);
-			int row = problem.staff.size() + c;
-			if (duals.at(row) > 0) {
-				(*solution)[d][s] = 1;
+	if (feasible) {
+		minimum_core_assert(problem.num_tasks == 1, "Need code for this.");
+		for (int i = 0; i + 1 < graph_solution.size(); ++i) {
+			int node1 = graph_solution[i];
+			int node2 = graph_solution[i + 1];
+			if (builder.is_not_worked(node1) && builder.is_have_worked(node2)) {
+				int p1 = builder.get_period(node1);
+				int p2 = builder.get_period(node2);
+				for (int p = p1; p <= p2; ++p) {
+					(*solution)[p][0] = 1;
+				}
 			} else {
-				(*solution)[d][s] = 0;
+				minimum_core_assert(!builder.is_have_worked(node2));
 			}
 		}
 	}
 
-	return true;
-}
-
-bool create_roster_ip(const RetailProblem& problem,
-                      const vector<double>& duals,
-                      int staff_index,
-                      const vector<vector<int>>& fixes,
-                      vector<vector<int>>* solution,
-                      mt19937* rng) {
-	uniform_real_distribution<double> rand(0, 1);
-
-	IP ip;
-	auto working = ip.add_boolean_grid(problem.periods.size(), problem.num_tasks);
-
-	for (int p = 0; p < problem.periods.size(); ++p) {
-		Sum task_sum = 0;
-		for (int t = 0; t < problem.num_tasks; ++t) {
-			task_sum += working[p][t];
-		}
-		ip.add_constraint(task_sum <= 1);
-	}
-
-	vector<Sum> working_any_shift(problem.periods.size(), 0);
-	for (int p = 0; p < problem.periods.size(); ++p) {
-		for (int t = 0; t < problem.num_tasks; ++t) {
-			working_any_shift[p] += working[p][t];
-		}
-	}
-
-	auto starting_shift = ip.add_boolean_vector(problem.periods.size());
-	for (int p = 1; p < problem.periods.size(); ++p) {
-		const auto& yesterday = working_any_shift[p - 1];
-		const auto& today = working_any_shift[p];
-		// today ∧ ¬yesterday ⇔ starting_shift[p]
-		ip.add_constraint(today >= starting_shift[p]);
-		ip.add_constraint(1 - yesterday >= starting_shift[p]);
-		ip.add_constraint(starting_shift[p] + 1 >= today + (1 - yesterday));
-	}
-
-	vector<Sum> day_constraints(problem.num_days + 1, 0);
-	for (int p = 1; p < problem.periods.size(); ++p) {
-		auto& period = problem.periods.at(p);
-		day_constraints[period.day] += starting_shift[p];
-		if (!period.can_start) {
-			ip.add_constraint(starting_shift[p] == 0);
-		}
-	}
-
-	// Can only start a single shift each day.
-	for (int day = 0; day < problem.num_days; ++day) {
-		ip.add_constraint(day_constraints[day] <= 1);
-	}
-	ip.add_constraint(day_constraints.back() == 0);
-
-	// Minimum shift duration is 6 hours.
-	for (int p = 1; p < problem.periods.size(); ++p) {
-		for (int p2 = p + 1; p2 < p + 6 * 4 && p2 < problem.periods.size(); ++p2) {
-			ip.add_constraint(working_any_shift[p2] >= starting_shift[p]);
-		}
-	}
-
-	for (int p = 0; p < problem.periods.size(); ++p) {
-		for (int t = 0; t < problem.num_tasks; ++t) {
-			if (fixes[p][t] >= 0) {
-				ip.add_constraint(working[p][t] == fixes[p][t]);
-			} else {
-				int c = problem.cover_constraint_index(p, t);
-				int row = problem.staff.size() + c;
-				ip.add_objective(-duals.at(row) * working[p][t]);
-			}
-		}
-	}
-
-	IPSolver solver;
-	solver.set_silent(true);
-	auto solutions = solver.solutions(&ip);
-	check(solutions->get(), "Could not solve problem.");
-
-	for (int p = 0; p < problem.periods.size(); ++p) {
-		for (int t = 0; t < problem.num_tasks; ++t) {
-			(*solution)[p][t] = working[p][t].bool_value() ? 1 : 0;
-		}
-	}
-
-	return true;
+	return feasible;
 }
 
 class ShiftShedulingColgenProblem : public SetPartitioningProblem {
