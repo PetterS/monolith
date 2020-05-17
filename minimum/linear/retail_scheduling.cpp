@@ -208,11 +208,6 @@ class RetailProblem {
 		}
 	}
 
-	void check_feasibility_for_staff(const int staff_index,
-	                                 const std::vector<std::vector<int>>& solution) const {
-		// TODO: Implement.
-	}
-
 	// Returns the solution value and throws if it is infeasible.
 	int check_feasibility(const std::vector<std::vector<std::vector<int>>>& solution) const {
 		using minimum::core::make_grid;
@@ -228,7 +223,7 @@ class RetailProblem {
 					}
 				}
 
-				check_feasibility_for_staff(staff_index, solution.at(staff_index));
+				// TODO: Check individual roster feasibility.
 			}
 		}
 
