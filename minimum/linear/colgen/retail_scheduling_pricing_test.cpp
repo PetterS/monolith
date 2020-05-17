@@ -1,6 +1,6 @@
 #include <vector>
 
-#include <Catch.hpp>
+#include <catch.hpp>
 
 #include <minimum/core/grid.h>
 #include <minimum/linear/colgen/retail_scheduling_pricing.h>
