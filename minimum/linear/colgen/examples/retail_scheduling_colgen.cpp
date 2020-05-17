@@ -333,7 +333,7 @@ class ShiftShedulingColgenProblem : public SetPartitioningProblem {
 		Column column(cost, 0, 1);
 		column.add_coefficient(staff_index, 1);
 
-		int start_row = problem.staff.size();
+		const int start_row = problem.staff.size();
 		for (auto d : range(problem.periods.size())) {
 			for (auto s : range(problem.num_tasks)) {
 				int c = problem.cover_constraint_index(d, s);
@@ -352,11 +352,6 @@ class ShiftShedulingColgenProblem : public SetPartitioningProblem {
 		// it concurrently.
 		vector<int> success(problem.staff.size(), 0);
 
-		// for (auto var : dual_variables) {
-		//	cerr << var << " ";
-		//}
-		// cerr << endl;
-
 		for (int p = 0; p < problem.staff.size(); ++p) {
 			if (generate_for_staff(p, dual_variables)) {
 				success[p] = 1;
@@ -374,7 +369,20 @@ class ShiftShedulingColgenProblem : public SetPartitioningProblem {
 		return problem.staff.at(member).id;
 	}
 
-	const std::vector<std::vector<std::vector<int>>>& get_solution() const { return solution; }
+	std::vector<std::vector<std::vector<int>>> get_solution() {
+		compute_fractional_solution(active_columns());
+
+		for (int p = 0; p < problem.staff.size(); ++p) {
+			for (int d = 0; d < problem.periods.size(); ++d) {
+				for (int t = 0; t < problem.num_tasks; ++t) {
+					int c = problem.cover_constraint_index(d, t);
+					solution[p][d][t] = fractional_solution(p, c) > 0.5 ? 1 : 0;
+				}
+			}
+		}
+
+		return solution;
+	}
 
    private:
 	bool generate_for_staff(int staff_index, const std::vector<double>& dual_variables) {
@@ -421,8 +429,10 @@ int main_program(int num_args, char* args[]) {
 		cerr << "Elapsed time : " << elapsed_time << "s.\n";
 	}
 
-	problem.save_solution(
-	    filename_base + ".ros", filename_base + ".xml", colgen_problem.get_solution());
+	auto solution = colgen_problem.get_solution();
+	auto objective_value =
+	    problem.save_solution(filename_base + ".ros", filename_base + ".xml", solution);
+	cerr << "Final objective value: " << objective_value << endl;
 
 	return 0;
 }

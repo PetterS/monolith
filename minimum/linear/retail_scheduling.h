@@ -207,30 +207,69 @@ class RetailProblem {
 		}
 	}
 
-	void save_solution(std::string problem_filename,
-	                   std::string filename,
-	                   const std::vector<std::vector<std::vector<int>>>& solution) const {
-		for (int p = 0; p < periods.size(); ++p) {
-			if (p > 0 && periods[p - 1].day != periods[p].day) {
-				std::cerr << "\n";
-			}
-			std::cerr << periods[p].day;
-		}
-		std::cerr << std::endl << std::endl;
+	// Returns the solution value and throws if it is infeasible.
+	int check_feasibility(const std::vector<std::vector<std::vector<int>>>& solution) const {
+		using minimum::core::make_grid;
+		using minimum::core::range;
+		std::string errors;
+		auto cover = make_grid<int>(periods.size(), num_tasks);
 
-		for (int day = 0; day < num_days; ++day) {
-			for (int p = day_start(day); p < day_start(day + 1); ++p) {
-				std::cerr << periods[p].day;
+		for (int staff_index : range(staff.size())) {
+			for (int period_index : range(periods.size())) {
+				for (int t : range(num_tasks)) {
+					if (solution.at(staff_index).at(period_index).at(t) == 1) {
+						cover.at(period_index).at(t) += 1;
+					}
+				}
+
+				// TODO: Check individual roster feasibility.
 			}
-			std::cerr << std::endl;
 		}
 
+		int objective = 0;
+
+		for (int period_index : range(periods.size())) {
+			auto& period = periods.at(period_index);
+			for (int t : range(num_tasks)) {
+				auto current = cover.at(period_index).at(t);
+				if (current < period.min_cover.at(t)) {
+					errors += minimum::core::to_string("\nCover violation for task ",
+					                                   t,
+					                                   " on day ",
+					                                   period.day,
+					                                   " at ",
+					                                   period.human_readable_time,
+					                                   ". Wanted ",
+					                                   period.min_cover.at(t),
+					                                   "; have ",
+					                                   current,
+					                                   ".");
+				} else if (current > period.max_cover.at(t)) {
+					auto delta = current - period.max_cover.at(t);
+					objective += delta * delta;
+				}
+			}
+		}
+
+		if (errors.length() > 0) {
+			throw std::runtime_error("Feasibility errors:" + errors);
+		}
+
+		return objective;
+	}
+
+	int save_solution(std::string problem_filename,
+	                  std::string filename,
+	                  const std::vector<std::vector<std::vector<int>>>& solution) const {
 		using namespace minimum::core;
+
+		auto objective_value = check_feasibility(solution);
+
 		std::ofstream file(filename);
 		file << "<Solution xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
 		        "xsi:noNamespaceSchemaLocation=\"Solution.xsd\">\n";
 		file << "<ProblemFile>" << problem_filename << "</ProblemFile>\n";
-		file << "<Penalty>889</Penalty>\n";
+		file << absl::StrFormat("<Penalty>%d</Penalty>\n", objective_value);
 		file << "<TimeStamp>2019-10-30T12:43:35</TimeStamp>\n";
 		file << "<Author>Petter Strandmark</Author>\n";
 		file << "<Reference>\n";
@@ -256,20 +295,20 @@ class RetailProblem {
 					}
 				}
 
-				if (staff_index == 0) {
-					if (p == 0) {
-						for (int i = 0; i < 6 * 4; ++i) {
-							std::cerr << " ";
-						}
-					}
-					if (p == day_start(period.day)) {
-						std::cerr << period.human_readable_time << " ";
-					}
-					std::cerr << (task == -1 ? "." : "1");
-					if (period.day < num_days && p == day_start(period.day + 1) - 1) {
-						std::cerr << " " << period.human_readable_time << "\n";
-					}
-				}
+				// if (staff_index == 0) {
+				//	if (p == 0) {
+				//		for (int i = 0; i < 6 * 4; ++i) {
+				//			std::cerr << " ";
+				//		}
+				//	}
+				//	if (p == day_start(period.day)) {
+				//		std::cerr << period.human_readable_time << " ";
+				//	}
+				//	std::cerr << (task == -1 ? "." : "1");
+				//	if (period.day < num_days && p == day_start(period.day + 1) - 1) {
+				//		std::cerr << " " << period.human_readable_time << "\n";
+				//	}
+				//}
 
 				bool last_period = p == periods.size() - 1;
 				if (current_task == -1 && task >= 0) {
@@ -304,6 +343,7 @@ class RetailProblem {
 			file << "</Employee>\n";
 		}
 		file << "</Solution>\n";
+		return objective_value;
 	}
 };
 
