@@ -478,7 +478,7 @@ int SetPartitioningProblem::fix_using_columns(const FixInformation& information,
 }
 
 void SetPartitioningProblem::initialize_constraint(
-    int c, double min_value, double max_value, double over_cost, double under_cost) {
+    int c, double min_value, double max_value, double under_cost, double over_cost) {
 	impl->constraints.at(c).min_value = min_value;
 	impl->constraints.at(c).max_value = max_value;
 	impl->constraints.at(c).over_cost = over_cost;

@@ -30,7 +30,7 @@ class MINIMUM_LINEAR_COLGEN_API SetPartitioningProblem : public Problem {
 	// This function will add two slack columns to the pool, which will then
 	// be treated as inital columns.
 	void initialize_constraint(
-	    int c, double min_value, double max_value, double over_cost, double under_cost);
+	    int c, double min_value, double max_value, double under_cost, double over_cost);
 
 	// Removes all perfomed fixes so the the problem can be solved again
 	// for a new solution.

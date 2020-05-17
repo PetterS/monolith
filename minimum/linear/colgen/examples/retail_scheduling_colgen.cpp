@@ -71,6 +71,8 @@ class GraphBuilder {
 	                                                   int staff_index,
 	                                                   const vector<vector<int>>& fixes,
 	                                                   mt19937* rng) const {
+		uniform_real_distribution<double> eps(-1, 1);
+
 		vector<int> best_task(problem.periods.size());
 		vector<double> best_dual(problem.periods.size());
 		for (auto p : range(problem.periods.size())) {
@@ -101,6 +103,7 @@ class GraphBuilder {
 			int day_end = problem.day_start(day + 1);
 			for (int p = problem.day_start(day); p < day_end; ++p) {
 				auto& period = problem.periods.at(p);
+
 				// Edges from one "not worked" to the next "not worked" span days.
 				if (p < problem.periods.size() - 1) {
 					dag.add_edge(not_worked_node(p), not_worked_node(p + 1));
@@ -124,11 +127,11 @@ class GraphBuilder {
 						}
 
 						auto& edge = dag.add_edge(
-						    not_worked_node(p), have_worked_node(last_node_in_shift), shift_cost);
+						    not_worked_node(p), have_worked_node(last_node_in_shift), -shift_cost);
 						edge.weights[0] = shift_length;
 					}
 
-					int next_day_in_14_hours = p + 14 * 4;
+					int next_day_in_14_hours = p + 14 * 4 + 1;
 					if (next_day_in_14_hours < day_end) {
 						next_day_in_14_hours = day_end;
 					}
@@ -230,6 +233,7 @@ bool create_roster_graph(const RetailProblem& problem,
 		}
 	}
 
+	minimum_core_assert(feasible);
 	return feasible;
 }
 
@@ -262,19 +266,19 @@ class ShiftShedulingColgenProblem : public SetPartitioningProblem {
 		// Initial duals just try to cover as much as possible, with some
 		// randomness to encourage different rosters.
 		auto initial_duals = make_grid<double>(problem.staff.size(), number_of_rows());
-		uniform_real_distribution<double> dual(-100, 100);
+		uniform_real_distribution<double> dual(-10, 100);
 		for (int p = 0; p < problem.staff.size(); ++p) {
 			for (int r = 0; r < number_of_rows(); ++r) {
 				initial_duals[p][r] = dual(rng[p]);
 			}
 		}
-
 		auto no_fixes =
 		    make_grid<int>(problem.periods.size(), problem.num_tasks, []() { return -1; });
 
 		for (int p = 0; p < problem.staff.size(); ++p) {
-			minimum_core_assert(
-			    create_roster_graph(problem, initial_duals[p], p, no_fixes, &solution[p], &rng[p]));
+			bool success =
+			    create_roster_graph(problem, initial_duals[p], p, no_fixes, &solution[p], &rng[p]);
+			check(success, "Initial roster generation failed.");
 		}
 
 		for (int p = 0; p < problem.staff.size(); ++p) {
@@ -312,6 +316,11 @@ class ShiftShedulingColgenProblem : public SetPartitioningProblem {
 		// vector of ints instead of bool because we may be writing to
 		// it concurrently.
 		vector<int> success(problem.staff.size(), 0);
+
+		// for (auto var : dual_variables) {
+		//	cerr << var << " ";
+		//}
+		// cerr << endl;
 
 		for (int p = 0; p < problem.staff.size(); ++p) {
 			if (generate_for_staff(p, dual_variables)) {
