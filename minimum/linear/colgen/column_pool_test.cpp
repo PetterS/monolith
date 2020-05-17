@@ -62,15 +62,24 @@ TEST_CASE("duplicates") {
 	column0.add_coefficient(0, 1);
 	Column column1(0, 0, 1);
 	column1.add_coefficient(1, 1);
-	Column column00(5, 1, 3);
+	Column column00(0, 0, 1);
 	column00.add_coefficient(0, 1);
+	Column column_different_cost(5, 0, 1);
+	column_different_cost.add_coefficient(0, 1);
+	Column column_different_lower_bound(0, 0.5, 1);
+	column_different_lower_bound.add_coefficient(0, 1);
+	Column column_different_upper_bound(0, 0, 0.5);
+	column_different_upper_bound.add_coefficient(0, 1);
 
 	ColumnPool pool;
 	pool.add(move(column0));
 	pool.add(move(column1));
 	pool.add(move(column00));
+	pool.add(move(column_different_cost));
+	pool.add(move(column_different_lower_bound));
+	pool.add(move(column_different_upper_bound));
 
-	REQUIRE(pool.size() == 2);
+	REQUIRE(pool.size() == 5);
 }
 
 TEST_CASE("const_member_functions") {
