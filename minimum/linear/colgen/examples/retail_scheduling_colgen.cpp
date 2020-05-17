@@ -97,6 +97,9 @@ class GraphBuilder {
 		minimum::algorithms::SortedDAG<double, 1, 1> dag(num_nodes());
 
 		dag.add_edge(source(), not_worked_node(0));
+		for (int p : range(problem.periods.size() - 1)) {
+			dag.add_edge(not_worked_node(p), not_worked_node(p + 1));
+		}
 		dag.add_edge(not_worked_node(problem.periods.size() - 1), sink());
 
 		for (int day = 0; day < problem.num_days; ++day) {
@@ -104,48 +107,37 @@ class GraphBuilder {
 			for (int p = problem.day_start(day); p < day_end; ++p) {
 				auto& period = problem.periods.at(p);
 
-				// Edges from one "not worked" to the next "not worked" span days.
-				if (p < problem.periods.size() - 1) {
-					dag.add_edge(not_worked_node(p), not_worked_node(p + 1));
-				}
-
-				// Shifts can only start between the following times: 06:00-10:00, 14:00-18:00 and
-				// 20:00-00:00
-				int start_on_day_hour4 = problem.time_to_hour4(period.human_readable_time);
-				if ((6 * 4 <= start_on_day_hour4 && start_on_day_hour4 <= 10 * 4)
-				    || (14 * 4 <= start_on_day_hour4 && start_on_day_hour4 <= 18 * 4)
-				    || (20 * 4 <= start_on_day_hour4 && start_on_day_hour4 <= 24 * 4)) {
+				if (period.can_start) {
 					for (int shift_length = 6 * 4; shift_length <= 10 * 4; ++shift_length) {
-						if (p + shift_length >= day_end) {
+						int last_node_in_shift = p + shift_length - 1;
+						if (last_node_in_shift >= problem.periods.size()) {
 							break;
 						}
 
-						int last_node_in_shift = p + shift_length - 1;
-						double shift_cost = subset_sum[last_node_in_shift];
+						double shift_value = subset_sum[last_node_in_shift];
 						if (p > 0) {
-							shift_cost -= subset_sum[p - 1];
+							shift_value -= subset_sum[p - 1];
 						}
 
 						auto& edge = dag.add_edge(
-						    not_worked_node(p), have_worked_node(last_node_in_shift), -shift_cost);
+						    not_worked_node(p), have_worked_node(last_node_in_shift), -shift_value);
 						edge.weights[0] = shift_length;
 					}
-
-					int next_day_in_14_hours = p + 14 * 4 + 1;
-					if (next_day_in_14_hours < day_end) {
-						next_day_in_14_hours = day_end;
-					}
-					int target_node;
-					if (next_day_in_14_hours < problem.periods.size()) {
-						target_node = not_worked_node(next_day_in_14_hours);
-					} else {
-						target_node = sink();
-					}
-					dag.add_edge(have_worked_node(p), target_node);
 				}
+
+				int next_day_in_14_hours = p + 14 * 4 + 1;
+				if (next_day_in_14_hours < day_end) {
+					next_day_in_14_hours = day_end;
+				}
+				int target_node;
+				if (next_day_in_14_hours < problem.periods.size()) {
+					target_node = not_worked_node(next_day_in_14_hours);
+				} else {
+					target_node = sink();
+				}
+				dag.add_edge(have_worked_node(p), target_node);
 			}
 		}
-
 		return dag;
 	}
 
@@ -171,10 +163,11 @@ bool create_roster_graph(const RetailProblem& problem,
 	vector<int> graph_solution;
 	bool feasible = false;
 	for (int attempts = 0; attempts <= 10; ++attempts) {
-		resource_constrained_shortest_path(dag,
-		                                   problem.staff.at(staff_index).min_minutes / 15,
-		                                   problem.staff.at(staff_index).max_minutes / 15,
-		                                   &graph_solution);
+		auto cost =
+		    resource_constrained_shortest_path(dag,
+		                                       problem.staff.at(staff_index).min_minutes / 15,
+		                                       problem.staff.at(staff_index).max_minutes / 15,
+		                                       &graph_solution);
 		feasible = true;
 
 		//
@@ -190,7 +183,6 @@ bool create_roster_graph(const RetailProblem& problem,
 				working_on_day[day] = 1;
 			}
 		}
-		int consecutive = 0;
 		vector<int> consecutive_working_days;
 		consecutive_working_days.reserve(problem.num_days);
 		for (int day : range(problem.num_days + 1)) {
@@ -271,6 +263,12 @@ class ShiftShedulingColgenProblem : public SetPartitioningProblem {
 			for (int r = 0; r < number_of_rows(); ++r) {
 				initial_duals[p][r] = dual(rng[p]);
 			}
+
+			// For testing, we can force staff to work a certain shift with the following code.
+			int period = problem.day_start(0) + 2 * 4;
+			int task = 0;
+			int row = problem.staff.size() + problem.cover_constraint_index(period, task);
+			initial_duals[p][row] = 1e6;
 		}
 		auto no_fixes =
 		    make_grid<int>(problem.periods.size(), problem.num_tasks, []() { return -1; });
@@ -291,9 +289,7 @@ class ShiftShedulingColgenProblem : public SetPartitioningProblem {
 	~ShiftShedulingColgenProblem() {}
 
 	Column create_column(int staff_index, const vector<vector<int>>& solution_for_staff) {
-		double cost = 0;
-
-		// TODO: Set the cost correctly.
+		const double cost = 0;
 
 		Column column(cost, 0, 1);
 		column.add_coefficient(staff_index, 1);
@@ -379,7 +375,7 @@ int main_program(int num_args, char* args[]) {
 	auto start_time = wall_time();
 	for (int i = 1; i <= FLAGS_num_solutions; ++i) {
 		colgen_problem.unfix_all();
-		// colgen_problem.solve();
+		colgen_problem.solve();
 		cerr << "Colgen done.\n";
 		auto elapsed_time = wall_time() - start_time;
 		cerr << "Elapsed time : " << elapsed_time << "s.\n";

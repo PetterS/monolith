@@ -69,7 +69,11 @@ class RetailProblem {
 
 	int num_cover_constraints() const { return num_tasks * periods.size(); }
 
-	int cover_constraint_index(int period, int task) const { return period * num_tasks + task; }
+	int cover_constraint_index(int period, int task) const {
+		minimum_core_assert(0 <= period && period < periods.size());
+		minimum_core_assert(0 <= task && task < num_tasks);
+		return period * num_tasks + task;
+	}
 	int cover_constraint_to_period(int c) const { return c / num_tasks; }
 	int cover_constraint_to_task(int c) const { return c % num_tasks; }
 
@@ -137,8 +141,9 @@ class RetailProblem {
 			period.day = day;
 			period.min_cover[task] = minimum::core::from_string<int>(parts[3]);
 			period.max_cover[task] = minimum::core::from_string<int>(parts[4]);
-			period.can_start = (6 * 4 <= hour4 && hour4 <= 10 * 4)
-			                   || (14 * 4 <= hour4 && hour4 <= 18 * 4) || (20 * 4 <= hour4);
+			period.can_start = day < num_days
+			                   && ((6 * 4 <= hour4 && hour4 <= 10 * 4)
+			                       || (14 * 4 <= hour4 && hour4 <= 18 * 4) || (20 * 4 <= hour4));
 		}
 		// Sanity check that all periods have been present in the problem formulation.
 		for (auto& period : periods) {
