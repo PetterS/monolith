@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <string_view>
 
@@ -10,6 +11,9 @@
 #include <minimum/core/range.h>
 #include <minimum/core/string.h>
 #include <minimum/linear/retail_scheduling.h>
+
+using namespace std;
+using namespace minimum::core;
 
 namespace minimum {
 namespace linear {
@@ -240,11 +244,38 @@ int RetailProblem::check_feasibility(
 	return objective;
 }
 
+std::string RetailProblem::solution_to_string(
+    const std::vector<std::vector<std::vector<int>>>& solution) const {
+	check_feasibility(solution);
+	ostringstream out;
+	for (int staff_index = 0; staff_index < staff.size(); ++staff_index) {
+		for (int p = 0; p < periods.size(); ++p) {
+			for (int t : range(num_tasks)) {
+				out << solution.at(staff_index).at(p).at(t) << " ";
+			}
+		}
+	}
+	return out.str();
+}
+
+std::vector<std::vector<std::vector<int>>> RetailProblem::string_to_solution(
+    const std::string input) const {
+	auto solution = make_grid<int>(staff.size(), periods.size(), num_tasks);
+	istringstream in(input);
+	for (int staff_index = 0; staff_index < staff.size(); ++staff_index) {
+		for (int p = 0; p < periods.size(); ++p) {
+			for (int t : range(num_tasks)) {
+				in >> solution.at(staff_index).at(p).at(t);
+			}
+		}
+	}
+	check_feasibility(solution);
+	return solution;
+}
+
 int RetailProblem::save_solution(std::string problem_filename,
                                  std::string filename,
                                  const std::vector<std::vector<std::vector<int>>>& solution) const {
-	using namespace minimum::core;
-
 	auto objective_value = check_feasibility(solution);
 
 	std::ofstream file(filename);
