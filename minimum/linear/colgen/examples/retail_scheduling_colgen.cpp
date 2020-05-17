@@ -88,19 +88,40 @@ class GraphBuilder {
 			}
 		}
 
+		// The subset sum structure is used to calculate sums of dual variables for shifts.
 		vector<double> subset_sum(problem.periods.size());
 		subset_sum[0] = best_dual[0];
 		for (auto p : range(size_t{1}, problem.periods.size())) {
 			subset_sum[p] = subset_sum[p - 1] + best_dual[p];
 		}
 
+		// Data structures respresenting fixes.
+		vector<int> any_fix(problem.periods.size(), 0);
+		for (int p : range(problem.periods.size())) {
+			for (auto t : range(problem.num_tasks)) {
+				if (fixes[p][t] >= 0) {
+					minimum_core_assert(fixes[p][t] == 1, "Can not handle zero fixes yet.");
+					any_fix[p] = 1;
+				}
+			}
+		}
+		vector<int> any_fix_subset_sum(problem.periods.size());
+		any_fix_subset_sum[0] = any_fix[0];
+		for (auto p : range(size_t{1}, problem.periods.size())) {
+			any_fix_subset_sum[p] = any_fix_subset_sum[p - 1] + any_fix[p];
+		}
+
 		minimum::algorithms::SortedDAG<double, 1, 1> dag(num_nodes());
 
 		dag.add_edge(source(), not_worked_node(0));
 		for (int p : range(problem.periods.size() - 1)) {
-			dag.add_edge(not_worked_node(p), not_worked_node(p + 1));
+			if (any_fix[p] != 1) {
+				dag.add_edge(not_worked_node(p), not_worked_node(p + 1));
+			}
 		}
-		dag.add_edge(not_worked_node(problem.periods.size() - 1), sink());
+		if (any_fix[problem.periods.size() - 1] != 1) {
+			dag.add_edge(not_worked_node(problem.periods.size() - 1), sink());
+		}
 
 		for (int day = 0; day < problem.num_days; ++day) {
 			int day_end = problem.day_start(day + 1);
@@ -129,13 +150,20 @@ class GraphBuilder {
 				if (next_day_in_14_hours < day_end) {
 					next_day_in_14_hours = day_end;
 				}
-				int target_node;
-				if (next_day_in_14_hours < problem.periods.size()) {
-					target_node = not_worked_node(next_day_in_14_hours);
-				} else {
-					target_node = sink();
+				int fixes_in_period = any_fix_subset_sum.at(min<int>(next_day_in_14_hours - 1,
+				                                                     problem.periods.size() - 1))
+				                      - any_fix_subset_sum[p];
+				minimum_core_assert(fixes_in_period >= 0);
+
+				if (fixes_in_period == 0) {
+					int target_node;
+					if (next_day_in_14_hours < problem.periods.size()) {
+						target_node = not_worked_node(next_day_in_14_hours);
+					} else {
+						target_node = sink();
+					}
+					dag.add_edge(have_worked_node(p), target_node);
 				}
-				dag.add_edge(have_worked_node(p), target_node);
 			}
 		}
 		return dag;
@@ -162,12 +190,23 @@ bool create_roster_graph(const RetailProblem& problem,
 
 	vector<int> graph_solution;
 	bool feasible = false;
-	for (int attempts = 0; attempts <= 10; ++attempts) {
-		auto cost =
-		    resource_constrained_shortest_path(dag,
-		                                       problem.staff.at(staff_index).min_minutes / 15,
-		                                       problem.staff.at(staff_index).max_minutes / 15,
-		                                       &graph_solution);
+	for (int attempts = 1; attempts <= 10; ++attempts) {
+		try {
+			auto cost =
+			    resource_constrained_shortest_path(dag,
+			                                       problem.staff.at(staff_index).min_minutes / 15,
+			                                       problem.staff.at(staff_index).max_minutes / 15,
+			                                       &graph_solution);
+		} catch (std::exception& e) {
+			if (attempts == 1) {
+				throw std::runtime_error(
+				    to_string("Shortest path failed in attempt ", attempts, ": ", e.what()));
+			} else {
+				// This can happen when we forbid a day. TODO: Forbid another day when the picked
+				// day has a fix.
+				return false;
+			}
+		}
 		feasible = true;
 
 		//
@@ -345,6 +384,7 @@ class ShiftShedulingColgenProblem : public SetPartitioningProblem {
 
 		auto fixes = make_grid<int>(problem.periods.size(), problem.num_tasks);
 		auto& fixes_for_staff = fixes_for_member(staff_index);
+		minimum_core_assert(fixes_for_staff.size() == problem.num_cover_constraints());
 		for (auto c : range(problem.num_cover_constraints())) {
 			int d = problem.cover_constraint_to_period(c);
 			int s = problem.cover_constraint_to_task(c);
