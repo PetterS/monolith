@@ -210,12 +210,16 @@ int main_program(int num_args, char* args[]) {
 			return 1;
 		}
 		int objective_value = from_string<int>(args[3]);
-		auto select = db.make_statement<string, double, string, string>(
-		    "select solution, solve_time, timestamp, version from solutions "
+		auto select = db.make_statement<string, double, string>(
+		    "select solution, solve_time, timestamp from solutions "
 		    "where name == ?1 and objective == ?2;");
 		auto result = select.execute(filename_base, objective_value).get();
 		auto solution = problem.string_to_solution(get<0>(result));
-		problem.save_solution(filename_base + ".ros", filename_base + ".xml", solution);
+		problem.save_solution(filename_base + ".ros",
+		                      filename_base + ".xml",
+		                      solution,
+		                      get<1>(result),
+		                      get<2>(result));
 		cout << "Solution saved to " << filename_base << ".xml.\n";
 	} else if (command == "run") {
 		ShiftShedulingColgenProblem colgen_problem(problem);

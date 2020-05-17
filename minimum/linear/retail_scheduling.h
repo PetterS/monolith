@@ -69,7 +69,9 @@ class MINIMUM_LINEAR_API RetailProblem {
 
 	int save_solution(std::string problem_filename,
 	                  std::string filename,
-	                  const std::vector<std::vector<std::vector<int>>>& solution) const;
+	                  const std::vector<std::vector<std::vector<int>>>& solution,
+	                  double solution_time,
+	                  std::string timestamp) const;
 
    private:
 	void expect_line(std::istream& file, std::string_view expected);

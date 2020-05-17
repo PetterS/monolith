@@ -275,7 +275,9 @@ std::vector<std::vector<std::vector<int>>> RetailProblem::string_to_solution(
 
 int RetailProblem::save_solution(std::string problem_filename,
                                  std::string filename,
-                                 const std::vector<std::vector<std::vector<int>>>& solution) const {
+                                 const std::vector<std::vector<std::vector<int>>>& solution,
+                                 double solution_time,
+                                 std::string timestamp) const {
 	auto objective_value = check_feasibility(solution);
 
 	std::ofstream file(filename);
@@ -283,15 +285,20 @@ int RetailProblem::save_solution(std::string problem_filename,
 	        "xsi:noNamespaceSchemaLocation=\"Solution.xsd\">\n";
 	file << "<ProblemFile>" << problem_filename << "</ProblemFile>\n";
 	file << absl::StrFormat("<Penalty>%d</Penalty>\n", objective_value);
-	file << "<TimeStamp>2019-10-30T12:43:35</TimeStamp>\n";
+	file << "<TimeStamp>" << timestamp << "</TimeStamp>\n";
 	file << "<Author>Petter Strandmark</Author>\n";
 	file << "<Reference>\n";
 	file << "</Reference>\n";
 	file << "<Machine></Machine>\n";
-	file << "<SolveTime>0.00:01:00</SolveTime>\n";
+	int days = solution_time / 60 / 60 / 24;
+	int hours = solution_time / 60 / 60 - days * 24;
+	int minutes = solution_time / 60 - hours * 60 - days * 24 * 60;
+	int seconds = solution_time - minutes * 60 - hours * 60 * 60 - days * 24 * 60 * 60;
+	file << absl::StrFormat(
+	    "<SolveTime>%d.%02d:%02d:%02d</SolveTime>\n", days, hours, minutes, seconds);
 	for (int staff_index = 0; staff_index < staff.size(); ++staff_index) {
 		auto& current = solution[staff_index];
-		file << "<Employee ID = \"" << staff[staff_index].id << "\">\n";
+		file << "<Employee ID=\"" << staff[staff_index].id << "\">\n";
 
 		int current_task = -1;
 		int current_period = -1;
