@@ -389,12 +389,12 @@ TEST_CASE("integral_solution_value") {
 	int num_groups = 2;
 	TestSetPartitioningProblem problem(num_groups, 20);
 
-	problem.initialize_constraint(11, 1, 1, 100.0, 1000.0);
-	problem.initialize_constraint(12, 1, 1, 100.0, 1000.0);
-	problem.initialize_constraint(13, 1, 1, 100.0, 1000.0);
-	problem.initialize_constraint(14, 1, 1, 100.0, 1000.0);
-	problem.initialize_constraint(15, 1, 1, 100.0, 1000.0);
-	problem.initialize_constraint(16, 1, 1, 100.0, 1000.0);
+	problem.initialize_constraint(11, 1, 1, 1000.0, 100.0);
+	problem.initialize_constraint(12, 1, 1, 1000.0, 100.0);
+	problem.initialize_constraint(13, 1, 1, 1000.0, 100.0);
+	problem.initialize_constraint(14, 1, 1, 1000.0, 100.0);
+	problem.initialize_constraint(15, 1, 1, 1000.0, 100.0);
+	problem.initialize_constraint(16, 1, 1, 1000.0, 100.0);
 
 	auto add_column = [&](int p, vector<int> constraints, double value) {
 		Column column(1.0, 0, 1);
