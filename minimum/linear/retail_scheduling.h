@@ -235,72 +235,64 @@ class RetailProblem {
 		for (int staff_index = 0; staff_index < staff.size(); ++staff_index) {
 			auto& current = solution[staff_index];
 			file << "<Employee ID = \"" << staff[staff_index].id << "\">\n";
-			for (int day = 0; day < num_days; ++day) {
-				bool has_shift_on_this_day = false;
-				int current_task = -1;
-				int current_period = -1;
-				for (int p = day_start(day); p < day_start(day + 1); ++p) {
-					auto& period = periods.at(p);
-					minimum_core_assert(period.day == day
-					                    || (day == num_days - 1 && period.day == num_days));
 
-					int hour4 = period.hour4_since_start;
-					int start_on_day_hour4 = time_to_hour4(period.human_readable_time);
+			int current_task = -1;
+			int current_period = -1;
+			for (int p = 0; p < periods.size(); ++p) {
+				auto& period = periods.at(p);
+				int hour4 = period.hour4_since_start;
+				int start_on_day_hour4 = time_to_hour4(period.human_readable_time);
 
-					int task = -1;
-					for (int t : range(num_tasks)) {
-						if (current[p][t] != 0) {
-							check(task == -1, "Multiple tasks in the same period.");
-							task = t;
+				int task = -1;
+				for (int t : range(num_tasks)) {
+					if (current[p][t] != 0) {
+						check(task == -1, "Multiple tasks in the same period.");
+						task = t;
+					}
+				}
+
+				if (staff_index == 0) {
+					if (p == 0) {
+						for (int i = 0; i < 6 * 4; ++i) {
+							std::cerr << " ";
 						}
 					}
-
-					if (staff_index == 0) {
-						if (p == day_start(day)) {
-							std::cerr << period.human_readable_time << " ";
-						}
-						std::cerr << (task == -1 ? "." : "1");
-						if (p == day_start(day + 1) - 1) {
-							std::cerr << " " << period.human_readable_time << "\n";
-						}
+					if (p == day_start(period.day)) {
+						std::cerr << period.human_readable_time << " ";
 					}
+					std::cerr << (task == -1 ? "." : "1");
+					if (period.day < num_days && p == day_start(period.day + 1) - 1) {
+						std::cerr << " " << period.human_readable_time << "\n";
+					}
+				}
 
-					bool last_period = p == day_start(day + 1) - 1;
-					if (current_task == -1 && task >= 0) {
-						if (has_shift_on_this_day) {
-							// check(!has_shift_on_this_day, "Already has a shift on this day.",
-							// staff_index, " ", day, " ", p);
-							continue;
-						}
+				bool last_period = p == periods.size() - 1;
+				if (current_task == -1 && task >= 0) {
+					// Start of the first task of the shift.
+					file << "    <Shift>\n";
+					file << absl::StrFormat("        <Day>%d</Day>\n", period.day);
+					file << "        <Start>" << format_hour4(start_on_day_hour4) << "</Start>\n";
+					current_task = task;
+					current_period = p;
+				} else if (current_task != -1 && (current_task != task || last_period)) {
+					int final_p = p - 1;
+					if (last_period) {
+						final_p = p;
+					}
+					int length = (periods[final_p].hour4_since_start
+					              - periods[current_period].hour4_since_start + 1)
+					             * 15;
 
-						// Start of the first task of the shift.
-						file << "    <Shift>\n";
-						file << absl::StrFormat("        <Day>%d</Day>\n", day);
-						file << "        <Start>" << format_hour4(start_on_day_hour4)
-						     << "</Start>\n";
-						current_task = task;
-						current_period = p;
-						has_shift_on_this_day = true;
-					} else if (current_task != -1 && (current_task != task || last_period)) {
-						int final_p = p - 1;
-						if (last_period) {
-							final_p = p;
-						}
-						int length = (periods[final_p].hour4_since_start
-						              - periods[current_period].hour4_since_start + 1)
-						             * 15;
-
-						file << absl::StrFormat(
-						    "        <Task "
-						    "WorkLength=\"%d\"><ID>%d</ID><Length>%d</Length></Task>\n",
-						    length,
-						    current_task + 1,
-						    length);
-						current_task = task;
-						current_period = hour4;
-						if (task == -1 || last_period) {
-							file << "    </Shift>\n";
-						}
+					file << absl::StrFormat(
+					    "        <Task "
+					    "WorkLength=\"%d\"><ID>%d</ID><Length>%d</Length></Task>\n",
+					    length,
+					    current_task + 1,
+					    length);
+					current_task = task;
+					current_period = hour4;
+					if (task == -1 || last_period) {
+						file << "    </Shift>\n";
 					}
 				}
 			}
