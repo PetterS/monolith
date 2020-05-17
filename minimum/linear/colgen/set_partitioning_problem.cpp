@@ -290,10 +290,10 @@ class SetPartitioningProblem::Implementation {
 
 		double cost = 0;
 		for (auto c : range(number_of_constraints)) {
-			if (rows[c] > constraints[c].requirement) {
-				cost += constraints[c].over_cost * (rows[c] - constraints[c].requirement);
-			} else if (rows[c] < constraints[c].requirement) {
-				cost += constraints[c].under_cost * (constraints[c].requirement - rows[c]);
+			if (rows[c] > constraints[c].max_value) {
+				cost += constraints[c].over_cost * (rows[c] - constraints[c].max_value);
+			} else if (rows[c] < constraints[c].min_value) {
+				cost += constraints[c].under_cost * (constraints[c].min_value - rows[c]);
 			}
 		}
 		return cost;
@@ -303,7 +303,8 @@ class SetPartitioningProblem::Implementation {
 	int number_of_constraints;
 
 	struct Constraint {
-		double requirement = numeric_limits<double>::quiet_NaN();
+		double min_value = numeric_limits<double>::quiet_NaN();
+		double max_value = numeric_limits<double>::quiet_NaN();
 		double over_cost = numeric_limits<double>::quiet_NaN();
 		double under_cost = numeric_limits<double>::quiet_NaN();
 	};
@@ -476,17 +477,16 @@ int SetPartitioningProblem::fix_using_columns(const FixInformation& information,
 	return fixed;
 }
 
-void SetPartitioningProblem::initialize_constraint(int c,
-                                                   double requirement,
-                                                   double over_cost,
-                                                   double under_cost) {
-	impl->constraints.at(c).requirement = requirement;
+void SetPartitioningProblem::initialize_constraint(
+    int c, double min_value, double max_value, double under_cost, double over_cost) {
+	impl->constraints.at(c).min_value = min_value;
+	impl->constraints.at(c).max_value = max_value;
 	impl->constraints.at(c).over_cost = over_cost;
 	impl->constraints.at(c).under_cost = under_cost;
 
 	int r = impl->number_of_groups + c;
-	set_row_lower_bound(r, requirement);
-	set_row_upper_bound(r, requirement);
+	set_row_lower_bound(r, min_value);
+	set_row_upper_bound(r, max_value);
 
 	Column under_slack(under_cost, 0, 1e100);
 	under_slack.add_coefficient(r, 1.0);

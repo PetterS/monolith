@@ -420,3 +420,48 @@ TEST_CASE("merge_graph") {
 
 	CHECK(dag.get_node(0).edges.size() == 2);
 }
+
+TEST_CASE("shortest_path_1_resource_constraint_with_edge_weights") {
+	const int n = 10;
+	SortedDAG<int, 1, 1> dag(n);
+
+	//  0 --> 2 --> 4 --> 6 --> 8
+	//  V  /  V  /  V  /  V  /  V
+	//  1 --> 3 --> 5 --> 7 --> 9
+
+	// All nodes cost -1, and all edges have weight 1.
+
+	for (int i : range(n)) {
+		if (i + 1 < n) {
+			auto& edge = dag.add_edge(i, i + 1, 0);
+			edge.weights[0] = 1;
+		}
+		if (i + 2 < n) {
+			auto& edge = dag.add_edge(i, i + 2, 0);
+			edge.weights[0] = 1;
+		}
+		dag.set_node_cost(i, -1);
+	}
+
+	std::vector<int> solution;
+	auto value = resource_constrained_shortest_path(dag, 0, 10, &solution);
+	CHECK(value == -n);
+	CHECK(solution.size() == n);
+	value = resource_constrained_shortest_path(dag, 0, 7, &solution);
+	CHECK(value == -8);
+	CHECK(solution.size() == 8);
+	CHECK_THROWS(resource_constrained_shortest_path(dag, 0, 3, &solution));
+
+	// Now all nodes instead cost 1.
+	for (int i : range(n)) {
+		dag.set_node_cost(i, 1);
+	}
+
+	value = resource_constrained_shortest_path(dag, 0, 10, &solution);
+	CHECK(value == 6);
+	CHECK(solution.size() == 6);
+	value = resource_constrained_shortest_path(dag, 8, 10, &solution);
+	CHECK(value == 9);
+	CHECK(solution.size() == 9);
+	CHECK_THROWS(resource_constrained_shortest_path(dag, 11, 14, &solution));
+}

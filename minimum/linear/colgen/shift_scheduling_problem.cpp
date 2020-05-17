@@ -97,8 +97,9 @@ ShiftShedulingColgenProblem::ShiftShedulingColgenProblem(
 	for (auto c : range(problem.requirement_size())) {
 		initialize_constraint(c,
 		                      problem.requirement(c).wanted(),
-		                      problem.requirement(c).over_cost(),
-		                      problem.requirement(c).under_cost());
+		                      problem.requirement(c).wanted(),
+		                      problem.requirement(c).under_cost(),
+		                      problem.requirement(c).over_cost());
 	}
 
 	day_shift_to_constraint =

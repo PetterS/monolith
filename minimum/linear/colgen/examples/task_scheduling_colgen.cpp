@@ -73,7 +73,7 @@ TaskShedulingColgenProblem::TaskShedulingColgenProblem(const proto::TaskScheduli
       problem(problem_) {
 	// Covering constraints with slack variables.
 	for (auto c : range(problem.task_size())) {
-		initialize_constraint(c, 1, 0, 10'000);
+		initialize_constraint(c, 1, 1, 10'000, 0);
 	}
 
 	for (auto m : range(problem.machine_size())) {

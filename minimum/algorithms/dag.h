@@ -16,20 +16,41 @@
 namespace minimum {
 namespace algorithms {
 
+template <typename T, int num_weights>
+class DAGEdge {
+	static_assert(num_weights > 0);
+
+   public:
+	DAGEdge(int to_, T cost_) : to(to_), cost(cost_) {
+		for (int i = 0; i < num_weights; ++i) {
+			weights[i] = 0;
+		}
+	}
+	int to;
+	T cost;
+	std::array<int, num_weights> weights;
+	bool operator<(const DAGEdge& other) const { return to < other.to; }
+	bool operator==(const DAGEdge& other) const { return to == other.to; }
+};
+
+template <typename T>
+class DAGEdge<T, 0> {
+   public:
+	DAGEdge(int to_, T cost_) : to(to_), cost(cost_) {}
+	int to;
+	T cost;
+	bool operator<(const DAGEdge& other) const { return to < other.to; }
+	bool operator==(const DAGEdge& other) const { return to == other.to; }
+};
+
 // A DAG that is already topologically sorted, i.e. only has edges
 // from i → j, where i < j.
-template <typename T = double, int num_weights = 1>
+template <typename T = double, int num_weights = 1, int num_edge_weights = 0>
 class SortedDAG {
 	static_assert(num_weights >= 0, "num_weights can not be negative.");
 
    public:
-	struct Edge {
-		Edge(int to_, T cost_) : to(to_), cost(cost_) {}
-		int to;
-		T cost;
-		bool operator<(const Edge& other) const { return to < other.to; }
-		bool operator==(const Edge& other) const { return to == other.to; }
-	};
+	using Edge = DAGEdge<T, num_edge_weights>;
 	struct Node {
 		T cost = 0;
 		std::array<int, num_weights> weights = {};
@@ -75,10 +96,10 @@ class SortedDAG {
 		nodes[i].edges.clear();
 	}
 
-	void add_edge(int i, int j, T cost = 0) {
+	Edge& add_edge(int i, int j, T cost = 0) {
 		minimum_core_assert(i >= 0 && j >= 0 && i < nodes.size() && j < nodes.size());
 		minimum::core::check(i < j, "Graph needs to be topologically sorted.");
-		nodes[i].edges.emplace_back(j, cost);
+		return nodes[i].edges.emplace_back(j, cost);
 	}
 
 	std::string str() const {
@@ -268,7 +289,7 @@ class SortedDAG {
 		}
 
 		if (rank) {
-			std::map<int, vector<int>> ranks;
+			std::map<int, std::vector<int>> ranks;
 			for (auto i : minimum::core::range(nodes.size())) {
 				ranks[rank(i)].push_back(i);
 			}
@@ -297,12 +318,13 @@ class SortedDAG {
 template <typename T = double>
 struct SolutionEntry {
 	int prev = -1;
-	T cost = std::numeric_limits<T>::max();
+	T cost = std::numeric_limits<T>::max() / 2;
 	bool operator==(const SolutionEntry& rhs) const { return prev == rhs.prev; }
 };
 
-template <typename T, int num_weights>
-T solution_cost(const SortedDAG<T, num_weights>& dag, const std::vector<int>& solution) {
+template <typename T, int num_weights, int num_edge_weights>
+T solution_cost(const SortedDAG<T, num_weights, num_edge_weights>& dag,
+                const std::vector<int>& solution) {
 	if (solution.empty()) {
 		return 0;
 	}
@@ -320,8 +342,9 @@ T solution_cost(const SortedDAG<T, num_weights>& dag, const std::vector<int>& so
 	return cost;
 }
 
-template <typename T, int num_weights>
-T shortest_path(const SortedDAG<T, num_weights>& dag, std::vector<SolutionEntry<T>>* solution_ptr) {
+template <typename T, int num_weights, int num_edge_weights>
+T shortest_path(const SortedDAG<T, num_weights, num_edge_weights>& dag,
+                std::vector<SolutionEntry<T>>* solution_ptr) {
 	using minimum::core::range;
 
 	auto& solution = *solution_ptr;
@@ -346,14 +369,14 @@ T shortest_path(const SortedDAG<T, num_weights>& dag, std::vector<SolutionEntry<
 }
 
 template <typename T, int num_weights>
-T resource_constrained_shortest_path(SortedDAG<T, num_weights> dag,
+T resource_constrained_shortest_path(SortedDAG<T, num_weights, 0> dag,
                                      std::array<T, num_weights> upper_bounds,
                                      std::vector<std::vector<SolutionEntry<T>>>* solutions) {
 	using minimum::core::range;
 
 	constexpr bool verbose = false;
 	if (verbose) {
-		cerr << "\n\n";
+		std::cerr << "\n\n";
 	}
 
 	static_assert(num_weights >= 1, "Need at least one resource constraint.");
@@ -437,9 +460,7 @@ T resource_constrained_shortest_path(SortedDAG<T, num_weights> dag,
 				T cost = 0;
 				int i = dag.size() - 1;
 				while (i >= 0) {
-					for (int w : range(num_weights)) {
-						cost += org_costs[i];
-					}
+					cost += org_costs[i];
 					i = solutions->back()[i].prev;
 				}
 				std::cerr << ", feasible=" << cost;
@@ -482,15 +503,18 @@ T resource_constrained_shortest_path(SortedDAG<T, num_weights> dag,
 	return cost;
 }
 
-template <typename T, int num_weights>
-T resource_constrained_shortest_path(const SortedDAG<T, num_weights>& dag,
+template <typename T, int num_weights, int num_edge_weights>
+T resource_constrained_shortest_path(const SortedDAG<T, num_weights, num_edge_weights>& dag,
                                      int lower_bound,
                                      int upper_bound,
                                      std::vector<int>* solution_ptr) {
 	static_assert(num_weights >= 1, "Need weights for resource constraints.");
+	static_assert(num_edge_weights <= 1,
+	              "Edge weights for consecutive constraint is not supported.");
 	using minimum::core::check;
 	using minimum::core::range;
 
+	check(lower_bound <= upper_bound, "Invalid bounds: ", lower_bound, " > ", upper_bound);
 	auto& solution = *solution_ptr;
 	solution.clear();
 	if (dag.size() == 0) {
@@ -510,15 +534,16 @@ T resource_constrained_shortest_path(const SortedDAG<T, num_weights>& dag,
 
 	for (auto i : range(dag.size())) {
 		for (auto c : range(upper_bound + 1)) {
-			if (i > 0
-			    && (partial[i][c].prev)
-			           < 0) {  // Parentheses to work around parser bug in GCC 5.4.0.
+			if (i > 0 && partial[i][c].prev < 0) {
 				// We cannot reach node i with c weight.
 				continue;
 			}
 			for (auto& edge : dag.get_node(i).edges) {
 				// Weight of the path up to and including the edge’s destination.
 				auto weight = c + dag.get_node(edge.to).weights[0];
+				if constexpr (num_edge_weights > 0) {
+					weight += edge.weights[0];
+				}
 				check(weight >= 0, "Negative resource encountered along path.");
 
 				if (weight > upper_bound) {
@@ -553,13 +578,22 @@ T resource_constrained_shortest_path(const SortedDAG<T, num_weights>& dag,
 	solution.push_back(i);
 	int current_c = best_c;
 	while (true) {
-		if ((partial[i][current_c].prev)
-		    < 0) {  // Parentheses to work around parser bug in GCC 5.4.0.
+		if (partial[i][current_c].prev < 0) {
 			break;
 		}
-		solution.push_back(partial[i][current_c].prev);
-		current_c -= dag.get_node(i).weights[0];
-		i = solution.back();
+
+		int i_prev = i;
+		i = partial[i][current_c].prev;
+		current_c -= dag.get_node(i_prev).weights[0];
+		if constexpr (num_edge_weights > 0) {
+			for (auto& edge : dag.get_node(i).edges) {
+				if (edge.to == i_prev) {
+					current_c -= edge.weights[0];
+					break;
+				}
+			}
+		}
+		solution.push_back(i);
 	}
 	reverse(solution.begin(), solution.end());
 	return partial.back()[best_c].cost;
@@ -568,20 +602,22 @@ T resource_constrained_shortest_path(const SortedDAG<T, num_weights>& dag,
 namespace internal {
 template <typename T>
 struct Entry {
-	tuple<int, int, int> prev = std::make_tuple(-1, -1, -1);
+	std::tuple<int, int, int> prev = std::make_tuple(-1, -1, -1);
 	T cost = std::numeric_limits<T>::max();
 	bool valid() { return get<0>(prev) >= 0; }
 };
 }  // namespace internal
 
-template <typename T, int num_weights>
-T resource_constrained_shortest_path(const SortedDAG<T, num_weights>& dag,
+template <typename T, int num_weights, int num_edge_weights>
+T resource_constrained_shortest_path(const SortedDAG<T, num_weights, num_edge_weights>& dag,
                                      int lower_bound,
                                      int upper_bound,
                                      int min_consecutive,
                                      int max_consecutive,
                                      std::vector<int>* solution_ptr) {
 	static_assert(num_weights >= 2, "Need weights for resource and consecutive constraints.");
+	static_assert(num_edge_weights <= 1,
+	              "Edge weights for consecutive constraint is not supported.");
 	using minimum::core::check;
 	using minimum::core::range;
 
@@ -597,7 +633,7 @@ T resource_constrained_shortest_path(const SortedDAG<T, num_weights>& dag,
 	}
 	// We allow a negative number as lower bound, but set it to zero since
 	// weights are not allowed to go negative anyway.
-	lower_bound = max(lower_bound, 0);
+	lower_bound = std::max(lower_bound, 0);
 	minimum_core_assert(max_consecutive >= 1);
 
 	// partial(i, c, d) is the smallest cost to reach node i consuming c
@@ -619,6 +655,9 @@ T resource_constrained_shortest_path(const SortedDAG<T, num_weights>& dag,
 
 					// Weight of the path up to and including the edge’s destination.
 					auto weight = c + to_node.weights[0];
+					if constexpr (num_edge_weights > 0) {
+						weight += edge.weights[0];
+					}
 					if (weight < 0) {
 						throw std::runtime_error("Negative resource encountered along path.");
 					}
@@ -690,20 +729,21 @@ T resource_constrained_shortest_path(const SortedDAG<T, num_weights>& dag,
 			break;
 		}
 		solution.push_back(get<0>(prev));
-		tie(i, c, d) = prev;
+		std::tie(i, c, d) = prev;
 	}
 	reverse(solution.begin(), solution.end());
 	return best;
 }
 
-template <typename T, int num_weights>
-void resource_constrained_shortest_path_partial(const SortedDAG<T, num_weights>& dag,
-                                                int lower_bound,
-                                                int upper_bound,
-                                                int min_consecutive,
-                                                int max_consecutive,
-                                                int num_splits,
-                                                std::vector<int>* solution_ptr) {
+template <typename T, int num_weights, int num_edge_weights>
+void resource_constrained_shortest_path_partial(
+    const SortedDAG<T, num_weights, num_edge_weights>& dag,
+    int lower_bound,
+    int upper_bound,
+    int min_consecutive,
+    int max_consecutive,
+    int num_splits,
+    std::vector<int>* solution_ptr) {
 	minimum::core::check(
 	    1 <= num_splits && 5 * num_splits <= dag.size(), "Can not split problem into ", num_splits);
 	if (num_splits == 1) {
@@ -718,7 +758,7 @@ void resource_constrained_shortest_path_partial(const SortedDAG<T, num_weights>&
 	std::vector<int> subsolution;
 	for (int part = 0; part < num_splits; ++part) {
 		// Create and solve subproblem.
-		SortedDAG<T, num_weights> subdag(dag, s, t);
+		SortedDAG<T, num_weights, num_edge_weights> subdag(dag, s, t);
 		int lb = ceil(double(lower_bound) / num_splits);
 		int ub = floor(double(upper_bound) / num_splits);
 
