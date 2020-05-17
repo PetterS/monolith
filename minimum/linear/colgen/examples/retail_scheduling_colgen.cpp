@@ -43,7 +43,7 @@ class ShiftShedulingColgenProblem : public SetPartitioningProblem {
 				int c = problem.cover_constraint_index(d, s);
 				// Initialize this constraint.
 				initialize_constraint(
-				    c, period.min_cover.at(s), period.max_cover.at(s), 1000.0, 1.0);
+				    c, period.min_cover.at(s), period.max_cover.at(s), 1000.0, 0, 0, 1.0);
 			}
 		}
 		timer.OK();
