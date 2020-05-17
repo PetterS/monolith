@@ -1,5 +1,6 @@
 
 library_with_tests("minimum_linear"
+    "absl_str_format"
 	"absl::flat_hash_map"
 	"absl::flat_hash_set"
 	"cleaneling"

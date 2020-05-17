@@ -178,9 +178,13 @@ int main_program(int num_args, char* args[]) {
 	for (int i = 1; i <= FLAGS_num_solutions; ++i) {
 		colgen_problem.unfix_all();
 		colgen_problem.solve();
+
 		cerr << "Colgen done.\n";
 		auto elapsed_time = wall_time() - start_time;
 		cerr << "Elapsed time : " << elapsed_time << "s.\n";
+		auto solution = colgen_problem.get_solution();
+		auto objective_value = problem.check_feasibility(solution);
+		cerr << "Objective value: " << objective_value << endl;
 	}
 
 	auto solution = colgen_problem.get_solution();
