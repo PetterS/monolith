@@ -1,3 +1,4 @@
+#include <cmath>
 #include <vector>
 using namespace std;
 
@@ -95,7 +96,11 @@ const RowEntry* Column::begin() const { return impl->rows.data(); }
 
 const RowEntry* Column::end() const { return impl->rows.data() + impl->rows.size(); }
 
-bool Column::operator==(const Column& rhs) const { return impl->rows == rhs.impl->rows; }
+bool Column::operator==(const Column& rhs) const {
+	return abs(impl->cost - rhs.impl->cost) < 1e-9
+	       && abs(impl->upper_bound - rhs.impl->upper_bound) < 1e-9
+	       && abs(impl->lower_bound - rhs.impl->lower_bound) < 1e-9 && impl->rows == rhs.impl->rows;
+}
 
 proto::Column Column::to_proto() const {
 	proto::Column proto_column;

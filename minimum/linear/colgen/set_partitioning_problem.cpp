@@ -413,6 +413,9 @@ int SetPartitioningProblem::fix_using_columns(const FixInformation& information,
 			if (column.upper_bound() == 1 && column.solution_value >= 0.5
 			    && column.solution_value < 1.0 - 1e-7) {
 				int p = impl->column_member[i];
+				if (p < 0) {
+					continue;
+				}
 
 				cerr << "-- Fixing column " << i << " to 1 for member " << member_name(p)
 				     << ", was " << column.solution_value << "\n";
@@ -477,8 +480,17 @@ int SetPartitioningProblem::fix_using_columns(const FixInformation& information,
 	return fixed;
 }
 
-void SetPartitioningProblem::initialize_constraint(
-    int c, double min_value, double max_value, double under_cost, double over_cost) {
+void SetPartitioningProblem::initialize_constraint(int c,
+                                                   double min_value,
+                                                   double max_value,
+                                                   double under_cost,
+                                                   double over_cost,
+                                                   double under_quadratic_cost,
+                                                   double over_quadratic_cost) {
+	check(under_quadratic_cost == 0, "under_quadratic_cost not supported.");
+	check(under_cost >= 0, "initialize_constraint: under_cost < 0");
+	check(over_cost >= 0, "initialize_constraint: over_cost < 0");
+	check(over_quadratic_cost >= 0, "initialize_constraint: over_quadratic_cost < 0");
 	impl->constraints.at(c).min_value = min_value;
 	impl->constraints.at(c).max_value = max_value;
 	impl->constraints.at(c).over_cost = over_cost;
@@ -493,10 +505,31 @@ void SetPartitioningProblem::initialize_constraint(
 	under_slack.set_integer(false);
 	pool.add(move(under_slack));
 
-	Column over_slack(over_cost, 0, 1e100);
-	over_slack.add_coefficient(r, -1.0);
-	over_slack.set_integer(false);
-	pool.add(move(over_slack));
+	if (over_quadratic_cost == 0) {
+		Column over_slack(over_cost, 0, 1e100);
+		over_slack.add_coefficient(r, -1.0);
+		over_slack.set_integer(false);
+		pool.add(move(over_slack));
+	} else {
+		// Add several variables so that the cost becomes:
+		// for over = 1: 1
+		// for over = 2: 1 + 3 = 4
+		// for over = 3: 1 + 3 + 5 = 9
+		// for over = 4: 1 + 3 + 5 + 7 = 16
+		const int steps = 4;
+		for (int i = 1; i <= steps; i++) {
+			double ub = 1;
+			if (i == steps) {
+				// Last variable is unbounded – this is an approximation.
+				ub = 1e100;
+			}
+			double cost = over_quadratic_cost * (2 * i - 1) + over_cost;
+			Column over_slack(cost, 0, ub);
+			over_slack.add_coefficient(r, -1.0);
+			over_slack.set_integer(false);
+			pool.add(move(over_slack));
+		}
+	}
 }
 
 void SetPartitioningProblem::unfix_all() {
