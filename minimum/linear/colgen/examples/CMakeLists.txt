@@ -37,6 +37,6 @@ add_test(
 	COMMAND shift_generation_colgen --min_rmp_iterations=15 --verify_solution=0.5)
 add_test(
 	NAME minimum_linear_colgen_retail_scheduling_0
-	COMMAND retail_scheduling_colgen --nosave_solution --nouse_first_order_solver --num_solutions=1 0
+	COMMAND retail_scheduling_colgen run 0 --nosave_solution --nouse_first_order_solver --num_solutions=1
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/minimum/linear/data/retail
 )
