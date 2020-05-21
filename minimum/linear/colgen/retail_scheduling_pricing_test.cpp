@@ -9,6 +9,7 @@
 
 using namespace std;
 using namespace minimum::core;
+using minimum::linear::colgen::create_retail_shift;
 using minimum::linear::colgen::create_roster_graph;
 
 minimum::linear::RetailProblem get_problem(std::string name) {
@@ -32,5 +33,102 @@ TEST_CASE("simple_pricing") {
 		CHECK(create_roster_graph(problem, duals, staff_index, fixes, &solution, &rng));
 		CHECK(solution[p][0] == 1);
 		problem.check_feasibility_for_staff(staff_index, solution);
+	}
+}
+
+TEST_CASE("create_retail_shift_2a") {
+	vector<vector<double>> shift_costs = {
+	    {0, -1},
+	    {0, -1},
+	    {0, -1},
+	    {0, -1},
+	    {0, -1},
+	    {-1, 0},
+	    {-1, 0},
+	    {-1, 0},
+	    {-1, 0},
+	};
+	CHECK(create_retail_shift(shift_costs) == vector<int>{1, 1, 1, 1, 1, 0, 0, 0, 0});
+}
+
+TEST_CASE("create_retail_shift_2b") {
+	vector<vector<double>> shift_costs = {
+	    {0, -10},
+	    {0, 1},
+	    {0, 1},
+	    {0, 1},
+	    {0, 1},
+	    {0, 1},
+	    {0, 1},
+	    {0, 1},
+	    {0, -1},
+	};
+	CHECK(create_retail_shift(shift_costs) == vector<int>{1, 1, 1, 1, 0, 0, 0, 0, 0});
+}
+
+TEST_CASE("create_retail_shift_2c") {
+	vector<vector<double>> shift_costs = {
+	    {10, 0},
+	    {10, 0},
+	    {10, 0},
+	    {10, 0},
+	    {10, 0},
+	    {10, 0},
+	    {10, 0},
+	    {10, 0},
+	    {10, 0},
+	};
+	for (int i = 0; i < shift_costs.size(); ++i) {
+		auto solution = create_retail_shift(shift_costs);
+		CHECK(solution[i] != 0);
+		shift_costs[i][0] = -1000;
+		solution = create_retail_shift(shift_costs);
+		CHECK(solution[i] == 0);
+		shift_costs[i][0] = 10;
+	}
+}
+
+TEST_CASE("create_retail_shift_3a") {
+	vector<vector<double>> shift_costs = {
+	    {3, 0, 100},
+	    {-3, 0, 100},
+	    {-3, 0, 100},
+	    {-3, 0, 100},
+	    {0, 0, 3},
+	    {0, 0, -20},
+	    {0, 0, 5},
+	    {0, 0, 8},
+	    {0, 0, 1},
+	};
+	CHECK(create_retail_shift(shift_costs) == vector<int>{0, 0, 0, 0, 0, 2, 2, 2, 2});
+}
+
+TEST_CASE("create_retail_shift_3bc") {
+	vector<vector<double>> shift_costs = {
+	    {10, 0, 10},
+	    {10, -1, 10},
+	    {10, -2, 10},
+	    {10, 2, 10},
+	    {10, -1, 10},
+	    {10, -3, 10},
+	    {10, 1, 10},
+	    {10, 2, 10},
+	    {10, -1, 10},
+	    {10, -3, 10},
+	    {10, 1, 10},
+	    {10, -1, 10},
+	    {10, -1, 10},
+	};
+	for (int i = 4; i < shift_costs.size() - 5; ++i) {
+		auto solution = create_retail_shift(shift_costs);
+		CHECK(solution[i] != 0);
+		CHECK(solution[i + 1] != 2);
+		shift_costs[i][0] = -1000;
+		shift_costs[i + 1][2] = -1000;
+		solution = create_retail_shift(shift_costs);
+		CHECK(solution[i] == 0);
+		CHECK(solution[i + 1] == 2);
+		shift_costs[i][0] = 10;
+		shift_costs[i + 1][2] = 10;
 	}
 }

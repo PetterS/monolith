@@ -291,9 +291,13 @@ class SetPartitioningProblem::Implementation {
 		double cost = 0;
 		for (auto c : range(number_of_constraints)) {
 			if (rows[c] > constraints[c].max_value) {
-				cost += constraints[c].over_cost * (rows[c] - constraints[c].max_value);
+				auto delta = rows[c] - constraints[c].max_value;
+				cost += constraints[c].over_cost * delta
+				        + constraints[c].over_quadratic_cost * delta * delta;
 			} else if (rows[c] < constraints[c].min_value) {
-				cost += constraints[c].under_cost * (constraints[c].min_value - rows[c]);
+				auto delta = constraints[c].min_value - rows[c];
+				cost += constraints[c].under_cost * delta
+				        + constraints[c].under_quadratic_cost * delta * delta;
 			}
 		}
 		return cost;
@@ -307,6 +311,8 @@ class SetPartitioningProblem::Implementation {
 		double max_value = numeric_limits<double>::quiet_NaN();
 		double over_cost = numeric_limits<double>::quiet_NaN();
 		double under_cost = numeric_limits<double>::quiet_NaN();
+		double over_quadratic_cost = numeric_limits<double>::quiet_NaN();
+		double under_quadratic_cost = numeric_limits<double>::quiet_NaN();
 	};
 	vector<Constraint> constraints;
 
@@ -491,10 +497,13 @@ void SetPartitioningProblem::initialize_constraint(int c,
 	check(under_cost >= 0, "initialize_constraint: under_cost < 0");
 	check(over_cost >= 0, "initialize_constraint: over_cost < 0");
 	check(over_quadratic_cost >= 0, "initialize_constraint: over_quadratic_cost < 0");
-	impl->constraints.at(c).min_value = min_value;
-	impl->constraints.at(c).max_value = max_value;
-	impl->constraints.at(c).over_cost = over_cost;
-	impl->constraints.at(c).under_cost = under_cost;
+	auto& constraint = impl->constraints.at(c);
+	constraint.min_value = min_value;
+	constraint.max_value = max_value;
+	constraint.over_cost = over_cost;
+	constraint.under_cost = under_cost;
+	constraint.over_quadratic_cost = over_quadratic_cost;
+	constraint.under_quadratic_cost = under_quadratic_cost;
 
 	int r = impl->number_of_groups + c;
 	set_row_lower_bound(r, min_value);

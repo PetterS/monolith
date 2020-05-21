@@ -189,7 +189,34 @@ void RetailProblem::print_info() const {
 
 void RetailProblem::check_feasibility_for_staff(
     const int staff_index, const std::vector<std::vector<int>>& solution) const {
-	// TODO: Implement.
+	// Shift length.
+	int current_task = -1;
+	int current_period = -1;
+	for (int p = 0; p < periods.size(); ++p) {
+		auto& period = periods.at(p);
+
+		int task = -1;
+		for (int t : range(num_tasks)) {
+			if (solution[p][t] != 0) {
+				check(task == -1, "Multiple tasks in the same period.");
+				task = t;
+			}
+		}
+
+		bool last_period = p == periods.size() - 1;
+		if (current_task == -1 && task >= 0) {
+			// Start of the first task of the shift.
+			current_task = task;
+			current_period = p;
+		} else if (current_task != -1 && (current_task != task || last_period)) {
+			int final_p = p - 1;
+			if (last_period) {
+				final_p = p;
+			}
+			int task_length = (final_p - current_period + 1) * 15;
+			minimum_core_assert(task_length >= 60);
+		}
+	}
 }
 
 // Returns the solution value and throws if it is infeasible.
@@ -304,7 +331,6 @@ int RetailProblem::save_solution(std::string problem_filename,
 		int current_period = -1;
 		for (int p = 0; p < periods.size(); ++p) {
 			auto& period = periods.at(p);
-			int hour4 = period.hour4_since_start;
 			int start_on_day_hour4 = time_to_hour4(period.human_readable_time);
 
 			int task = -1;
@@ -343,9 +369,7 @@ int RetailProblem::save_solution(std::string problem_filename,
 				if (last_period) {
 					final_p = p;
 				}
-				int length = (periods[final_p].hour4_since_start
-				              - periods[current_period].hour4_since_start + 1)
-				             * 15;
+				int length = (final_p - current_period + 1) * 15;
 
 				file << absl::StrFormat(
 				    "        <Task "
@@ -354,7 +378,7 @@ int RetailProblem::save_solution(std::string problem_filename,
 				    current_task + 1,
 				    length);
 				current_task = task;
-				current_period = hour4;
+				current_period = p;
 				if (task == -1 || last_period) {
 					file << "    </Shift>\n";
 				}
