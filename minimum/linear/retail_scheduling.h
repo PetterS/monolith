@@ -63,9 +63,15 @@ class MINIMUM_LINEAR_API RetailProblem {
 	// Returns the solution value and throws if it is infeasible.
 	int check_feasibility(const std::vector<std::vector<std::vector<int>>>& solution) const;
 
+	std::string solution_to_string(
+	    const std::vector<std::vector<std::vector<int>>>& solution) const;
+	std::vector<std::vector<std::vector<int>>> string_to_solution(const std::string input) const;
+
 	int save_solution(std::string problem_filename,
 	                  std::string filename,
-	                  const std::vector<std::vector<std::vector<int>>>& solution) const;
+	                  const std::vector<std::vector<std::vector<int>>>& solution,
+	                  double solution_time,
+	                  std::string timestamp) const;
 
    private:
 	void expect_line(std::istream& file, std::string_view expected);

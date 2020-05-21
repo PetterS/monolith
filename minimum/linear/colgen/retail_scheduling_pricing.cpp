@@ -2,6 +2,7 @@
 #include <vector>
 
 #include <minimum/algorithms/dag.h>
+#include <minimum/core/numeric.h>
 #include <minimum/core/range.h>
 #include <minimum/linear/colgen/retail_scheduling_pricing.h>
 
@@ -64,7 +65,6 @@ class GraphBuilder {
 	                                                   mt19937* rng) const {
 		uniform_real_distribution<double> eps(-1, 1);
 
-		vector<int> best_task(problem.periods.size());
 		vector<double> best_dual(problem.periods.size());
 		for (auto p : range(problem.periods.size())) {
 			best_dual[p] = numeric_limits<double>::min();
@@ -74,7 +74,6 @@ class GraphBuilder {
 				double dual = duals.at(row);
 				if (dual > best_dual[p]) {
 					best_dual[p] = dual;
-					best_task[p] = t;
 				}
 			}
 		}
@@ -88,13 +87,43 @@ class GraphBuilder {
 
 		// Data structures respresenting fixes.
 		vector<int> any_fix(problem.periods.size(), 0);
+		int prev_fix1 = -1;
+		int prev_fix2 = -1;
+		int prev_fix3 = -1;
+		int prev_fix4 = -1;
 		for (int p : range(problem.periods.size())) {
+			int this_t = -1;
 			for (auto t : range(problem.num_tasks)) {
 				if (fixes[p][t] >= 0) {
 					minimum_core_assert(fixes[p][t] == 1, "Can not handle zero fixes yet.");
+					minimum_core_assert(any_fix[p] == 0);
 					any_fix[p] = 1;
+					this_t = t;
 				}
 			}
+
+			// This is subtle!
+			//
+			// If  period p   is fixed to T1
+			// and period p-1 is fixed to T2
+			//
+			// We need to count p-1, p-2, p-3 and p-4 as fixes as well.
+			// Otherwise there might not be room to cram in a full one-hour shift of T2.
+			if (this_t >= 0
+			    && ((prev_fix4 >= 0 && this_t != prev_fix4)
+			        || (prev_fix3 >= 0 && this_t != prev_fix3)
+			        || (prev_fix2 >= 0 && this_t != prev_fix2)
+			        || (prev_fix1 >= 0 && this_t != prev_fix1))) {
+				any_fix.at(p - 4) = 1;
+				any_fix.at(p - 3) = 1;
+				any_fix.at(p - 2) = 1;
+				any_fix.at(p - 1) = 1;
+			}
+			prev_fix4 = prev_fix3;
+			prev_fix3 = prev_fix2;
+			prev_fix2 = prev_fix1;
+			prev_fix1 = this_t;
+			// End subtle part.
 		}
 		vector<int> any_fix_subset_sum(problem.periods.size());
 		any_fix_subset_sum[0] = any_fix[0];
@@ -164,6 +193,107 @@ class GraphBuilder {
 	const RetailProblem& problem;
 };
 
+// Given an array of costs for all tasks in a shift, create the optimal shift.
+// The minimum length of 4 is hard-coded in this function.
+vector<int> create_retail_shift(const vector<vector<double>>& shift_costs) {
+	const int length = shift_costs.size();
+	const int num_tasks = shift_costs.at(0).size();
+	const int source = 0;
+	const int sink = length * num_tasks + 1;
+	minimum_core_assert(length >= 5);
+	for (int i : range(length)) {
+		for (int t : range(num_tasks)) {
+			auto val = shift_costs.at(i).at(t);
+			minimum_core_assert(-1e10 <= val && val <= 1e10);
+		}
+	}
+
+	minimum::algorithms::SortedDAG<double, 0, 0> dag(length * num_tasks + 2);
+
+	auto node = [num_tasks](int i, int task) { return i * num_tasks + task + 1; };
+
+	for (int t : range(num_tasks)) {
+		dag.add_edge(source,
+		             node(3, t),
+		             shift_costs.at(0).at(t) + shift_costs.at(1).at(t) + shift_costs.at(2).at(t)
+		                 + shift_costs.at(3).at(t));
+		dag.add_edge(node(length - 1, t), sink);
+	}
+
+	for (int i : range(length - 1)) {
+		for (int t : range(num_tasks)) {
+			// Can always stay on the same task.
+			dag.add_edge(node(i, t), node(i + 1, t), shift_costs.at(i + 1).at(t));
+			// Switching tasks require waiting 1h.
+			if (i < length - 4) {
+				for (int t2 : range(num_tasks)) {
+					if (t != t2) {
+						double cost = shift_costs.at(i + 1).at(t2) + shift_costs.at(i + 2).at(t2)
+						              + shift_costs.at(i + 3).at(t2) + shift_costs.at(i + 4).at(t2);
+						dag.add_edge(node(i, t), node(i + 4, t2), cost);
+					}
+				}
+			}
+		}
+	}
+
+	vector<minimum::algorithms::SolutionEntry<double>> raw_solution;
+	auto value = minimum::algorithms::shortest_path(dag, &raw_solution);
+	vector<int> solution(length, -1);
+	int node_index = raw_solution.size() - 1;
+	// Skip sink.
+	node_index = raw_solution[node_index].prev;
+	int i_prev = -1;
+	int t_prev = -1;
+	while (node_index >= 0) {
+		int i = -1;
+		int t = -1;
+		if (source < node_index) {
+			i = (node_index - 1) / num_tasks;
+			t = (node_index - 1) % num_tasks;
+		}
+		if (t_prev >= 0) {
+			for (int idx = i + 1; idx <= i_prev; ++idx) {
+				solution[idx] = t_prev;
+			}
+		}
+		i_prev = i;
+		t_prev = t;
+
+		node_index = raw_solution[node_index].prev;
+	}
+
+	double computed_value = 0;
+	for (int i : range(length)) {
+		auto t = solution[i];
+		minimum_core_assert(0 <= t && t < num_tasks);
+		computed_value += shift_costs[i][t];
+	}
+	minimum_core_assert(relative_error(computed_value, value) < 1e-7);
+	// cerr << "-- Value is " << value << endl;
+	return solution;
+}
+
+void remove_days_with_fixes(const RetailProblem& problem,
+                            vector<int>* days,
+                            vector<vector<int>> fixes) {
+	for (auto itr = days->begin(); itr != days->end(); ++itr) {
+		bool day_ok = true;
+		for (int p = problem.day_start(*itr); p < problem.day_start(*itr + 1) && day_ok; ++p) {
+			for (auto t : range(problem.num_tasks)) {
+				if (fixes[p][t] == 1) {
+					day_ok = false;
+					break;
+				}
+			}
+		}
+		if (!day_ok) {
+			itr = days->erase(itr);
+			itr--;
+		}
+	}
+}
+
 bool create_roster_graph(const RetailProblem& problem,
                          const vector<double>& duals,
                          int staff_index,
@@ -182,22 +312,10 @@ bool create_roster_graph(const RetailProblem& problem,
 	vector<int> graph_solution;
 	bool feasible = false;
 	for (int attempts = 1; attempts <= 10; ++attempts) {
-		try {
-			auto cost =
-			    resource_constrained_shortest_path(dag,
-			                                       problem.staff.at(staff_index).min_minutes / 15,
-			                                       problem.staff.at(staff_index).max_minutes / 15,
-			                                       &graph_solution);
-		} catch (std::exception& e) {
-			if (attempts == 1) {
-				throw std::runtime_error(
-				    to_string("Shortest path failed in attempt ", attempts, ": ", e.what()));
-			} else {
-				// This can happen when we forbid a day. TODO: Forbid another day when the picked
-				// day has a fix.
-				return false;
-			}
-		}
+		resource_constrained_shortest_path(dag,
+		                                   problem.staff.at(staff_index).min_minutes / 15,
+		                                   problem.staff.at(staff_index).max_minutes / 15,
+		                                   &graph_solution);
 		feasible = true;
 
 		//
@@ -221,11 +339,13 @@ bool create_roster_graph(const RetailProblem& problem,
 			} else {
 				if (consecutive_working_days.size() > 5) {
 					feasible = false;
+
+					remove_days_with_fixes(problem, &consecutive_working_days, fixes);
 					uniform_int_distribution<int> random_index(0,
 					                                           consecutive_working_days.size() - 1);
-					int day = consecutive_working_days[random_index(*rng)];
+					int day_to_remove = consecutive_working_days[random_index(*rng)];
 					for (int p : range(problem.periods.size())) {
-						if (problem.periods[p].day == day) {
+						if (problem.periods[p].day == day_to_remove) {
 							dag.disconnect_node(builder.have_worked_node(p));
 						}
 					}
@@ -239,23 +359,98 @@ bool create_roster_graph(const RetailProblem& problem,
 	}
 
 	if (feasible) {
-		minimum_core_assert(problem.num_tasks == 1, "Need code for this.");
-		for (int i = 0; i + 1 < graph_solution.size(); ++i) {
-			int node1 = graph_solution[i];
-			int node2 = graph_solution[i + 1];
-			if (builder.is_not_worked(node1) && builder.is_have_worked(node2)) {
-				int p1 = builder.get_period(node1);
-				int p2 = builder.get_period(node2);
-				for (int p = p1; p <= p2; ++p) {
-					(*solution)[p][0] = 1;
+		if (problem.num_tasks == 1) {
+			for (int i = 0; i + 1 < graph_solution.size(); ++i) {
+				int node1 = graph_solution[i];
+				int node2 = graph_solution[i + 1];
+				if (builder.is_not_worked(node1) && builder.is_have_worked(node2)) {
+					int p1 = builder.get_period(node1);
+					int p2 = builder.get_period(node2);
+					for (int p = p1; p <= p2; ++p) {
+						(*solution)[p][0] = 1;
+					}
+				} else {
+					minimum_core_assert(!builder.is_have_worked(node2));
 				}
-			} else {
-				minimum_core_assert(!builder.is_have_worked(node2));
+			}
+		} else {
+			for (int i = 0; i + 1 < graph_solution.size(); ++i) {
+				const int node1 = graph_solution[i];
+				const int node2 = graph_solution[i + 1];
+				if (builder.is_not_worked(node1) && builder.is_have_worked(node2)) {
+					const int p1 = builder.get_period(node1);
+					const int p2 = builder.get_period(node2);
+
+					vector<vector<double>> shift_costs(p2 - p1 + 1,
+					                                   vector<double>(problem.num_tasks, 0.0));
+					for (int p = p1; p <= p2; ++p) {
+						bool has_fix = false;
+						for (int t : range(problem.num_tasks)) {
+							if (fixes.at(p).at(t) == 1) {
+								shift_costs[p - p1][t] = -1e7;
+								minimum_core_assert(!has_fix);
+								has_fix = true;
+							} else if (fixes.at(p).at(t) == 0) {
+								shift_costs[p - p1][t] = 1e7;
+								minimum_core_assert(!has_fix);
+								has_fix = true;
+							} else {
+								int c = problem.cover_constraint_index(p, t);
+								int row = problem.staff.size() + c;
+								double dual = duals.at(row);
+								shift_costs[p - p1][t] = -dual;
+							}
+						}
+					}
+
+					const auto shift_solution = create_retail_shift(shift_costs);
+					minimum_core_assert(shift_solution.size() == p2 - p1 + 1);
+					for (int p = p1, sol_index = 0; p <= p2; ++p, ++sol_index) {
+						const int picked_task = shift_solution[sol_index];
+						(*solution)[p][picked_task] = 1;
+						for (int t : range(problem.num_tasks)) {
+							if (fixes.at(p).at(t) == 1) {
+								if (picked_task != t) {
+									// The solver did not respect our fixes? This can happen in the
+									// following situation. Consider the following fixes:
+									//
+									// time →
+									//
+									// *  1  1  1  *  0  0  0  1  ...
+									//    ↑
+									//    |
+									//    | Start of shift
+									//
+									// (from a real case)
+									//
+									// There is no way to respect these fixes with the given shift
+									// start. A more common scenario is prevented by the "subtle"
+									// code at the start of this function.
+									//
+									// We could use a SAT solver to prove that the second star has
+									// to be a 0 before solving the first graph problem, but let's
+									// leave that for future work.
+									//
+									// We can not create a legal shift here so we abort.
+									cerr << "-- Pricing: unable to handle fixes in period " << p
+									     << " task " << t << " picked " << picked_task
+									     << ". Staff is " << staff_index << ".\n";
+									return false;
+								}
+							} else if (fixes.at(p).at(t) == 0) {
+								minimum_core_assert(picked_task != t);
+							}
+						}
+					}
+				} else {
+					minimum_core_assert(!builder.is_have_worked(node2));
+				}
 			}
 		}
+
+		problem.check_feasibility_for_staff(staff_index, *solution);
 	}
 
-	minimum_core_assert(feasible);
 	return feasible;
 }
 
