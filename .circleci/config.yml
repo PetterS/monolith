@@ -35,7 +35,7 @@ jobs:
           command: |
             cd ..
             cd build
-            make
+            make -j2
 
       - run:
           name: Test Core

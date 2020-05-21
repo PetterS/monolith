@@ -3,6 +3,7 @@
 #include <catch.hpp>
 
 #include <minimum/core/grid.h>
+#include <minimum/core/random.h>
 #include <minimum/linear/colgen/retail_scheduling_pricing.h>
 #include <minimum/linear/data/util.h>
 #include <minimum/linear/retail_scheduling.h>
@@ -33,6 +34,35 @@ TEST_CASE("simple_pricing") {
 		CHECK(create_roster_graph(problem, duals, staff_index, fixes, &solution, &rng));
 		CHECK(solution[p][0] == 1);
 		problem.check_feasibility_for_staff(staff_index, solution);
+	}
+}
+
+TEST_CASE("pricing_with_multiple_tasks_and_fixes") {
+	auto problem = get_problem("10_7_20_3");
+
+	auto fixes = make_grid<int>(problem.periods.size(), problem.num_tasks, []() { return -1; });
+	auto solution = make_grid<int>(problem.periods.size(), problem.num_tasks);
+
+	auto rng = seeded_engine<mt19937>();
+	uniform_real_distribution<double> eps(-1, 1);
+	vector<double> duals(problem.staff.size() + problem.periods.size() * problem.num_tasks, 0);
+	for (auto& dual : duals) {
+		dual = eps(rng);
+	}
+
+	for (int p = 4; p < problem.periods.size() - 4; p += 20) {
+		fixes[p][1] = 1;
+		fixes[p - 1][2] = 1;
+
+		const int staff_index = 0;
+		REQUIRE(create_roster_graph(problem, duals, staff_index, fixes, &solution, &rng));
+		CHECK(solution[p][1] == 1);
+		CHECK(solution[p - 1][2] == 1);
+		problem.check_feasibility_for_staff(staff_index, solution);
+
+		fixes[p][1] = -1;
+		fixes[p - 1][2] = -1;
+		break;
 	}
 }
 

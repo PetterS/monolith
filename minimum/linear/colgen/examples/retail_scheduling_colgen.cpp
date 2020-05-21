@@ -25,6 +25,8 @@ using namespace minimum::linear::colgen;
 
 DEFINE_int32(num_solutions, 1, "Number of solutions to compute. Default: 1.");
 
+DECLARE_bool(save_solution);
+
 class ShiftShedulingColgenProblem : public SetPartitioningProblem {
    public:
 	ShiftShedulingColgenProblem(RetailProblem problem_)
@@ -285,7 +287,7 @@ int main_program(int num_args, char* args[]) {
 			cerr << "Colgen done.\n";
 			auto elapsed_time = wall_time() - start_time;
 			cerr << "Elapsed time : " << elapsed_time << "s.\n";
-			Timer timer("Saving solution...");
+			Timer timer("Checking solution...");
 			auto solution = colgen_problem.get_solution();
 			int objective_value = -1;
 			try {
@@ -298,14 +300,18 @@ int main_program(int num_args, char* args[]) {
 				timer.fail();
 				cerr << error.what() << endl;
 			}
+			timer.OK();
 			if (objective_value >= 0) {
-				insert.execute(filename_base,
-				               objective_value,
-				               problem.solution_to_string(solution),
-				               elapsed_time,
-				               version::revision,
-				               get_all_command_line_options());
-				timer.OK();
+				if (FLAGS_save_solution) {
+					Timer timer("Saving solution...");
+					insert.execute(filename_base,
+					               objective_value,
+					               problem.solution_to_string(solution),
+					               elapsed_time,
+					               version::revision,
+					               get_all_command_line_options());
+					timer.OK();
+				}
 				cerr << "Objective value: " << objective_value << endl;
 			}
 		}
