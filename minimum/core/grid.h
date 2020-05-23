@@ -73,6 +73,20 @@ auto make_grid(std::size_t s, std::size_t s2, std::size_t s3) {
 }
 
 template <typename T, typename Index>
+class Grid2D {
+   public:
+	Grid2D(Index m_, Index n_) : n(n_), data(new T[m_ * n_]) {}
+	Grid2D(const Grid2D& other) = delete;
+	~Grid2D() { delete[] data; }
+	inline T& operator()(Index i, Index j) { return data[i * n + j]; }
+	inline const T& operator()(Index i, Index j) const { data[i * n + j]; }
+
+   private:
+	Index n;
+	T* data;
+};
+
+template <typename T, typename Index>
 class Grid3D {
    public:
 	Grid3D(Index m_, Index n_, Index o_) : o(o_), on(o_ * n_), data(new T[m_ * n_ * o_]) {}

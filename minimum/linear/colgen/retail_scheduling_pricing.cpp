@@ -1,9 +1,12 @@
+#include <numeric>
 #include <random>
 #include <vector>
 
 #include <minimum/algorithms/dag.h>
 #include <minimum/core/numeric.h>
+#include <minimum/core/random.h>
 #include <minimum/core/range.h>
+#include <minimum/core/time.h>
 #include <minimum/linear/colgen/retail_scheduling_pricing.h>
 
 using namespace std;
@@ -346,7 +349,13 @@ bool create_roster_graph(const RetailProblem& problem,
 					int day_to_remove = consecutive_working_days[random_index(*rng)];
 					for (int p : range(problem.periods.size())) {
 						if (problem.periods[p].day == day_to_remove) {
-							dag.disconnect_node(builder.have_worked_node(p));
+							dag.clear_edges(builder.not_worked_node(p));
+							if (p < problem.periods.size() - 1) {
+								dag.add_edge(builder.not_worked_node(p),
+								             builder.not_worked_node(p + 1));
+							} else {
+								dag.add_edge(builder.not_worked_node(p), builder.sink());
+							}
 						}
 					}
 				}
@@ -452,6 +461,132 @@ bool create_roster_graph(const RetailProblem& problem,
 	}
 
 	return feasible;
+}
+
+namespace {
+long long penalty(const RetailProblem& problem,
+                  const vector<vector<vector<int>>>& solution,
+                  vector<double>* duals) {
+	auto cover = make_grid<int>(problem.periods.size(), problem.num_tasks);
+
+	for (int staff_index : range(problem.staff.size())) {
+		for (int period_index : range(problem.periods.size())) {
+			for (int t : range(problem.num_tasks)) {
+				if (solution.at(staff_index).at(period_index).at(t) == 1) {
+					cover.at(period_index).at(t) += 1;
+				}
+			}
+		}
+	}
+
+	long long objective = 0;
+	duals->resize(problem.staff.size() + problem.periods.size() * problem.num_tasks);
+
+	for (int period_index : range(problem.periods.size())) {
+		auto& period = problem.periods.at(period_index);
+		for (int t : range(problem.num_tasks)) {
+			auto current = cover.at(period_index).at(t);
+			int objective_change = 0;
+			int dual_change = 0;
+			if (current < period.min_cover.at(t)) {
+				auto delta = period.min_cover.at(t) - current;
+				objective_change = 10000 * delta;
+				dual_change = objective_change;
+			} else if (current > period.max_cover.at(t)) {
+				auto delta = current - period.max_cover.at(t);
+				objective_change = delta * delta;
+				dual_change = -objective_change;
+			}
+			objective += objective_change;
+			duals->at(problem.staff.size() + problem.cover_constraint_index(period_index, t)) =
+			    dual_change;
+		}
+	}
+
+	return objective;
+}
+}  // namespace
+
+void retail_local_search(
+    const RetailProblem& problem,
+    std::function<bool(const RetailLocalSearchInfo& info,
+                       const std::vector<std::vector<std::vector<int>>>& solution)> callback) {
+	auto rng = repeatably_seeded_engine<mt19937>(42);
+	vector<int> staff_indices(problem.staff.size());
+	iota(staff_indices.begin(), staff_indices.end(), 0);
+
+	auto solution = make_grid<int>(problem.staff.size(), problem.periods.size(), problem.num_tasks);
+	auto existing_solution = make_grid<int>(problem.periods.size(), problem.num_tasks);
+	auto fixes = make_grid<int>(problem.periods.size(), problem.num_tasks, []() { return -1; });
+	vector<double> duals;
+
+	long long objective = penalty(problem, solution, &duals);
+	int num_restarts = 0;
+	long long best_objective = numeric_limits<long long>::max();
+
+	cerr << "-- Empty objective: " << objective << endl;
+	double start_time = wall_time();
+	for (int iteration = 1;; ++iteration) {
+		long long prev_objective = objective;
+
+		shuffle(staff_indices.begin(), staff_indices.end(), rng);
+		for (int staff_index : staff_indices) {
+			existing_solution = solution[staff_index];
+			for (int p : range(problem.periods.size())) {
+				for (int t : range(problem.num_tasks)) {
+					solution[staff_index][p][t] = 0;
+				}
+			}
+			penalty(problem, solution, &duals);
+
+			bool success = create_roster_graph(
+			    problem, duals, staff_index, fixes, &solution[staff_index], &rng);
+			long long new_objective = penalty(problem, solution, &duals);
+
+			if (!success || (iteration > 1 && new_objective > objective)) {
+				solution[staff_index] = existing_solution;
+			} else {
+				objective = new_objective;
+			}
+		}
+		double elapsed_time = wall_time() - start_time;
+
+		objective = penalty(problem, solution, &duals);
+		if (objective < best_objective) {
+			best_objective = objective;
+			cerr << "-- Iteration " << iteration << ": New best objective: " << objective << " ("
+			     << num_restarts << " restarts) in " << elapsed_time << "s.\n";
+
+			bool feasible = false;
+			int computed_objective_value = objective;
+			try {
+				computed_objective_value = problem.check_feasibility(solution);
+				feasible = true;
+			} catch (...) {
+				// Infeasible.
+			}
+			minimum_core_assert(computed_objective_value == objective);
+			if (feasible) {
+				RetailLocalSearchInfo info;
+				info.computed_objective_value = computed_objective_value;
+				info.elapsed_time = elapsed_time;
+				if (!callback(info, solution)) {
+					break;
+				}
+			}
+		}
+
+		if (objective >= prev_objective) {
+			num_restarts++;
+			iteration = 0;
+			solution =
+			    make_grid<int>(problem.staff.size(), problem.periods.size(), problem.num_tasks);
+		}
+
+		if (elapsed_time > 10) {
+			break;
+		}
+	}
 }
 
 }  // namespace colgen

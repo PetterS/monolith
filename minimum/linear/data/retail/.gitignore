@@ -1,1 +1,5 @@
 *.ros
+*.xml
+*.log
+*.sqlite3
+
