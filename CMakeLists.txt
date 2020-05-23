@@ -133,6 +133,7 @@ if (MSVC)
   add_definitions("/wd4267")
   # Signed/unsigned.
   add_definitions("/wd4018")
+  add_definitions("/wd4146")
   # https://github.com/google/protobuf/tree/master/cmake
   add_definitions("/wd4251")
   # Non dll-interface class 'google::protobuf::Message' used as base for dll-interface class

@@ -235,7 +235,6 @@ int main_program(int num_args, char* args[]) {
 	string filename_base = args[2];
 	ifstream input(filename_base + ".txt");
 	const RetailProblem problem(input);
-	problem.print_info();
 
 	auto insert = db.make_statement<>(
 	    "insert or ignore into solutions(name, objective, solution, solve_time, timestamp, "
@@ -263,8 +262,8 @@ int main_program(int num_args, char* args[]) {
 			return 1;
 		}
 		int objective_value = from_string<int>(args[3]);
-		auto select = db.make_statement<string, double, string>(
-		    "select solution, solve_time, timestamp from solutions "
+		auto select = db.make_statement<string, double, string, string>(
+		    "select solution, solve_time, timestamp, options from solutions "
 		    "where name == ?1 and objective == ?2;");
 		auto result = select.execute(filename_base, objective_value).get();
 		auto solution = problem.string_to_solution(get<0>(result));
@@ -272,9 +271,11 @@ int main_program(int num_args, char* args[]) {
 		                      filename_base + ".xml",
 		                      solution,
 		                      get<1>(result),
-		                      get<2>(result));
+		                      get<2>(result),
+		                      get<3>(result));
 		cout << "Solution saved to " << filename_base << ".xml.\n";
 	} else if (command == "run") {
+		problem.print_info();
 		ShiftShedulingColgenProblem colgen_problem(problem);
 		int best_objective_value = 1000'000'000;
 		vector<vector<vector<int>>> best_solution;

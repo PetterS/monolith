@@ -102,6 +102,8 @@ class SortedDAG {
 		return nodes[i].edges.emplace_back(j, cost);
 	}
 
+	void clear_edges(int i) { nodes.at(i).edges.clear(); }
+
 	std::string str() const {
 		std::string out;
 		for (int i : minimum::core::range(nodes.size())) {
@@ -503,6 +505,15 @@ T resource_constrained_shortest_path(SortedDAG<T, num_weights, 0> dag,
 	return cost;
 }
 
+namespace internal {
+template <typename T>
+struct WeightedEntry {
+	std::tuple<int, int> prev = std::make_tuple(-1, -1);
+	T cost = std::numeric_limits<T>::max() / 2;
+	bool valid() { return get<0>(prev) >= 0; }
+};
+}  // namespace internal
+
 template <typename T, int num_weights, int num_edge_weights>
 T resource_constrained_shortest_path(const SortedDAG<T, num_weights, num_edge_weights>& dag,
                                      int lower_bound,
@@ -528,13 +539,13 @@ T resource_constrained_shortest_path(const SortedDAG<T, num_weights, num_edge_we
 
 	// partial[i][c] is the smallest cost to reach node i consuming c
 	// resource.
-	auto partial = minimum::core::make_grid<SolutionEntry<T>>(dag.size(), upper_bound + 1);
+	minimum::core::Grid2D<internal::WeightedEntry<T>, int> partial(dag.size(), upper_bound + 1);
 
-	partial[0][dag.get_node(0).weights[0]].cost = dag.get_node(0).cost;
+	partial(0, dag.get_node(0).weights[0]).cost = dag.get_node(0).cost;
 
 	for (auto i : range(dag.size())) {
 		for (auto c : range(upper_bound + 1)) {
-			if (i > 0 && partial[i][c].prev < 0) {
+			if (i > 0 && !partial(i, c).valid()) {
 				// We cannot reach node i with c weight.
 				continue;
 			}
@@ -550,10 +561,10 @@ T resource_constrained_shortest_path(const SortedDAG<T, num_weights, num_edge_we
 					continue;
 				}
 				// Cost of the path up to and including the edge’s destination.
-				auto cost = partial[i][c].cost + dag.get_node(edge.to).cost + edge.cost;
-				if (cost < partial[edge.to][weight].cost) {
-					partial[edge.to][weight].cost = cost;
-					partial[edge.to][weight].prev = i;
+				auto cost = partial(i, c).cost + dag.get_node(edge.to).cost + edge.cost;
+				if (cost < partial(edge.to, weight).cost) {
+					partial(edge.to, weight).cost = cost;
+					partial(edge.to, weight).prev = std::make_tuple(i, c);
 				}
 			}
 		}
@@ -562,10 +573,10 @@ T resource_constrained_shortest_path(const SortedDAG<T, num_weights, num_edge_we
 	T best = std::numeric_limits<T>::max();
 	int best_c = -1;
 	for (auto c : range(lower_bound, upper_bound + 1)) {
-		if (partial.back()[c].prev >= 0) {
+		if (partial(dag.size() - 1, c).valid()) {
 			// std::cerr << "-- There is a path with cost " << partial.back()[c].cost
 			//           << " and " << c << " weight.\n";
-			auto cost = partial.back()[c].cost;
+			auto cost = partial(dag.size() - 1, c).cost;
 			if (cost < best) {
 				best = cost;
 				best_c = c;
@@ -576,27 +587,16 @@ T resource_constrained_shortest_path(const SortedDAG<T, num_weights, num_edge_we
 
 	int i = dag.size() - 1;
 	solution.push_back(i);
-	int current_c = best_c;
+	int c = best_c;
 	while (true) {
-		if (partial[i][current_c].prev < 0) {
+		std::tie(i, c) = partial(i, c).prev;
+		if (i < 0) {
 			break;
-		}
-
-		int i_prev = i;
-		i = partial[i][current_c].prev;
-		current_c -= dag.get_node(i_prev).weights[0];
-		if constexpr (num_edge_weights > 0) {
-			for (auto& edge : dag.get_node(i).edges) {
-				if (edge.to == i_prev) {
-					current_c -= edge.weights[0];
-					break;
-				}
-			}
 		}
 		solution.push_back(i);
 	}
 	reverse(solution.begin(), solution.end());
-	return partial.back()[best_c].cost;
+	return partial(dag.size() - 1, best_c).cost;
 }
 
 namespace internal {
@@ -723,13 +723,12 @@ T resource_constrained_shortest_path(const SortedDAG<T, num_weights, num_edge_we
 	solution.push_back(i);
 	int c = best_c;
 	int d = best_d;
-	while (i >= 0) {
-		const auto& prev = partial(i, c, d).prev;
-		if (get<0>(prev) < 0) {
+	while (true) {
+		std::tie(i, c, d) = partial(i, c, d).prev;
+		if (i < 0) {
 			break;
 		}
-		solution.push_back(get<0>(prev));
-		std::tie(i, c, d) = prev;
+		solution.push_back(i);
 	}
 	reverse(solution.begin(), solution.end());
 	return best;

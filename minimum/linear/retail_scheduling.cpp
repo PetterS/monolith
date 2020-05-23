@@ -189,6 +189,8 @@ void RetailProblem::print_info() const {
 
 void RetailProblem::check_feasibility_for_staff(
     const int staff_index, const std::vector<std::vector<int>>& solution) const {
+	auto& member = staff.at(staff_index);
+	int minutes_worked = 0;
 	// Shift length.
 	int current_task = -1;
 	int current_period = -1;
@@ -200,6 +202,7 @@ void RetailProblem::check_feasibility_for_staff(
 			if (solution[p][t] != 0) {
 				check(task == -1, "Multiple tasks in the same period.");
 				task = t;
+				minutes_worked += 15;
 			}
 		}
 
@@ -214,9 +217,17 @@ void RetailProblem::check_feasibility_for_staff(
 				final_p = p;
 			}
 			int task_length = (final_p - current_period + 1) * 15;
-			minimum_core_assert(task_length >= 60);
+			check(task_length >= 60, "Task length of ", task_length, " is too short.");
 		}
 	}
+	check(member.min_minutes <= minutes_worked && minutes_worked <= member.max_minutes,
+	      member.min_minutes,
+	      " <= ",
+	      minutes_worked,
+	      " <= ",
+	      member.max_minutes,
+	      " is not fulfilled for staff ",
+	      member.id);
 }
 
 // Returns the solution value and throws if it is infeasible.
@@ -234,9 +245,8 @@ int RetailProblem::check_feasibility(
 					cover.at(period_index).at(t) += 1;
 				}
 			}
-
-			check_feasibility_for_staff(staff_index, solution.at(staff_index));
 		}
+		check_feasibility_for_staff(staff_index, solution.at(staff_index));
 	}
 
 	int objective = 0;
@@ -304,7 +314,8 @@ int RetailProblem::save_solution(std::string problem_filename,
                                  std::string filename,
                                  const std::vector<std::vector<std::vector<int>>>& solution,
                                  double solution_time,
-                                 std::string timestamp) const {
+                                 std::string timestamp,
+                                 std::string solution_method) const {
 	auto objective_value = check_feasibility(solution);
 
 	std::ofstream file(filename);
@@ -315,6 +326,7 @@ int RetailProblem::save_solution(std::string problem_filename,
 	file << "<TimeStamp>" << timestamp << "</TimeStamp>\n";
 	file << "<Author>Petter Strandmark</Author>\n";
 	file << "<Reference>\n";
+	file << "  " << solution_method << "\n";
 	file << "</Reference>\n";
 	file << "<Machine></Machine>\n";
 	int days = solution_time / 60 / 60 / 24;
@@ -326,7 +338,8 @@ int RetailProblem::save_solution(std::string problem_filename,
 	for (int staff_index = 0; staff_index < staff.size(); ++staff_index) {
 		auto& current = solution[staff_index];
 		file << "<Employee ID=\"" << staff[staff_index].id << "\">\n";
-
+		int working_minutes = 0;
+		int working_minutes_written = 0;
 		int current_task = -1;
 		int current_period = -1;
 		for (int p = 0; p < periods.size(); ++p) {
@@ -336,8 +349,9 @@ int RetailProblem::save_solution(std::string problem_filename,
 			int task = -1;
 			for (int t : range(num_tasks)) {
 				if (current[p][t] != 0) {
-					check(task == -1, "Multiple tasks in the same period.");
+					minimum_core_assert(task == -1);
 					task = t;
+					working_minutes += 15;
 				}
 			}
 
@@ -366,7 +380,7 @@ int RetailProblem::save_solution(std::string problem_filename,
 				current_period = p;
 			} else if (current_task != -1 && (current_task != task || last_period)) {
 				int final_p = p - 1;
-				if (last_period) {
+				if (current_task == task && last_period) {
 					final_p = p;
 				}
 				int length = (final_p - current_period + 1) * 15;
@@ -377,6 +391,7 @@ int RetailProblem::save_solution(std::string problem_filename,
 				    length,
 				    current_task + 1,
 				    length);
+				working_minutes_written += length;
 				current_task = task;
 				current_period = p;
 				if (task == -1 || last_period) {
@@ -385,6 +400,9 @@ int RetailProblem::save_solution(std::string problem_filename,
 			}
 		}
 		file << "</Employee>\n";
+		minimum_core_assert(working_minutes_written == working_minutes,
+		                    "Solution error for employee ",
+		                    staff[staff_index].id);
 	}
 	file << "</Solution>\n";
 	return objective_value;
