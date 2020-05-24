@@ -43,7 +43,10 @@ void SqliteDb::create_function(const char* name,
 	    == SQLITE_OK);
 }
 
-SqliteDb::SqliteDb(SqliteDb&& other) { *this = move(other); }
+SqliteDb::SqliteDb(SqliteDb&& other) {
+	c_db = nullptr;
+	*this = move(other);
+}
 
 SqliteDb& SqliteDb::operator=(SqliteDb&& other) noexcept {
 	sqlite3_close_v2(c_db);  // nullptr is OK.
