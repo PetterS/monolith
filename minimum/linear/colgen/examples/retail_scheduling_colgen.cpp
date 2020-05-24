@@ -24,6 +24,7 @@ using namespace minimum::linear;
 using namespace minimum::linear::colgen;
 
 DEFINE_int32(num_solutions, 1, "Number of solutions to compute. Default: 1.");
+DEFINE_bool(local_search, false, "Use local search to generate rosters before starting.");
 
 DECLARE_bool(save_solution);
 
@@ -89,6 +90,17 @@ class ShiftShedulingColgenProblem : public SetPartitioningProblem {
 		}
 
 		timer.OK();
+
+		if (FLAGS_local_search) {
+			retail_local_search(problem,
+			                    [&](const RetailLocalSearchInfo& info,
+			                        const vector<vector<vector<int>>>& local_solution) {
+				                    for (int p = 0; p < problem.staff.size(); ++p) {
+					                    add_column(create_column(p, local_solution[p]));
+				                    }
+				                    return true;
+			                    });
+		}
 	}
 
 	~ShiftShedulingColgenProblem() {}
@@ -215,14 +227,26 @@ int main_program(int num_args, char* args[]) {
 	db.make_statement<>(
 	      "create unique index if not exists objective_index on solutions (name, objective);")
 	    .execute();
+	db.add_custom_function<string, string, int>("split",
+	                                            [](string s, string delim, int index) -> string {
+		                                            if (delim.size() != 1) {
+			                                            return "";
+		                                            }
+		                                            auto parts = split(s, delim[0]);
+		                                            if (0 <= index && index < parts.size()) {
+			                                            return parts[index];
+		                                            } else {
+			                                            return "";
+		                                            }
+	                                            });
 
 	if (command == "list") {
-		auto select = db.make_statement<string, int>(
-		    "select name, min(objective) from solutions "
+		auto select = db.make_statement<string, string, int>(
+		    "select cast(split(name, '_', 0) as integer) as n, name, min(objective) from solutions "
 		    "group by name "
-		    "order by name;");
+		    "order by n;");
 		for (auto& result : select.execute()) {
-			cout << get<0>(result) << ": " << GREEN << get<1>(result) << NORMAL << ".\n";
+			cout << get<1>(result) << ": " << GREEN << get<2>(result) << NORMAL << ".\n";
 		}
 		return 0;
 	}
