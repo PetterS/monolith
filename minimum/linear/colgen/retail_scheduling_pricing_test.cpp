@@ -12,11 +12,25 @@ using namespace std;
 using namespace minimum::core;
 using minimum::linear::colgen::create_retail_shift;
 using minimum::linear::colgen::create_roster_graph;
+using minimum::linear::colgen::retail_local_search;
 
 minimum::linear::RetailProblem get_problem(std::string name) {
 	auto base_dir = minimum::linear::data::get_directory();
 	std::ifstream file{base_dir + "/retail/" + name + ".txt"};
 	return {file};
+}
+
+TEST_CASE("simplest_pricing") {
+	auto problem = get_problem("0");
+	const auto fixes =
+	    make_grid<int>(problem.periods.size(), problem.num_tasks, []() { return -1; });
+	vector<double> duals(problem.staff.size() + problem.periods.size() * problem.num_tasks, 0);
+	auto solution = make_grid<int>(problem.periods.size(), problem.num_tasks);
+	mt19937 rng;
+
+	for (int staff_index = 0; staff_index < problem.staff.size(); staff_index++) {
+		CHECK(create_roster_graph(problem, duals, staff_index, fixes, &solution, &rng));
+	}
 }
 
 TEST_CASE("simple_pricing") {
@@ -35,6 +49,13 @@ TEST_CASE("simple_pricing") {
 		CHECK(solution[p][0] == 1);
 		problem.check_feasibility_for_staff(staff_index, solution);
 	}
+}
+
+TEST_CASE("simple_local_search") {
+	auto problem = get_problem("1_7_10_1");
+	minimum::linear::colgen::RetailLocalSearchParameters parameters;
+	parameters.time_limit_seconds = 0.1;
+	retail_local_search(problem, parameters);
 }
 
 TEST_CASE("pricing_with_multiple_tasks_and_fixes") {
@@ -64,6 +85,75 @@ TEST_CASE("pricing_with_multiple_tasks_and_fixes") {
 		fixes[p - 1][2] = -1;
 		break;
 	}
+}
+
+namespace {
+void run_existing_solution_test(string problem_name, string solution_name) {
+	auto rng = seeded_engine<mt19937>();
+	const auto problem = get_problem(problem_name);
+	const auto base_dir = minimum::linear::data::get_directory();
+	ifstream solution_file{base_dir + "/retail/" + solution_name + ".solution"};
+	const auto existing_solution = problem.load_solution(solution_file);
+	const auto fixes =
+	    make_grid<int>(problem.periods.size(), problem.num_tasks, []() { return -1; });
+
+	for (int staff_index : range(problem.staff.size())) {
+		vector<double> duals(problem.staff.size() + problem.periods.size() * problem.num_tasks, 0);
+		auto solution = make_grid<int>(problem.periods.size(), problem.num_tasks);
+		for (int period_index : range(problem.periods.size())) {
+			for (int t : range(problem.num_tasks)) {
+				auto current = existing_solution[staff_index].at(period_index).at(t);
+				double dual_change;
+				if (current == 1) {
+					dual_change = 1000;
+				} else {
+					dual_change = -1000;
+				}
+				duals.at(problem.staff.size() + problem.cover_constraint_index(period_index, t)) =
+				    dual_change;
+			}
+		}
+
+		REQUIRE(create_roster_graph(problem, duals, staff_index, fixes, &solution, &rng));
+
+		for (int period_index : range(problem.periods.size())) {
+			for (int t : range(problem.num_tasks)) {
+				if (solution.at(period_index).at(t)
+				    != existing_solution[staff_index][period_index][t]) {
+					auto& period = problem.periods[period_index];
+					auto& person = problem.staff[staff_index];
+					auto msg = to_string("Mismatch for staff ",
+					                     person.id,
+					                     " at day ",
+					                     period.day,
+					                     ", ",
+					                     period.human_readable_time,
+					                     ", task ",
+					                     t,
+					                     ". Wanted ",
+					                     existing_solution[staff_index][period_index][t],
+					                     ".");
+					FAIL(msg);
+				}
+			}
+		}
+	}
+}
+}  // namespace
+
+TEST_CASE("existing_good_solution_is_feasible_for_pricing") {
+	// Very good test that ensures a resonably good solution is actually feasible for the pricer.
+	// This small test case has a few good features:
+	//   - A single task, so that the heuristic for picking tasks is not tested here.
+	//     (should still work though)
+	//   - Short enough so that the heuristic for disallowing consecutive days is not used.
+	//     (but the duals are created so it should work anyway)
+	run_existing_solution_test("1_7_10_1", "test_solution_1a");
+}
+
+TEST_CASE("existing_good_solution_with_multiple_shifts_is_feasible_for_pricing") {
+	// Same as the previous test but with several tasks.
+	run_existing_solution_test("10_7_20_3", "test_solution_10a");
 }
 
 TEST_CASE("create_retail_shift_2a") {

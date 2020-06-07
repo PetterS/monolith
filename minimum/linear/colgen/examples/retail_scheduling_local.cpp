@@ -24,6 +24,12 @@ using namespace minimum::linear;
 using namespace minimum::linear::colgen;
 using namespace std;
 
+DEFINE_double(time_limit_seconds,
+              10.0,
+              "The time limit in seconds before the search is terminated.");
+
+DECLARE_bool(save_solution);
+
 string get_all_command_line_options() {
 	stringstream sout_flags;
 	vector<gflags::CommandLineFlagInfo> all_flags;
@@ -52,23 +58,38 @@ int main_program(int num_args, char* args[]) {
 	    "insert or ignore into solutions(name, objective, solution, solve_time, timestamp, "
 	    "version, options)"
 	    "VALUES(?1, ?2, ?3, ?4, strftime(\'%Y-%m-%dT%H:%M:%S\', \'now\'), ?5, ?6);");
+	int earlier_best_value =
+	    db.make_statement<int>("select min(objective) from solutions where name = ?1;")
+	        .execute(base_name)
+	        .get<0>();
+	cerr << "-- Earlier best solution is " << earlier_best_value << "\n";
+
 	int best_value = numeric_limits<int>::max();
 	double best_time = -1;
-	auto callback = [&](const RetailLocalSearchInfo& info,
-	                    const vector<vector<vector<int>>>& solution) {
+	RetailLocalSearchParameters params;
+	if (num_args > 2) {
+		check(!FLAGS_save_solution, "Can not save new solutions with a solution already given.");
+		ifstream fin(args[2]);
+		params.solution = problem.load_solution(fin);
+	}
+	params.callback = [&](const RetailLocalSearchInfo& info,
+	                      const vector<vector<vector<int>>>& solution) {
 		if (info.computed_objective_value < best_value) {
 			best_value = info.computed_objective_value;
 			best_time = info.elapsed_time;
 		}
-		insert.execute(base_name,
-		               info.computed_objective_value,
-		               problem.solution_to_string(solution),
-		               info.elapsed_time,
-		               version::revision,
-		               "local_search " + get_all_command_line_options());
+		if (FLAGS_save_solution && info.computed_objective_value < earlier_best_value) {
+			insert.execute(base_name,
+			               info.computed_objective_value,
+			               problem.solution_to_string(solution),
+			               info.elapsed_time,
+			               version::revision,
+			               "local_search " + get_all_command_line_options());
+		}
 		return true;
 	};
-	retail_local_search(problem, callback);
+	params.time_limit_seconds = FLAGS_time_limit_seconds;
+	retail_local_search(problem, params);
 	cout << base_name << " " << best_value << " " << best_time << endl;
 	return 0;
 }

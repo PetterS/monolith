@@ -5,6 +5,7 @@
 #include <string_view>
 
 #include <absl/strings/str_format.h>
+#include <rapidxml.hpp>
 
 #include <minimum/core/check.h>
 #include <minimum/core/grid.h>
@@ -89,6 +90,18 @@ RetailProblem::RetailProblem(std::istream& file) {
 		person.id = parts[0];
 		person.min_minutes = minimum::core::from_string<int>(parts[1]);
 		person.max_minutes = minimum::core::from_string<int>(parts[2]);
+
+		if (person.min_minutes % 15 != 0) {
+			// A minimum number of minutes of 29 is equivalent to 30 because
+			// all shifts are divisible by 15.
+			person.min_minutes += (15 - (person.min_minutes % 15));
+		}
+		if (person.max_minutes % 15 != 0) {
+			// A maximum number of minutes of 32 is equivalent to 30 because
+			// all shifts are divisible by 15.
+			person.max_minutes -= person.max_minutes % 15;
+		}
+
 		staff.emplace_back(person);
 	}
 
@@ -121,9 +134,8 @@ RetailProblem::RetailProblem(std::istream& file) {
 		period.day = day;
 		period.min_cover[task] = minimum::core::from_string<int>(parts[3]);
 		period.max_cover[task] = minimum::core::from_string<int>(parts[4]);
-		period.can_start = day < num_days
-		                   && ((6 * 4 <= hour4 && hour4 <= 10 * 4)
-		                       || (14 * 4 <= hour4 && hour4 <= 18 * 4) || (20 * 4 <= hour4));
+		period.can_start = hour4 == 0 || (6 * 4 <= hour4 && hour4 <= 10 * 4)
+		                   || (14 * 4 <= hour4 && hour4 <= 18 * 4) || (20 * 4 <= hour4);
 	}
 	// Sanity check that all periods have been present in the problem formulation.
 	for (auto& period : periods) {
@@ -139,7 +151,7 @@ int RetailProblem::time_to_hour4(const std::string& s) const {
 	auto parts = minimum::core::split(s, '-');
 	minimum::core::check(parts.size() == 2, "Invalid period: ", s);
 	auto hm_parts = minimum::core::split(parts[0], ':');
-	minimum::core::check(parts.size() == 2, "Invalid period: ", s);
+	minimum::core::check(hm_parts.size() == 2, "Invalid period: ", s);
 	int hour = minimum::core::from_string<int>(hm_parts[0]);
 	int minute = minimum::core::from_string<int>(hm_parts[1]);
 	minimum::core::check(
@@ -153,7 +165,7 @@ std::string RetailProblem::format_hour4(int hour4) const {
 	return absl::StrFormat("%02d:%02d:00", hour, minutes);
 }
 
-int RetailProblem::time_to_period(int day, int hour4) {
+int RetailProblem::time_to_period(int day, int hour4) const {
 	// First day starts at 06:00.
 	int period = (hour4 - 6 * 4) + (day * 24 * 4);
 	minimum_core_assert(0 <= period && period < periods.size());
@@ -355,21 +367,6 @@ int RetailProblem::save_solution(std::string problem_filename,
 				}
 			}
 
-			// if (staff_index == 0) {
-			//	if (p == 0) {
-			//		for (int i = 0; i < 6 * 4; ++i) {
-			//			std::cerr << " ";
-			//		}
-			//	}
-			//	if (p == day_start(period.day)) {
-			//		std::cerr << period.human_readable_time << " ";
-			//	}
-			//	std::cerr << (task == -1 ? "." : "1");
-			//	if (period.day < num_days && p == day_start(period.day + 1) - 1) {
-			//		std::cerr << " " << period.human_readable_time << "\n";
-			//	}
-			//}
-
 			bool last_period = p == periods.size() - 1;
 			if (current_task == -1 && task >= 0) {
 				// Start of the first task of the shift.
@@ -406,6 +403,69 @@ int RetailProblem::save_solution(std::string problem_filename,
 	}
 	file << "</Solution>\n";
 	return objective_value;
+}
+
+std::vector<std::vector<std::vector<int>>> RetailProblem::load_solution(std::istream& in) const {
+	auto solution = make_grid<int>(staff.size(), periods.size(), num_tasks);
+	check(!!in, "Invalid stream");
+
+	string contents(istreambuf_iterator<char>(in), {});
+	contents += '\0';
+	rapidxml::xml_document<> doc;
+	doc.parse<0>(contents.data());
+	auto root = doc.first_node("Solution");
+	check(root != nullptr, "Did not find <Solution>.");
+	for (auto employee = root->first_node("Employee"); employee;
+	     employee = employee->next_sibling("Employee")) {
+		auto id_attr = employee->first_attribute("ID");
+		check(id_attr != nullptr, "<Employee> without ID");
+		auto id = id_attr->value();
+		int staff_index = -1;
+		for (int i : range(staff.size())) {
+			if (staff[i].id == id) {
+				staff_index = i;
+			}
+		}
+		check(staff_index >= 0, "Invalid staff ID");
+
+		for (auto shift = employee->first_node("Shift"); shift;
+		     shift = shift->next_sibling("Shift")) {
+			auto day_node = shift->first_node("Day");
+			check(day_node != nullptr, "No <Day> node.");
+			int day = from_string<int>(day_node->value());
+			check(0 <= day && day <= num_days, "Invalid day");
+
+			auto start = shift->first_node("Start");
+			check(start != nullptr, "No <Start> node.");
+
+			auto hms_parts = minimum::core::split(start->value(), ':');
+			check(hms_parts.size() == 3, "Invalid time: ", start->value());
+			int hour = from_string<int>(hms_parts[0]);
+			int minute = from_string<int>(hms_parts[1]);
+			check(minute == 0 || minute == 15 || minute == 30 || minute == 45,
+			      "Invalid period: ",
+			      start->value());
+			int hour4 = 4 * hour + minute / 15;
+			int period = time_to_period(day, hour4);
+			for (auto task = shift->first_node("Task"); task; task = task->next_sibling("Task")) {
+				auto id_node = task->first_node("ID");
+				check(id_node != nullptr, "No <ID> node.");
+				int task_id = from_string<int>(id_node->value()) - 1;
+				check(0 <= task_id && task_id < num_tasks, "Invalid task ID");
+
+				auto length_node = task->first_node("Length");
+				check(length_node != nullptr, "No <Length> node.");
+				int length = from_string<int>(length_node->value());
+
+				check(length % 15 == 0, "Invalid task length");
+				int finish = period + length / 15;
+				for (; period < finish; ++period) {
+					solution[staff_index][period][task_id] = 1;
+				}
+			}
+		}
+	}
+	return solution;
 }
 
 }  // namespace linear

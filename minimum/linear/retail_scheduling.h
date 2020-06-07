@@ -50,7 +50,7 @@ class MINIMUM_LINEAR_API RetailProblem {
 
 	std::string format_hour4(int hour4) const;
 
-	int time_to_period(int day, int hour4);
+	int time_to_period(int day, int hour4) const;
 
 	// Returns the index of the first period of the day.
 	int day_start(int day) const;
@@ -73,6 +73,8 @@ class MINIMUM_LINEAR_API RetailProblem {
 	                  double solution_time,
 	                  std::string timestamp,
 	                  std::string solution_method) const;
+
+	std::vector<std::vector<std::vector<int>>> load_solution(std::istream& in) const;
 
    private:
 	void expect_line(std::istream& file, std::string_view expected);
