@@ -70,7 +70,7 @@ class GraphBuilder {
 
 		vector<double> best_dual(problem.periods.size());
 		for (auto p : range(problem.periods.size())) {
-			best_dual[p] = numeric_limits<double>::min();
+			best_dual[p] = numeric_limits<double>::lowest();
 			for (auto t : range(problem.num_tasks)) {
 				int c = problem.cover_constraint_index(p, t);
 				int row = problem.staff.size() + c;
@@ -82,6 +82,7 @@ class GraphBuilder {
 		}
 
 		// The subset sum structure is used to calculate sums of dual variables for shifts.
+		// subset_sum[p] - subset_sum[q] is the sum for p, p-1, ..., q+1.
 		vector<double> subset_sum(problem.periods.size());
 		subset_sum[0] = best_dual[0];
 		for (auto p : range(size_t{1}, problem.periods.size())) {
@@ -153,26 +154,24 @@ class GraphBuilder {
 
 				if (period.can_start) {
 					for (int shift_length = 6 * 4; shift_length <= 10 * 4; ++shift_length) {
-						int last_node_in_shift = p + shift_length - 1;
-						if (last_node_in_shift >= problem.periods.size()) {
+						int last_period_in_shift = p + shift_length - 1;
+						if (last_period_in_shift >= problem.periods.size()) {
 							break;
 						}
 
-						double shift_value = subset_sum[last_node_in_shift];
+						double shift_value = subset_sum[last_period_in_shift];
 						if (p > 0) {
 							shift_value -= subset_sum[p - 1];
 						}
 
-						auto& edge = dag.add_edge(
-						    not_worked_node(p), have_worked_node(last_node_in_shift), -shift_value);
+						auto& edge = dag.add_edge(not_worked_node(p),
+						                          have_worked_node(last_period_in_shift),
+						                          -shift_value);
 						edge.weights[0] = shift_length;
 					}
 				}
 
 				int next_day_in_14_hours = p + 14 * 4 + 1;
-				if (next_day_in_14_hours < day_end) {
-					next_day_in_14_hours = day_end;
-				}
 				int fixes_in_period = any_fix_subset_sum.at(min<int>(next_day_in_14_hours - 1,
 				                                                     problem.periods.size() - 1))
 				                      - any_fix_subset_sum[p];
@@ -189,6 +188,7 @@ class GraphBuilder {
 				}
 			}
 		}
+
 		return dag;
 	}
 
@@ -273,7 +273,6 @@ vector<int> create_retail_shift(const vector<vector<double>>& shift_costs) {
 		computed_value += shift_costs[i][t];
 	}
 	minimum_core_assert(relative_error(computed_value, value) < 1e-7);
-	// cerr << "-- Value is " << value << endl;
 	return solution;
 }
 
@@ -362,6 +361,7 @@ bool create_roster_graph(const RetailProblem& problem,
 				consecutive_working_days.clear();
 			}
 		}
+
 		if (feasible) {
 			break;
 		}
@@ -491,11 +491,17 @@ long long penalty(const RetailProblem& problem,
 			if (current < period.min_cover.at(t)) {
 				auto delta = period.min_cover.at(t) - current;
 				objective_change = 10000 * delta;
-				dual_change = objective_change;
+				dual_change = 10000;
 			} else if (current > period.max_cover.at(t)) {
 				auto delta = current - period.max_cover.at(t);
 				objective_change = delta * delta;
-				dual_change = -objective_change;
+				dual_change = -((delta + 1) * (delta + 1) - delta * delta);
+			} else if (current == period.max_cover.at(t)) {
+				objective_change = 0;
+				dual_change = -1;
+			} else {
+				objective_change = 0;
+				dual_change = 0;
 			}
 			objective += objective_change;
 			duals->at(problem.staff.size() + problem.cover_constraint_index(period_index, t)) =
@@ -507,10 +513,8 @@ long long penalty(const RetailProblem& problem,
 }
 }  // namespace
 
-void retail_local_search(
-    const RetailProblem& problem,
-    std::function<bool(const RetailLocalSearchInfo& info,
-                       const std::vector<std::vector<std::vector<int>>>& solution)> callback) {
+void retail_local_search(const RetailProblem& problem,
+                         const RetailLocalSearchParameters& parameters) {
 	auto rng = repeatably_seeded_engine<mt19937>(42);
 	vector<int> staff_indices(problem.staff.size());
 	iota(staff_indices.begin(), staff_indices.end(), 0);
@@ -519,6 +523,20 @@ void retail_local_search(
 	auto existing_solution = make_grid<int>(problem.periods.size(), problem.num_tasks);
 	auto fixes = make_grid<int>(problem.periods.size(), problem.num_tasks, []() { return -1; });
 	vector<double> duals;
+
+	if (!parameters.solution.empty()) {
+		check(parameters.solution.size() == solution.size(), "Given solution has wrong size.");
+		for (int i : range(solution.size())) {
+			check(parameters.solution[i].size() == solution[i].size(),
+			      "Given solution has wrong size.");
+			for (int p : range(parameters.solution[i].size())) {
+				check(parameters.solution[i][p].size() == solution[i][p].size(),
+				      "Given solution has wrong size.");
+			}
+		}
+		solution = parameters.solution;
+		cerr << "-- Using provided start solution.\n";
+	}
 
 	long long objective = penalty(problem, solution, &duals);
 	int num_restarts = 0;
@@ -548,11 +566,17 @@ void retail_local_search(
 			} else {
 				objective = new_objective;
 			}
+
+			double elapsed_time = wall_time() - start_time;
+			if (parameters.time_limit_seconds >= 0
+			    && elapsed_time > parameters.time_limit_seconds) {
+				return;
+			}
 		}
-		double elapsed_time = wall_time() - start_time;
 
 		objective = penalty(problem, solution, &duals);
 		if (objective < best_objective) {
+			double elapsed_time = wall_time() - start_time;
 			best_objective = objective;
 			cerr << "-- Iteration " << iteration << ": New best objective: " << objective << " ("
 			     << num_restarts << " restarts) in " << elapsed_time << "s.\n";
@@ -570,7 +594,7 @@ void retail_local_search(
 				RetailLocalSearchInfo info;
 				info.computed_objective_value = computed_objective_value;
 				info.elapsed_time = elapsed_time;
-				if (!callback(info, solution)) {
+				if (parameters.callback && !parameters.callback(info, solution)) {
 					break;
 				}
 			}
@@ -579,12 +603,12 @@ void retail_local_search(
 		if (objective >= prev_objective) {
 			num_restarts++;
 			iteration = 0;
-			solution =
-			    make_grid<int>(problem.staff.size(), problem.periods.size(), problem.num_tasks);
-		}
-
-		if (elapsed_time > 10) {
-			break;
+			if (!parameters.solution.empty()) {
+				solution = parameters.solution;
+			} else {
+				solution =
+				    make_grid<int>(problem.staff.size(), problem.periods.size(), problem.num_tasks);
+			}
 		}
 	}
 }

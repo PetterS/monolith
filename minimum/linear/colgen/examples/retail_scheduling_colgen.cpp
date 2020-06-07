@@ -92,14 +92,16 @@ class ShiftShedulingColgenProblem : public SetPartitioningProblem {
 		timer.OK();
 
 		if (FLAGS_local_search) {
-			retail_local_search(problem,
-			                    [&](const RetailLocalSearchInfo& info,
-			                        const vector<vector<vector<int>>>& local_solution) {
-				                    for (int p = 0; p < problem.staff.size(); ++p) {
-					                    add_column(create_column(p, local_solution[p]));
-				                    }
-				                    return true;
-			                    });
+			RetailLocalSearchParameters params;
+			params.callback = [&](const RetailLocalSearchInfo& info,
+			                      const vector<vector<vector<int>>>& local_solution) {
+				for (int p = 0; p < problem.staff.size(); ++p) {
+					add_column(create_column(p, local_solution[p]));
+				}
+				return true;
+			};
+			params.time_limit_seconds = 10.0;
+			retail_local_search(problem, params);
 		}
 	}
 

@@ -22,10 +22,20 @@ struct RetailLocalSearchInfo {
 	double elapsed_time = -1;
 };
 
-void MINIMUM_LINEAR_COLGEN_API retail_local_search(
-    const RetailProblem& problem,
-    std::function<bool(const RetailLocalSearchInfo& info,
-                       const std::vector<std::vector<std::vector<int>>>& solution)> callback);
+struct RetailLocalSearchParameters {
+	// If the callback returns false, the search will stop.
+	std::function<bool(const RetailLocalSearchInfo& info,
+	                   const std::vector<std::vector<std::vector<int>>>& solution)>
+	    callback = nullptr;
+	// Set time limit to negative to disable time limit.
+	double time_limit_seconds = 10.0;
+
+	// If non-empty, used to initialize the search.
+	std::vector<std::vector<std::vector<int>>> solution;
+};
+
+void MINIMUM_LINEAR_COLGEN_API retail_local_search(const RetailProblem& problem,
+                                                   const RetailLocalSearchParameters& parameters);
 
 // Available for testing.
 std::vector<int> MINIMUM_LINEAR_COLGEN_API

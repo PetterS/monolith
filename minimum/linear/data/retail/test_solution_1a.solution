@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Solution xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Solution.xsd">
+    <ProblemFile>1_7_10_1.ros</ProblemFile>
+    <Penalty>383</Penalty>
+    <TimeStamp>2020-04-21T17:43:46</TimeStamp>
+    <Author></Author>
+    <Reference></Reference>
+    <Machine></Machine>
+    <SolveTime>00:00:00</SolveTime>
+
+    <Employee ID="1">
+        <Shift>
+            <Day>1</Day>
+            <Start>00:00:00</Start>
+            <Task WorkLength="360">
+                <ID>1</ID>
+                <Length>360</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>2</Day>
+            <Start>06:00:00</Start>
+            <Task WorkLength="405">
+                <ID>1</ID>
+                <Length>405</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>3</Day>
+            <Start>08:15:00</Start>
+            <Task WorkLength="435">
+                <ID>1</ID>
+                <Length>435</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>4</Day>
+            <Start>16:15:00</Start>
+            <Task WorkLength="360">
+                <ID>1</ID>
+                <Length>360</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>5</Day>
+            <Start>22:15:00</Start>
+            <Task WorkLength="480">
+                <ID>1</ID>
+                <Length>480</Length>
+            </Task>
+        </Shift>
+    </Employee>
+    <Employee ID="2">
+        <Shift>
+            <Day>0</Day>
+            <Start>14:00:00</Start>
+            <Task WorkLength="570">
+                <ID>1</ID>
+                <Length>570</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>1</Day>
+            <Start>17:15:00</Start>
+            <Task WorkLength="405">
+                <ID>1</ID>
+                <Length>405</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>2</Day>
+            <Start>15:15:00</Start>
+            <Task WorkLength="495">
+                <ID>1</ID>
+                <Length>495</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>3</Day>
+            <Start>23:45:00</Start>
+            <Task WorkLength="390">
+                <ID>1</ID>
+                <Length>390</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>5</Day>
+            <Start>15:45:00</Start>
+            <Task WorkLength="360">
+                <ID>1</ID>
+                <Length>360</Length>
+            </Task>
+        </Shift>
+    </Employee>
+    <Employee ID="3">
+        <Shift>
+            <Day>2</Day>
+            <Start>10:00:00</Start>
+            <Task WorkLength="420">
+                <ID>1</ID>
+                <Length>420</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>3</Day>
+            <Start>09:45:00</Start>
+            <Task WorkLength="480">
+                <ID>1</ID>
+                <Length>480</Length>
+            </Task>
+        </Shift>
+    </Employee>
+    <Employee ID="4">
+        <Shift>
+            <Day>0</Day>
+            <Start>23:30:00</Start>
+            <Task WorkLength="480">
+                <ID>1</ID>
+                <Length>480</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>2</Day>
+            <Start>00:00:00</Start>
+            <Task WorkLength="360">
+                <ID>1</ID>
+                <Length>360</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>4</Day>
+            <Start>06:15:00</Start>
+            <Task WorkLength="600">
+                <ID>1</ID>
+                <Length>600</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>5</Day>
+            <Start>14:30:00</Start>
+            <Task WorkLength="480">
+                <ID>1</ID>
+                <Length>480</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>6</Day>
+            <Start>15:30:00</Start>
+            <Task WorkLength="360">
+                <ID>1</ID>
+                <Length>360</Length>
+            </Task>
+        </Shift>
+    </Employee>
+    <Employee ID="5">
+        <Shift>
+            <Day>0</Day>
+            <Start>18:00:00</Start>
+            <Task WorkLength="360">
+                <ID>1</ID>
+                <Length>360</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>1</Day>
+            <Start>21:30:00</Start>
+            <Task WorkLength="570">
+                <ID>1</ID>
+                <Length>570</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>2</Day>
+            <Start>23:45:00</Start>
+            <Task WorkLength="510">
+                <ID>1</ID>
+                <Length>510</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>4</Day>
+            <Start>22:45:00</Start>
+            <Task WorkLength="420">
+                <ID>1</ID>
+                <Length>420</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>6</Day>
+            <Start>21:30:00</Start>
+            <Task WorkLength="360">
+                <ID>1</ID>
+                <Length>360</Length>
+            </Task>
+        </Shift>
+    </Employee>
+    <Employee ID="6">
+        <Shift>
+            <Day>1</Day>
+            <Start>06:45:00</Start>
+            <Task WorkLength="435">
+                <ID>1</ID>
+                <Length>435</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>3</Day>
+            <Start>17:45:00</Start>
+            <Task WorkLength="360">
+                <ID>1</ID>
+                <Length>360</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>5</Day>
+            <Start>00:00:00</Start>
+            <Task WorkLength="375">
+                <ID>1</ID>
+                <Length>375</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>6</Day>
+            <Start>00:00:00</Start>
+            <Task WorkLength="570">
+                <ID>1</ID>
+                <Length>570</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>7</Day>
+            <Start>00:00:00</Start>
+            <Task WorkLength="360">
+                <ID>1</ID>
+                <Length>360</Length>
+            </Task>
+        </Shift>
+    </Employee>
+    <Employee ID="7">
+        <Shift>
+            <Day>0</Day>
+            <Start>06:00:00</Start>
+            <Task WorkLength="465">
+                <ID>1</ID>
+                <Length>465</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>1</Day>
+            <Start>14:00:00</Start>
+            <Task WorkLength="435">
+                <ID>1</ID>
+                <Length>435</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>2</Day>
+            <Start>22:45:00</Start>
+            <Task WorkLength="600">
+                <ID>1</ID>
+                <Length>600</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>4</Day>
+            <Start>17:00:00</Start>
+            <Task WorkLength="375">
+                <ID>1</ID>
+                <Length>375</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>6</Day>
+            <Start>08:00:00</Start>
+            <Task WorkLength="405">
+                <ID>1</ID>
+                <Length>405</Length>
+            </Task>
+        </Shift>
+    </Employee>
+    <Employee ID="8">
+        <Shift>
+            <Day>3</Day>
+            <Start>20:00:00</Start>
+            <Task WorkLength="600">
+                <ID>1</ID>
+                <Length>600</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>6</Day>
+            <Start>09:30:00</Start>
+            <Task WorkLength="420">
+                <ID>1</ID>
+                <Length>420</Length>
+            </Task>
+        </Shift>
+    </Employee>
+    <Employee ID="9">
+        <Shift>
+            <Day>1</Day>
+            <Start>07:30:00</Start>
+            <Task WorkLength="600">
+                <ID>1</ID>
+                <Length>600</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>4</Day>
+            <Start>06:00:00</Start>
+            <Task WorkLength="600">
+                <ID>1</ID>
+                <Length>600</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>5</Day>
+            <Start>06:30:00</Start>
+            <Task WorkLength="555">
+                <ID>1</ID>
+                <Length>555</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>6</Day>
+            <Start>17:00:00</Start>
+            <Task WorkLength="405">
+                <ID>1</ID>
+                <Length>405</Length>
+            </Task>
+        </Shift>
+    </Employee>
+    <Employee ID="10">
+        <Shift>
+            <Day>0</Day>
+            <Start>07:45:00</Start>
+            <Task WorkLength="600">
+                <ID>1</ID>
+                <Length>600</Length>
+            </Task>
+        </Shift>
+        <Shift>
+            <Day>5</Day>
+            <Start>06:00:00</Start>
+            <Task WorkLength="480">
+                <ID>1</ID>
+                <Length>480</Length>
+            </Task>
+        </Shift>
+    </Employee>
+</Solution>

@@ -139,6 +139,8 @@ if (MSVC)
   # Non dll-interface class 'google::protobuf::Message' used as base for dll-interface class
   add_definitions("/wd4275")
 
+  add_definitions("-D_CRT_SECURE_NO_WARNINGS")
+
   # Workaround for ICE in Eigen.
   add_definitions("-DEIGEN_DONT_PARALLELIZE")
 
@@ -225,6 +227,7 @@ include_directories(
 	SYSTEM third-party/minisat
 	# SYSTEM third-party/or-tools/src
 	SYSTEM third-party/protobuf/src
+	SYSTEM third-party/rapidxml
 	SYSTEM third-party/scs
 	SYSTEM third-party/sqlite3
 	SYSTEM third-party/sym-ildl
