@@ -67,8 +67,7 @@ class MINIMUM_LINEAR_API RetailProblem {
 	    const std::vector<std::vector<std::vector<int>>>& solution) const;
 	std::vector<std::vector<std::vector<int>>> string_to_solution(const std::string input) const;
 
-	int save_solution(std::string problem_filename,
-	                  std::string filename,
+	std::string save_solution(std::string problem_filename,
 	                  const std::vector<std::vector<std::vector<int>>>& solution,
 	                  double solution_time,
 	                  std::string timestamp,

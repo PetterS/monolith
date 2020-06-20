@@ -322,15 +322,14 @@ std::vector<std::vector<std::vector<int>>> RetailProblem::string_to_solution(
 	return solution;
 }
 
-int RetailProblem::save_solution(std::string problem_filename,
-                                 std::string filename,
+std::string RetailProblem::save_solution(std::string problem_filename,
                                  const std::vector<std::vector<std::vector<int>>>& solution,
                                  double solution_time,
                                  std::string timestamp,
                                  std::string solution_method) const {
 	auto objective_value = check_feasibility(solution);
 
-	std::ofstream file(filename);
+	std::ostringstream file;
 	file << "<Solution xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
 	        "xsi:noNamespaceSchemaLocation=\"Solution.xsd\">\n";
 	file << "<ProblemFile>" << problem_filename << "</ProblemFile>\n";
@@ -402,7 +401,7 @@ int RetailProblem::save_solution(std::string problem_filename,
 		                    staff[staff_index].id);
 	}
 	file << "</Solution>\n";
-	return objective_value;
+	return file.str();
 }
 
 std::vector<std::vector<std::vector<int>>> RetailProblem::load_solution(std::istream& in) const {

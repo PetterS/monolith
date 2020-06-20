@@ -54,12 +54,13 @@ int main_program(int num_args, char* args[]) {
 	problem.print_info();
 
 	auto db = SqliteDb::fromFile("solutions.sqlite3");
+
 	auto insert = db.make_statement<>(
 	    "insert or ignore into solutions(name, objective, solution, solve_time, timestamp, "
 	    "version, options)"
 	    "VALUES(?1, ?2, ?3, ?4, strftime(\'%Y-%m-%dT%H:%M:%S\', \'now\'), ?5, ?6);");
 	int earlier_best_value =
-	    db.make_statement<int>("select min(objective) from solutions where name = ?1;")
+	    db.make_statement<int>("select ifnull(min(objective), 2000000000) from solutions where name = ?1;")
 	        .execute(base_name)
 	        .get<0>();
 	cerr << "-- Earlier best solution is " << earlier_best_value << "\n";
@@ -81,7 +82,7 @@ int main_program(int num_args, char* args[]) {
 		if (FLAGS_save_solution && info.computed_objective_value < earlier_best_value) {
 			insert.execute(base_name,
 			               info.computed_objective_value,
-			               problem.solution_to_string(solution),
+			               problem.save_solution(base_name + ".xml", solution, 0, "", ""),
 			               info.elapsed_time,
 			               version::revision,
 			               "local_search " + get_all_command_line_options());

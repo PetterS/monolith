@@ -268,9 +268,9 @@ int main_program(int num_args, char* args[]) {
 	    "VALUES(?1, ?2, ?3, ?4, strftime(\'%Y-%m-%dT%H:%M:%S\', \'now\'), ?5, ?6);");
 
 	if (command == "print") {
-		auto select = db.make_statement<int, string, double, string, string, string>(
+		auto select = db.make_statement<int, double, string, string, string>(
 		    "select * from ("
-		    "  select objective, solution, solve_time, timestamp, version, ifnull(options, '') "
+		    "  select objective, solve_time, timestamp, version, ifnull(options, '') "
 		    "  from solutions "
 		    "  where name == ?1 "
 		    "  order by objective asc "
@@ -279,12 +279,12 @@ int main_program(int num_args, char* args[]) {
 		    "order by objective desc;");
 		for (auto& result : select.execute(filename_base)) {
 			cout << YELLOW << setw(10) << right << get<0>(result) << NORMAL << ": "
-			     << get<2>(result) << "s. Ran at " << get<3>(result) << " with (" << get<4>(result)
-			     << "). " << get<5>(result) << "\n";
+			     << get<1>(result) << "s. Ran at " << get<2>(result) << " with (" << get<3>(result)
+			     << "). " << get<4>(result) << "\n";
 		}
 	} else if (command == "save") {
 		if (num_args <= 3) {
-			cerr << "Need objetive value.\n";
+			cerr << "Need objective value.\n";
 			return 1;
 		}
 		int objective_value = from_string<int>(args[3]);
@@ -292,13 +292,12 @@ int main_program(int num_args, char* args[]) {
 		    "select solution, solve_time, timestamp, options from solutions "
 		    "where name == ?1 and objective == ?2;");
 		auto result = select.execute(filename_base, objective_value).get();
-		auto solution = problem.string_to_solution(get<0>(result));
-		problem.save_solution(filename_base + ".ros",
-		                      filename_base + ".xml",
-		                      solution,
-		                      get<1>(result),
-		                      get<2>(result),
-		                      get<3>(result));
+		auto solution_xml = get<0>(result);
+		istringstream sin(solution_xml);
+		auto solution = problem.load_solution(sin);
+		ofstream fout(filename_base + ".xml");
+		string solution_to_save = problem.save_solution(filename_base + ".ros", solution, get<1>(result), get<2>(result), get<3>(result));
+		fout.write(solution_to_save.c_str(), solution_to_save.length());
 		cout << "Solution saved to " << filename_base << ".xml.\n";
 	} else if (command == "run") {
 		problem.print_info();
@@ -333,7 +332,7 @@ int main_program(int num_args, char* args[]) {
 					Timer timer("Saving solution...");
 					insert.execute(filename_base,
 					               objective_value,
-					               problem.solution_to_string(solution),
+					               problem.save_solution(filename_base + ".ros", solution, 0, "", ""),
 					               elapsed_time,
 					               version::revision,
 					               get_all_command_line_options());
