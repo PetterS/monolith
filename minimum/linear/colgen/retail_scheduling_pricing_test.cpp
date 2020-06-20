@@ -133,7 +133,7 @@ void run_existing_solution_test(string problem_name, string solution_name) {
 					                     ". Wanted ",
 					                     existing_solution[staff_index][period_index][t],
 					                     ".");
-					FAIL(msg);
+					FAIL_CHECK(msg);
 				}
 			}
 		}

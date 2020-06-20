@@ -18,47 +18,54 @@ namespace colgen {
 
 class GraphBuilder {
    public:
-	GraphBuilder(const RetailProblem& problem_) : problem(problem_) {}
+	struct PeriodNodes {
+		// Three nodes for each period.
+		int not_worked_node = -1;
+		int have_worked_and_can_continue_this_day = -1;
+		int have_worked_and_can_not_continue_this_day = -1;
+	};
 
-	int num_nodes() const { return 2 * problem.periods.size() + 2; }
-	int source() const {
-		minimum_core_assert(!is_not_worked(0) && !is_have_worked(0));
-		return 0;
+	GraphBuilder(const RetailProblem& problem_) : problem(problem_) {
+		int n = 1;  // Start with the sink.
+		for (int p = 0; p < problem.periods.size(); ++p) {
+			nodes_data.emplace_back();
+			nodes_data.back().not_worked_node = n++;
+			nodes_data.back().have_worked_and_can_continue_this_day = n++;
+			nodes_data.back().have_worked_and_can_not_continue_this_day = n++;
+		}
 	}
+
+	int num_nodes() const { return 3 * problem.periods.size() + 2; }
+
+	int source() const { return 0; }
 
 	int sink() const {
 		int node = num_nodes() - 1;
-		minimum_core_assert(!is_not_worked(0) && !is_have_worked(0));
 		return node;
 	}
 
-	int not_worked_node(int period) const {
+	const PeriodNodes& get_nodes(int period) const {
 		minimum_core_assert(0 <= period && period < problem.periods.size());
-		int node = 1 + 2 * period;
-		minimum_core_assert(get_period(node) == period);
-		minimum_core_assert(is_not_worked(node) && !is_have_worked(node));
-		return node;
-	}
-
-	int have_worked_node(int period) const {
-		minimum_core_assert(0 <= period && period < problem.periods.size());
-		int node = 1 + 2 * period + 1;
-		minimum_core_assert(get_period(node) == period);
-		minimum_core_assert(!is_not_worked(node) && is_have_worked(node));
-		return node;
+		return nodes_data[period];
 	}
 
 	int get_period(int node) const {
 		minimum_core_assert(1 <= node && node < num_nodes() - 1, "Node is ", node);
-		return (node - 1) / 2;
+		return (node - 1) / 3;
 	}
 
 	bool is_not_worked(int node) const {
-		return 1 <= node && node < num_nodes() - 1 && (node - 1) % 2 == 0;
+		if (node <= 0 || node >= num_nodes() - 1) {
+			return false;
+		}
+		return get_nodes(get_period(node)).not_worked_node == node;
 	}
 
 	bool is_have_worked(int node) const {
-		return 1 <= node && node < num_nodes() - 1 && (node - 1) % 2 == 1;
+		if (node <= 0 || node >= num_nodes() - 1) {
+			return false;
+		}
+		return !is_not_worked(node);
 	}
 
 	// float may be OK if more efficient.
@@ -137,14 +144,14 @@ class GraphBuilder {
 
 		minimum::algorithms::SortedDAG<double, 1, 1> dag(num_nodes());
 
-		dag.add_edge(source(), not_worked_node(0));
+		dag.add_edge(source(), get_nodes(0).not_worked_node);
 		for (int p : range(problem.periods.size() - 1)) {
 			if (any_fix[p] != 1) {
-				dag.add_edge(not_worked_node(p), not_worked_node(p + 1));
+				dag.add_edge(get_nodes(p).not_worked_node, get_nodes(p + 1).not_worked_node);
 			}
 		}
 		if (any_fix[problem.periods.size() - 1] != 1) {
-			dag.add_edge(not_worked_node(problem.periods.size() - 1), sink());
+			dag.add_edge(get_nodes(problem.periods.size() - 1).not_worked_node, sink());
 		}
 
 		for (int day = 0; day < problem.num_days; ++day) {
@@ -164,27 +171,51 @@ class GraphBuilder {
 							shift_value -= subset_sum[p - 1];
 						}
 
-						auto& edge = dag.add_edge(not_worked_node(p),
-						                          have_worked_node(last_period_in_shift),
-						                          -shift_value);
+						auto dest = -1;
+						if (period.day != problem.periods.at(last_period_in_shift).day) {
+							dest = get_nodes(last_period_in_shift)
+							           .have_worked_and_can_continue_this_day;
+						} else {
+							dest = get_nodes(last_period_in_shift)
+							           .have_worked_and_can_not_continue_this_day;
+						}
+
+						auto& edge = dag.add_edge(get_nodes(p).not_worked_node, dest, -shift_value);
 						edge.weights[0] = shift_length;
 					}
 				}
 
-				int next_day_in_14_hours = p + 14 * 4 + 1;
-				int fixes_in_period = any_fix_subset_sum.at(min<int>(next_day_in_14_hours - 1,
-				                                                     problem.periods.size() - 1))
-				                      - any_fix_subset_sum[p];
+				int later_14_hours = p + 14 * 4 + 1;
+				int fixes_in_period =
+				    any_fix_subset_sum.at(min<int>(later_14_hours - 1, problem.periods.size() - 1))
+				    - any_fix_subset_sum[p];
 				minimum_core_assert(fixes_in_period >= 0);
-
 				if (fixes_in_period == 0) {
 					int target_node;
-					if (next_day_in_14_hours < problem.periods.size()) {
-						target_node = not_worked_node(next_day_in_14_hours);
+					if (later_14_hours < problem.periods.size()) {
+						target_node = get_nodes(later_14_hours).not_worked_node;
 					} else {
 						target_node = sink();
 					}
-					dag.add_edge(have_worked_node(p), target_node);
+					dag.add_edge(get_nodes(p).have_worked_and_can_continue_this_day, target_node);
+				}
+
+				int start_of_next_day = day_end;
+				if (day == problem.num_days - 1) {
+					start_of_next_day = problem.day_start(day) + 24 * 4;
+				}
+				int destination =
+				    min<int>(max(start_of_next_day, later_14_hours), problem.periods.size() - 1);
+				int fixes_in_period2 =
+				    any_fix_subset_sum.at(destination - 1) - any_fix_subset_sum[p];
+				if (fixes_in_period2 == 0) {
+					if (p == destination) {
+						dag.add_edge(get_nodes(p).have_worked_and_can_not_continue_this_day,
+						             sink());
+					} else {
+						dag.add_edge(get_nodes(p).have_worked_and_can_not_continue_this_day,
+						             get_nodes(destination).not_worked_node);
+					}
 				}
 			}
 		}
@@ -194,6 +225,7 @@ class GraphBuilder {
 
    private:
 	const RetailProblem& problem;
+	std::vector<PeriodNodes> nodes_data;
 };
 
 // Given an array of costs for all tasks in a shift, create the optimal shift.
@@ -348,12 +380,12 @@ bool create_roster_graph(const RetailProblem& problem,
 					int day_to_remove = consecutive_working_days[random_index(*rng)];
 					for (int p : range(problem.periods.size())) {
 						if (problem.periods[p].day == day_to_remove) {
-							dag.clear_edges(builder.not_worked_node(p));
+							dag.clear_edges(builder.get_nodes(p).not_worked_node);
 							if (p < problem.periods.size() - 1) {
-								dag.add_edge(builder.not_worked_node(p),
-								             builder.not_worked_node(p + 1));
+								dag.add_edge(builder.get_nodes(p).not_worked_node,
+								             builder.get_nodes(p + 1).not_worked_node);
 							} else {
-								dag.add_edge(builder.not_worked_node(p), builder.sink());
+								dag.add_edge(builder.get_nodes(p).not_worked_node, builder.sink());
 							}
 						}
 					}

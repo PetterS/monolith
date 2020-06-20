@@ -206,8 +206,9 @@ void RetailProblem::check_feasibility_for_staff(
 	// Shift length.
 	int current_task = -1;
 	int current_period = -1;
+	int last_day_started = -1;
 	for (int p = 0; p < periods.size(); ++p) {
-		auto& period = periods.at(p);
+		auto& period = periods[p];
 
 		int task = -1;
 		for (int t : range(num_tasks)) {
@@ -223,6 +224,8 @@ void RetailProblem::check_feasibility_for_staff(
 			// Start of the first task of the shift.
 			current_task = task;
 			current_period = p;
+			check(last_day_started != period.day, "Can not start two shifts on same day.");
+			last_day_started = period.day;
 		} else if (current_task != -1 && (current_task != task || last_period)) {
 			int final_p = p - 1;
 			if (last_period) {
@@ -323,10 +326,10 @@ std::vector<std::vector<std::vector<int>>> RetailProblem::string_to_solution(
 }
 
 std::string RetailProblem::save_solution(std::string problem_filename,
-                                 const std::vector<std::vector<std::vector<int>>>& solution,
-                                 double solution_time,
-                                 std::string timestamp,
-                                 std::string solution_method) const {
+                                         const std::vector<std::vector<std::vector<int>>>& solution,
+                                         double solution_time,
+                                         std::string timestamp,
+                                         std::string solution_method) const {
 	auto objective_value = check_feasibility(solution);
 
 	std::ostringstream file;
