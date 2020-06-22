@@ -11,6 +11,7 @@ set(ABSL_STD_CXX_FLAG "" CACHE STRING "c++ std flag" FORCE)
 
 add_subdirectory(abseil-cpp)
 add_subdirectory(bliss)
+add_subdirectory(cadical)
 add_subdirectory(Catch)
 add_subdirectory(cleaneling)
 add_subdirectory(coin)

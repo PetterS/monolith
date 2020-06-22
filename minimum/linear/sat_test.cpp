@@ -181,6 +181,10 @@ TEST_CASE("minisatp") {
 
 TEST_CASE("glucose") { simple_test(glucose_solver); }
 
+TEST_CASE("cadical") {
+	simple_test([]() { return cadical_solver(true); });
+}
+
 TEST_CASE("simple_integer_programming_tests_minisat") {
 	IpToSatSolver solver(bind(minisat_solver, true));
 	solver.set_silent(true);
@@ -301,7 +305,8 @@ TEST_CASE("sat-constraints_coefs_larger_than_1") {
 	ip.add_constraint(4 * x - y - z >= 0);
 	REQUIRE(solve_minisat(&ip));
 
-	REQUIRE_NUM_SOLUTIONS(ip, []() { return minisat_solver(true); }, 5);
+	REQUIRE_NUM_SOLUTIONS(
+	    ip, []() { return minisat_solver(true); }, 5);
 }
 
 TEST_CASE("sat-constraints_coefs_zero") {
@@ -309,7 +314,8 @@ TEST_CASE("sat-constraints_coefs_zero") {
 	auto x = ip.add_boolean();
 	ip.add_constraint(0 * x >= 0);
 
-	REQUIRE_NUM_SOLUTIONS(ip, []() { return minisat_solver(true); }, 2);
+	REQUIRE_NUM_SOLUTIONS(
+	    ip, []() { return minisat_solver(true); }, 2);
 }
 
 TEST_CASE("sat-constraints_fractional_coeff-1") {
@@ -336,7 +342,8 @@ TEST_CASE("sat-constraints_coefs_less_than_minus_1") {
 	auto z = ip.add_boolean();
 	ip.add_constraint(8 * x - 2 * y - 2 * z >= 0);
 
-	REQUIRE_NUM_SOLUTIONS(ip, []() { return minisat_solver(true); }, 5);
+	REQUIRE_NUM_SOLUTIONS(
+	    ip, []() { return minisat_solver(true); }, 5);
 }
 
 TEST_CASE("sat-constraints_coefs_negative_multiple_times") {
@@ -346,7 +353,8 @@ TEST_CASE("sat-constraints_coefs_negative_multiple_times") {
 	auto z = ip.add_boolean();
 	ip.add_constraint(8 * x - y - y - z - z >= 0);
 
-	REQUIRE_NUM_SOLUTIONS(ip, []() { return minisat_solver(true); }, 5);
+	REQUIRE_NUM_SOLUTIONS(
+	    ip, []() { return minisat_solver(true); }, 5);
 }
 
 TEST_CASE("sat-negative-objective") {
@@ -376,7 +384,8 @@ TEST_CASE("sat-objective-next_solution") {
 	ip.add_objective(obj);
 	ip.add_constraint(x + y + z + w + u + v == 2);
 
-	REQUIRE_NUM_SOLUTIONS(ip, []() { return minisat_solver(true); }, 6);
+	REQUIRE_NUM_SOLUTIONS(
+	    ip, []() { return minisat_solver(true); }, 6);
 }
 
 TEST_CASE("add_min_consecutive_constraints-2-true") {
@@ -393,7 +402,8 @@ TEST_CASE("add_min_consecutive_constraints-2-true") {
 	// 1 1 0
 	// 0 1 1
 	// 1 0 1
-	REQUIRE_NUM_SOLUTIONS(ip, []() { return minisat_solver(true); }, 3);
+	REQUIRE_NUM_SOLUTIONS(
+	    ip, []() { return minisat_solver(true); }, 3);
 }
 
 TEST_CASE("add_min_max_consecutive_constraints-4") {

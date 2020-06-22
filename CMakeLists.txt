@@ -217,6 +217,7 @@ include_directories(
 	# SYSTEM ${PROJECT_BINARY_DIR}/third-party/or-tools
 	SYSTEM third-party/abseil-cpp
 	SYSTEM third-party/bliss
+	SYSTEM third-party/cadical
 	SYSTEM third-party/Catch
 	SYSTEM third-party/Eigen
 	SYSTEM third-party/FADBAD++
