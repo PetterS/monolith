@@ -242,7 +242,7 @@ class SetPartitioningProblem::Implementation {
 	//
 	// Returns the cost of all columns for group members.
 	double make_solution_integer(const std::vector<std::size_t>& active_columns) {
-		vector<pair<size_t, double>> best_column(number_of_groups, make_pair(0, 0));
+		vector<pair<size_t, double>> best_column(number_of_groups, make_pair(0, -1));
 		vector<pair<size_t, double>> saved_solution_values;
 
 		for (auto i : active_columns) {
@@ -262,7 +262,7 @@ class SetPartitioningProblem::Implementation {
 
 		double column_cost = 0;
 		for (auto& entry : best_column) {
-			minimum_core_assert(entry.second > 0);
+			minimum_core_assert(entry.second >= 0);
 			column_cost += parent->pool.at(entry.first).cost();
 			parent->pool.at(entry.first).solution_value = 1;
 		}
