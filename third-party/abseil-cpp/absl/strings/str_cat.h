@@ -37,7 +37,8 @@
 // attempt to pass ':' instead of ":" might result in a 58 ending up in your
 // result.
 //
-// Bools convert to "0" or "1".
+// Bools convert to "0" or "1". Pointers to types other than `char *` are not
+// valid inputs. No output is generated for null `char *` pointers.
 //
 // Floating point numbers are formatted with six-digit precision, which is
 // the default for "std::cout <<" or printf "%g" (the same as "%.6g").
@@ -63,6 +64,7 @@
 #include "absl/strings/string_view.h"
 
 namespace absl {
+ABSL_NAMESPACE_BEGIN
 
 namespace strings_internal {
 // AlphaNumBuffer allows a way to pass a string to StrCat without having to do
@@ -251,7 +253,7 @@ class AlphaNum {
       const std::basic_string<char, std::char_traits<char>, Allocator>& str)
       : piece_(str) {}
 
-  // Use std::string literals ":" instead of character literals ':'.
+  // Use string literals ":" instead of character literals ':'.
   AlphaNum(char c) = delete;  // NOLINT(runtime/explicit)
 
   AlphaNum(const AlphaNum&) = delete;
@@ -289,7 +291,8 @@ class AlphaNum {
 // StrCat()
 // -----------------------------------------------------------------------------
 //
-// Merges given strings or numbers, using no delimiter(s).
+// Merges given strings or numbers, using no delimiter(s), returning the merged
+// result as a string.
 //
 // `StrCat()` is designed to be the fastest possible way to construct a string
 // out of a mix of raw C strings, string_views, strings, bool values,
@@ -399,6 +402,7 @@ SixDigits(double d) {
   return result;
 }
 
+ABSL_NAMESPACE_END
 }  // namespace absl
 
 #endif  // ABSL_STRINGS_STR_CAT_H_

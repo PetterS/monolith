@@ -19,37 +19,26 @@
 #include <iosfwd>
 #include <string>
 
+#include "absl/base/config.h"
+#include "absl/flags/commandlineflag.h"
 #include "absl/flags/declare.h"
-#include "absl/flags/internal/commandlineflag.h"
 #include "absl/strings/string_view.h"
 
 // --------------------------------------------------------------------
 // Usage reporting interfaces
 
 namespace absl {
+ABSL_NAMESPACE_BEGIN
 namespace flags_internal {
-
-// Sets the "usage" message to be used by help reporting routines.
-// For example:
-//  absl::SetProgramUsageMessage(
-//      absl::StrCat("This program does nothing.  Sample usage:\n", argv[0],
-//                   " <uselessarg1> <uselessarg2>"));
-// Do not include commandline flags in the usage: we do that for you!
-// Note: Calling SetProgramUsageMessage twice will trigger a call to std::exit.
-void SetProgramUsageMessage(absl::string_view new_usage_message);
-
-// Returns the usage message set by SetProgramUsageMessage().
-absl::string_view ProgramUsageMessage();
-
-// --------------------------------------------------------------------
 
 // The format to report the help messages in.
 enum class HelpFormat {
   kHumanReadable,
 };
 
-// Outputs the help message describing specific flag.
-void FlagHelp(std::ostream& out, const flags_internal::CommandLineFlag& flag,
+// Streams the help message describing `flag` to `out`.
+// The default value for `flag` is included in the output.
+void FlagHelp(std::ostream& out, const CommandLineFlag& flag,
               HelpFormat format = HelpFormat::kHumanReadable);
 
 // Produces the help messages for all flags matching the filter. A flag matches
@@ -61,8 +50,8 @@ void FlagHelp(std::ostream& out, const flags_internal::CommandLineFlag& flag,
 //  .../path/to/file.<ext>
 // for any extension 'ext'. If the filter is empty this function produces help
 // messages for all flags.
-void FlagsHelp(std::ostream& out, absl::string_view filter = {},
-               HelpFormat format = HelpFormat::kHumanReadable);
+void FlagsHelp(std::ostream& out, absl::string_view filter,
+               HelpFormat format, absl::string_view program_usage_message);
 
 // --------------------------------------------------------------------
 
@@ -74,18 +63,42 @@ void FlagsHelp(std::ostream& out, absl::string_view filter = {},
 // -1 - if no usage flags were set on a commmand line.
 // Non negative return values are expected to be used as an exit code for a
 // binary.
-int HandleUsageFlags(std::ostream& out);
+int HandleUsageFlags(std::ostream& out,
+                     absl::string_view program_usage_message);
+
+// --------------------------------------------------------------------
+// Globals representing usage reporting flags
+
+enum class HelpMode {
+  kNone,
+  kImportant,
+  kShort,
+  kFull,
+  kPackage,
+  kMatch,
+  kVersion,
+  kOnlyCheckArgs
+};
+
+// Returns substring to filter help output (--help=substr argument)
+std::string GetFlagsHelpMatchSubstr();
+// Returns the requested help mode.
+HelpMode GetFlagsHelpMode();
+// Returns the requested help format.
+HelpFormat GetFlagsHelpFormat();
+
+// These are corresponding setters to the attributes above.
+void SetFlagsHelpMatchSubstr(absl::string_view);
+void SetFlagsHelpMode(HelpMode);
+void SetFlagsHelpFormat(HelpFormat);
+
+// Deduces usage flags from the input argument in a form --name=value or
+// --name. argument is already split into name and value before we call this
+// function.
+bool DeduceUsageFlags(absl::string_view name, absl::string_view value);
 
 }  // namespace flags_internal
+ABSL_NAMESPACE_END
 }  // namespace absl
-
-ABSL_DECLARE_FLAG(bool, help);
-ABSL_DECLARE_FLAG(bool, helpfull);
-ABSL_DECLARE_FLAG(bool, helpshort);
-ABSL_DECLARE_FLAG(bool, helppackage);
-ABSL_DECLARE_FLAG(bool, version);
-ABSL_DECLARE_FLAG(bool, only_check_args);
-ABSL_DECLARE_FLAG(std::string, helpon);
-ABSL_DECLARE_FLAG(std::string, helpmatch);
 
 #endif  // ABSL_FLAGS_INTERNAL_USAGE_H_

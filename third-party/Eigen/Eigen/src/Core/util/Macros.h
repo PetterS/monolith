@@ -388,6 +388,8 @@
 #endif
 
 // Does the compiler support result_of?
+// Petter Strandmark. This is removed in C++20.
+#define EIGEN_HAS_STD_RESULT_OF 0
 #ifndef EIGEN_HAS_STD_RESULT_OF
 #if EIGEN_MAX_CPP_VER>=11 && ((__has_feature(cxx_lambdas) || (defined(__cplusplus) && __cplusplus >= 201103L)))
 #define EIGEN_HAS_STD_RESULT_OF 1

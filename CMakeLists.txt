@@ -22,7 +22,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 if (MSVC)
   # Use the latest C++ standard.
-  add_definitions("/std:c++latest")	
+  add_definitions("/std:c++latest")
+  # We need to report the correct value for the __cplusplus macro.
+  add_definitions("/Zc:__cplusplus")
 endif()
 
 include(cmake/LibraryWithTests.cmake)

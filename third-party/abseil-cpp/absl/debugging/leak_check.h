@@ -32,7 +32,10 @@
 
 #include <cstddef>
 
+#include "absl/base/config.h"
+
 namespace absl {
+ABSL_NAMESPACE_BEGIN
 
 // HaveLeakSanitizer()
 //
@@ -59,7 +62,8 @@ void DoIgnoreLeak(const void* ptr);
 //
 // If the passed `ptr` does not point to an actively allocated object at the
 // time `IgnoreLeak()` is called, the call is a no-op; if it is actively
-// allocated, the object must not get deallocated later.
+// allocated, leak sanitizer will assume this object is referenced even if
+// there is no actual reference in user memory.
 //
 template <typename T>
 T* IgnoreLeak(T* ptr) {
@@ -104,6 +108,7 @@ void RegisterLivePointers(const void* ptr, size_t size);
 // `RegisterLivePointers()`, enabling leak checking of those pointers.
 void UnRegisterLivePointers(const void* ptr, size_t size);
 
+ABSL_NAMESPACE_END
 }  // namespace absl
 
 #endif  // ABSL_DEBUGGING_LEAK_CHECK_H_

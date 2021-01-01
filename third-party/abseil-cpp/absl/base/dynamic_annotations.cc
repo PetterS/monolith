@@ -95,6 +95,7 @@ static int GetRunningOnValgrind(void) {
   return 0;
 }
 
+#ifdef ABSL_HAVE_THREAD_SANITIZER
 /* See the comments in dynamic_annotations.h */
 int RunningOnValgrind(void) {
   static volatile int running_on_valgrind = -1;
@@ -122,6 +123,7 @@ double ValgrindSlowdown(void) {
   }
   return local_slowdown;
 }
+#endif
 
 #ifdef __cplusplus
 }  // extern "C"

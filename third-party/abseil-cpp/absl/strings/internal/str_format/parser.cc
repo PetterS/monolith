@@ -1,3 +1,17 @@
+// Copyright 2020 The Abseil Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #include "absl/strings/internal/str_format/parser.h"
 
 #include <assert.h>
@@ -14,10 +28,12 @@
 #include <unordered_set>
 
 namespace absl {
+ABSL_NAMESPACE_BEGIN
 namespace str_format_internal {
 
-using CC = ConversionChar::Id;
-using LM = LengthMod::Id;
+using CC = FormatConversionCharInternal;
+using LM = LengthMod;
+
 ABSL_CONST_INIT const ConvTag kTags[256] = {
     {},    {},    {},    {},    {},    {},    {},    {},     // 00-07
     {},    {},    {},    {},    {},    {},    {},    {},     // 08-0f
@@ -27,9 +43,9 @@ ABSL_CONST_INIT const ConvTag kTags[256] = {
     {},    {},    {},    {},    {},    {},    {},    {},     // 28-2f
     {},    {},    {},    {},    {},    {},    {},    {},     // 30-37
     {},    {},    {},    {},    {},    {},    {},    {},     // 38-3f
-    {},    CC::A, {},    CC::C, {},    CC::E, CC::F, CC::G,  // @ABCDEFG
+    {},    CC::A, {},    {},    {},    CC::E, CC::F, CC::G,  // @ABCDEFG
     {},    {},    {},    {},    LM::L, {},    {},    {},     // HIJKLMNO
-    {},    {},    {},    CC::S, {},    {},    {},    {},     // PQRSTUVW
+    {},    {},    {},    {},    {},    {},    {},    {},     // PQRSTUVW
     CC::X, {},    {},    {},    {},    {},    {},    {},     // XYZ[\]^_
     {},    CC::a, {},    CC::c, CC::d, CC::e, CC::f, CC::g,  // `abcdefg
     LM::h, CC::i, LM::j, {},    LM::l, {},    CC::n, CC::o,  // hijklmno
@@ -204,11 +220,11 @@ flags_done:
     using str_format_internal::LengthMod;
     LengthMod length_mod = tag.as_length();
     ABSL_FORMAT_PARSER_INTERNAL_GET_CHAR();
-    if (c == 'h' && length_mod.id() == LengthMod::h) {
-      conv->length_mod = LengthMod::FromId(LengthMod::hh);
+    if (c == 'h' && length_mod == LengthMod::h) {
+      conv->length_mod = LengthMod::hh;
       ABSL_FORMAT_PARSER_INTERNAL_GET_CHAR();
-    } else if (c == 'l' && length_mod.id() == LengthMod::l) {
-      conv->length_mod = LengthMod::FromId(LengthMod::ll);
+    } else if (c == 'l' && length_mod == LengthMod::l) {
+      conv->length_mod = LengthMod::ll;
       ABSL_FORMAT_PARSER_INTERNAL_GET_CHAR();
     } else {
       conv->length_mod = length_mod;
@@ -226,6 +242,32 @@ flags_done:
 }
 
 }  // namespace
+
+std::string LengthModToString(LengthMod v) {
+  switch (v) {
+    case LengthMod::h:
+      return "h";
+    case LengthMod::hh:
+      return "hh";
+    case LengthMod::l:
+      return "l";
+    case LengthMod::ll:
+      return "ll";
+    case LengthMod::L:
+      return "L";
+    case LengthMod::j:
+      return "j";
+    case LengthMod::z:
+      return "z";
+    case LengthMod::t:
+      return "t";
+    case LengthMod::q:
+      return "q";
+    case LengthMod::none:
+      return "";
+  }
+  return "";
+}
 
 const char *ConsumeUnboundConversion(const char *p, const char *end,
                                      UnboundConversion *conv, int *next_arg) {
@@ -268,15 +310,17 @@ struct ParsedFormatBase::ParsedFormatConsumer {
   char* data_pos;
 };
 
-ParsedFormatBase::ParsedFormatBase(string_view format, bool allow_ignored,
-                                   std::initializer_list<Conv> convs)
+ParsedFormatBase::ParsedFormatBase(
+    string_view format, bool allow_ignored,
+    std::initializer_list<FormatConversionCharSet> convs)
     : data_(format.empty() ? nullptr : new char[format.size()]) {
   has_error_ = !ParseFormatString(format, ParsedFormatConsumer(this)) ||
                !MatchesConversions(allow_ignored, convs);
 }
 
 bool ParsedFormatBase::MatchesConversions(
-    bool allow_ignored, std::initializer_list<Conv> convs) const {
+    bool allow_ignored,
+    std::initializer_list<FormatConversionCharSet> convs) const {
   std::unordered_set<int> used;
   auto add_if_valid_conv = [&](int pos, char c) {
       if (static_cast<size_t>(pos) > convs.size() ||
@@ -294,10 +338,13 @@ bool ParsedFormatBase::MatchesConversions(
     if (conv.width.is_from_arg() &&
         !add_if_valid_conv(conv.width.get_from_arg(), '*'))
       return false;
-    if (!add_if_valid_conv(conv.arg_position, conv.conv.Char())) return false;
+    if (!add_if_valid_conv(conv.arg_position,
+                           FormatConversionCharToChar(conv.conv)))
+      return false;
   }
   return used.size() == convs.size() || allow_ignored;
 }
 
 }  // namespace str_format_internal
+ABSL_NAMESPACE_END
 }  // namespace absl
