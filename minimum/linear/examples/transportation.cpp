@@ -1,4 +1,4 @@
-// Petter Strandmark 2013
+// Petter Strandmark
 // petter.strandmark@gmail.com
 //
 // Dantzig, G B, chapter 3.3 in Linear Programming and Extensions,

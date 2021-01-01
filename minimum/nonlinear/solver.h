@@ -1,4 +1,4 @@
-// Petter Strandmark 2012–2013.
+// Petter Strandmark.
 #ifndef MINIMUM_NONLINEAR_SOLVER_H
 #define MINIMUM_NONLINEAR_SOLVER_H
 // The Solver class is a lightweight class defining settings

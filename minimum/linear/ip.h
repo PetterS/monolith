@@ -1,4 +1,4 @@
-// Petter Strandmark 2013
+// Petter Strandmark
 // petter.strandmark@gmail.com
 //
 /// This header provides a simple modelling language in C++.

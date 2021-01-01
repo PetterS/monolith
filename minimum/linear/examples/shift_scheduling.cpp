@@ -1,4 +1,4 @@
-// Petter Strandmark 2014.
+// Petter Strandmark.
 //
 // Reads and solves problem files from “Employee Shift Scheduling Benchmark
 // Data Sets”

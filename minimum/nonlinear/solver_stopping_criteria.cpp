@@ -1,4 +1,4 @@
-// Petter Strandmark 2012.
+// Petter Strandmark.
 
 #include <minimum/nonlinear/solver.h>
 

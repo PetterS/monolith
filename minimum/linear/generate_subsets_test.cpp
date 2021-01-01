@@ -1,4 +1,4 @@
-// Petter Strandmark 2014.
+// Petter Strandmark.
 #include <algorithm>
 #include <catch.hpp>
 #include <iostream>

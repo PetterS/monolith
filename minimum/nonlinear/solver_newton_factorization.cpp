@@ -1,4 +1,4 @@
-// Petter Strandmark 2012.
+// Petter Strandmark.
 
 #include <cstring>
 #include <iostream>

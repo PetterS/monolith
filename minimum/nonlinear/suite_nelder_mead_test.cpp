@@ -1,4 +1,4 @@
-// Petter Strandmark 2012
+// Petter Strandmark
 //
 #include <cmath>
 #include <iomanip>

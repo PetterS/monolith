@@ -1,4 +1,4 @@
-// Petter Strandmark 2013.
+// Petter Strandmark.
 //
 // This example illustrates how a constraint can
 // be used to compute the closest point lying on

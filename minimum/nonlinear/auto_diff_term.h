@@ -1,4 +1,4 @@
-// Petter Strandmark 2012–2013.
+// Petter Strandmark.
 #ifndef MINIMUM_NONLINEAR_AUTO_DIFF_TERM_H
 #define MINIMUM_NONLINEAR_AUTO_DIFF_TERM_H
 

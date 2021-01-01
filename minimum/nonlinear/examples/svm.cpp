@@ -1,4 +1,4 @@
-// Petter Strandmark 2013.
+// Petter Strandmark.
 //
 // Example of constrained optimization. Finds an optimal
 // separating hyperplane between two sets of points in 2D.

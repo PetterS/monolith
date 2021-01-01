@@ -1,7 +1,7 @@
 // Include this function in a file defining the run_test
 // template function.
 //
-// Petter Strandmark 2012
+// Petter Strandmark
 //
 
 // ----------------------------------------------------------------------

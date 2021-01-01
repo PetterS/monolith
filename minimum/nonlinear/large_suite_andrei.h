@@ -1,4 +1,4 @@
-// Petter Strandmark 2013.
+// Petter Strandmark.
 //
 // Test functions from
 // Neculai Andrei, An Unconstrained Optimization Test Functions Collection,

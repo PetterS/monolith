@@ -1,4 +1,4 @@
-// Petter Strandmark 2013.
+// Petter Strandmark.
 //
 // The code in this file requires C++14 generic lambdas.
 //

@@ -1,4 +1,4 @@
-// Petter Strandmark 2012.
+// Petter Strandmark.
 //
 // This example performs inference in the Cox–Ingersoll–Ross model
 // (CIR model) which is a stochastic differential equation of the

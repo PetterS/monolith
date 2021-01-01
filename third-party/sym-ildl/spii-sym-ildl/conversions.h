@@ -1,4 +1,4 @@
-// Petter Strandmark 2013.
+// Petter Strandmark.
 #ifndef SPII_SYM_ILDL_CONVERSIONS_H
 #define SPII_SYM_ILDL_CONVERSIONS_H
 

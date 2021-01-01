@@ -1,4 +1,4 @@
-// Petter Strandmark 2013.
+// Petter Strandmark.
 #ifndef CURVE_EXTRACTION_CURVATURE_H
 #define CURVE_EXTRACTION_CURVATURE_H
 

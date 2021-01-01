@@ -1,4 +1,4 @@
-// Petter Strandmark 2014.
+// Petter Strandmark.
 //
 // This example illustrates how function objects can be
 // reused with different data.

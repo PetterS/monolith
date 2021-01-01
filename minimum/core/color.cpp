@@ -1,4 +1,4 @@
-// Petter Strandmark 2002, 2006, 2013
+// Petter Strandmark
 
 #include <minimum/core/color.h>
 

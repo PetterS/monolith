@@ -1,4 +1,4 @@
-// Petter Strandmark 2013.
+// Petter Strandmark.
 //
 // When everything is built and installed correctly, it is possible
 // to build this file with:

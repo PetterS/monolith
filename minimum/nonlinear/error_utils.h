@@ -1,4 +1,4 @@
-// Petter Strandmark 2013–2014.
+// Petter Strandmark.
 #ifndef MINIMUM_NONLINEAR_ERROR_UTILS_H
 #define MINIMUM_NONLINEAR_ERROR_UTILS_H
 

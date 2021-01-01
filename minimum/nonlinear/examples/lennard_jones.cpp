@@ -1,4 +1,4 @@
-// Petter Strandmark 2012.
+// Petter Strandmark.
 //
 // See http://doye.chem.ox.ac.uk/jon/structures/LJ/tables.150.html
 // for best known minima for N <= 150.

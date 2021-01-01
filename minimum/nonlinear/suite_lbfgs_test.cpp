@@ -1,4 +1,4 @@
-// Petter Strandmark 2012
+// Petter Strandmark
 //
 // Test functions from
 // Jorge J. More, Burton S. Garbow and Kenneth E. Hillstrom,

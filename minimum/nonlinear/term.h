@@ -1,4 +1,4 @@
-// Petter Strandmark 2012.
+// Petter Strandmark.
 #ifndef MINIMUM_NONLINEAR_TERM_H
 #define MINIMUM_NONLINEAR_TERM_H
 // The Term class defines a single term in an objective function.

@@ -1,4 +1,4 @@
-// Petter Strandmark 2014.
+// Petter Strandmark.
 #ifndef MINIMUM_NONLINEAR_SOLVER_CALLBACKS_H
 #define MINIMUM_NONLINEAR_SOLVER_CALLBACKS_H
 

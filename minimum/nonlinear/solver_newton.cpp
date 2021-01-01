@@ -1,4 +1,4 @@
-// Petter Strandmark 2012.
+// Petter Strandmark.
 
 #include <cstdio>
 #include <iomanip>
@@ -335,7 +335,7 @@ void NewtonSolver::solve(const Function& function, SolverResults* results) const
 				this->log_function(
 				    to_string(std::setw(4), iter) + " "
 				    + to_string(
-				          std::scientific, std::showpos, std::setprecision(6), std::setw(10), fval)
+				        std::scientific, std::showpos, std::setprecision(6), std::setw(10), fval)
 				    + " " + to_string(std::scientific, std::setprecision(3), std::setw(9), normg)
 				    + " " + to_string(std::scientific, std::setprecision(3), std::setw(9), alpha)
 				    + " " + to_string(std::setw(3), factorizations) + "   "
@@ -354,12 +354,12 @@ void NewtonSolver::solve(const Function& function, SolverResults* results) const
 				this->log_function(
 				    to_string(std::setw(4), iter) + " "
 				    + to_string(
-				          std::scientific, std::showpos, std::setprecision(6), std::setw(10), fval)
+				        std::scientific, std::showpos, std::setprecision(6), std::setw(10), fval)
 				    + " " + to_string(std::scientific, std::setprecision(3), std::setw(9), normg)
 				    + " " + to_string(std::scientific, std::setprecision(3), std::setw(9), normH)
 				    + " "
 				    + to_string(
-				          std::scientific, std::showpos, std::setprecision(3), std::setw(10), detH)
+				        std::scientific, std::showpos, std::setprecision(3), std::setw(10), detH)
 				    + " " + to_string(std::scientific, std::showpos, std::setprecision(2), mindiag)
 				    + " " + to_string(std::scientific, std::setprecision(3), std::setw(9), alpha)
 				    + " " + to_string(std::setw(3), factorizations));

@@ -1,4 +1,4 @@
-// Petter Strandmark 2012–2013.
+// Petter Strandmark.
 #pragma once
 // This header defines the Function class which is used
 // to store an objective function to be optimized.

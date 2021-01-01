@@ -1,4 +1,4 @@
-// Petter Strandmark 2013–2014.
+// Petter Strandmark.
 
 #include <iostream>
 

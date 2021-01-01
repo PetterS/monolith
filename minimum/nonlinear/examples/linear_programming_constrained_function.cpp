@@ -1,4 +1,4 @@
-// Petter Strandmark 2013.
+// Petter Strandmark.
 //
 // This is a test of ConstrainedFunction with a known optimum.
 

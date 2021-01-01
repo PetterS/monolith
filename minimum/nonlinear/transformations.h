@@ -1,4 +1,4 @@
-// Petter Strandmark 2012.
+// Petter Strandmark.
 #ifndef MINIMUM_NONLINEAR_TRANSFORMATIONS_H
 #define MINIMUM_NONLINEAR_TRANSFORMATIONS_H
 

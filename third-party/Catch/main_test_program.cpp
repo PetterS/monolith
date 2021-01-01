@@ -1,3 +1,3 @@
-// Petter Strandmark 2014.
+// Petter Strandmark.
 #define CATCH_CONFIG_MAIN
 #include <catch.hpp>

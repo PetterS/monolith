@@ -1,4 +1,4 @@
-// Petter Strandmark 2012–2013.
+// Petter Strandmark.
 
 #include <cstddef>
 #include <cstdio>

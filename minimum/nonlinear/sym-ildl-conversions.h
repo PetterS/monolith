@@ -1,4 +1,4 @@
-// Petter Strandmark 2013.
+// Petter Strandmark.
 #ifndef MINIMUM_NONLINEAR_SYM_ILDL_CONVERSIONS_H
 #define MINIMUM_NONLINEAR_SYM_ILDL_CONVERSIONS_H
 
@@ -170,7 +170,7 @@ class MyPermutation : public Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dyn
    public:
 	MyPermutation(const std::vector<int>& perm)
 	    : Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic, int>(
-	          static_cast<int>(perm.size())) {
+	        static_cast<int>(perm.size())) {
 		for (std::size_t i = 0; i < perm.size(); ++i) {
 			m_indices(i) = perm[i];
 		}

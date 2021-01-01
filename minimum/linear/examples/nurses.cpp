@@ -1,4 +1,4 @@
-// Petter Strandmark 2014.
+// Petter Strandmark.
 //
 // Reads and solves problem files from NSPLib
 // http://www.projectmanagement.ugent.be/?q=research/personnel_scheduling/nsp

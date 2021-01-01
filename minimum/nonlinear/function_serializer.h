@@ -1,4 +1,4 @@
-// Petter Strandmark 2013.
+// Petter Strandmark.
 #ifndef MINIMUM_NONLINEAR_FUNCTION_SERIALIZER_H
 #define MINIMUM_NONLINEAR_FUNCTION_SERIALIZER_H
 

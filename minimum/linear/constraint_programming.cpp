@@ -1,4 +1,4 @@
-// Petter Strandmark 2014
+// Petter Strandmark
 // petter.strandmark@gmail.com
 
 namespace minimum {

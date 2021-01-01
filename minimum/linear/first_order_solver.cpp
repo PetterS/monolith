@@ -1,4 +1,4 @@
-// Petter Strandmark 2014
+// Petter Strandmark
 // petter.strandmark@gmail.com
 //
 // [1] Chambolle, A., & Pock, T. (2011). A first-order primal-dual algorithm for convex

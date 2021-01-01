@@ -1,4 +1,4 @@
-// Petter Strandmark 2012.
+// Petter Strandmark.
 //
 // This example illustrates how a change of variables
 // can be used to compute the closest point lying on

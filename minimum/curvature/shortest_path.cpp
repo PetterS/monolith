@@ -1,4 +1,4 @@
-// Petter Strandmark 2013.
+// Petter Strandmark.
 
 #include <algorithm>
 #include <cstdio>

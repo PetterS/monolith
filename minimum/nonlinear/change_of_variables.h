@@ -1,4 +1,4 @@
-// Petter Strandmark 2012.
+// Petter Strandmark.
 #ifndef MINIMUM_NONLINEAR_CHANGE_OF_VARIABLES_H
 #define MINIMUM_NONLINEAR_CHANGE_OF_VARIABLES_H
 

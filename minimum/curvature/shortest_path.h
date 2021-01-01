@@ -1,4 +1,4 @@
-// Petter Strandmark 2013.
+// Petter Strandmark.
 //
 // Computes the shortest path between two sets of
 // nodes in a dynamically generated graph. Uses
