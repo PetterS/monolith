@@ -72,6 +72,9 @@ Abseil contains the following C++ library components:
 * [`algorithm`](absl/algorithm/)
   <br /> The `algorithm` library contains additions to the C++ `<algorithm>`
   library and container-based versions of such algorithms.
+* [`cleanup`](absl/cleanup/)
+  <br /> The `cleanup` library contains the control-flow-construct-like type
+  `absl::Cleanup` which is used for executing a callback on scope exit.
 * [`container`](absl/container/)
   <br /> The `container` library contains additional STL-style containers,
   including Abseil's unordered "Swiss table" containers.
@@ -89,6 +92,9 @@ Abseil contains the following C++ library components:
   available within C++14 and C++17 versions of the C++ `<type_traits>` library.
 * [`numeric`](absl/numeric/)
   <br /> The `numeric` library contains C++11-compatible 128-bit integers.
+* [`profiling`](absl/profiling/)
+  <br /> The `profiling` library contains utility code for profiling C++
+  entities.  It is currently a private dependency of other Abseil libraries.
 * [`status`](absl/status/)
   <br /> The `status` contains abstractions for error handling, specifically
   `absl::Status` and `absl::StatusOr<T>`.

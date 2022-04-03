@@ -14,15 +14,6 @@
 # limitations under the License.
 #
 
-# This is deprecated and will be removed in the future.  It also doesn't do
-# anything anyways.  Prefer to use the library associated with the API you are
-# using.
-absl_cc_library(
-  NAME
-    container
-  PUBLIC
-)
-
 absl_cc_library(
   NAME
     btree
@@ -44,6 +35,7 @@ absl_cc_library(
     absl::core_headers
     absl::layout
     absl::memory
+    absl::raw_logging_internal
     absl::strings
     absl::throw_delegate
     absl::type_traits
@@ -89,7 +81,7 @@ absl_cc_test(
     absl::strings
     absl::test_instance_tracker
     absl::type_traits
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_library(
@@ -118,7 +110,7 @@ absl_cc_test(
     absl::optional
     absl::test_instance_tracker
     absl::utility
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_library(
@@ -153,7 +145,7 @@ absl_cc_test(
     absl::exception_testing
     absl::hash_testing
     absl::memory
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_test(
@@ -167,7 +159,7 @@ absl_cc_test(
     absl::fixed_array
     absl::config
     absl::exception_safety_testing
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_library(
@@ -231,7 +223,7 @@ absl_cc_test(
     absl::memory
     absl::raw_logging_internal
     absl::strings
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_test(
@@ -245,7 +237,7 @@ absl_cc_test(
     absl::inlined_vector
     absl::config
     absl::exception_safety_testing
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_library(
@@ -271,7 +263,7 @@ absl_cc_test(
     ${ABSL_TEST_COPTS}
   DEPS
     absl::test_instance_tracker
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_library(
@@ -283,6 +275,7 @@ absl_cc_library(
     ${ABSL_DEFAULT_COPTS}
   DEPS
     absl::container_memory
+    absl::core_headers
     absl::hash_function_defaults
     absl::raw_hash_map
     absl::algorithm_container
@@ -306,7 +299,7 @@ absl_cc_test(
     absl::unordered_map_modifiers_test
     absl::any
     absl::raw_logging_internal
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_library(
@@ -344,7 +337,7 @@ absl_cc_test(
     absl::memory
     absl::raw_logging_internal
     absl::strings
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_library(
@@ -356,8 +349,9 @@ absl_cc_library(
     ${ABSL_DEFAULT_COPTS}
   DEPS
     absl::container_memory
+    absl::core_headers
     absl::hash_function_defaults
-    absl::node_hash_policy
+    absl::node_slot_policy
     absl::raw_hash_map
     absl::algorithm_container
     absl::memory
@@ -379,7 +373,7 @@ absl_cc_test(
     absl::unordered_map_lookup_test
     absl::unordered_map_members_test
     absl::unordered_map_modifiers_test
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_library(
@@ -390,8 +384,9 @@ absl_cc_library(
   COPTS
     ${ABSL_DEFAULT_COPTS}
   DEPS
+    absl::core_headers
     absl::hash_function_defaults
-    absl::node_hash_policy
+    absl::node_slot_policy
     absl::raw_hash_set
     absl::algorithm_container
     absl::memory
@@ -413,7 +408,7 @@ absl_cc_test(
     absl::unordered_set_lookup_test
     absl::unordered_set_members_test
     absl::unordered_set_modifiers_test
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_library(
@@ -442,7 +437,7 @@ absl_cc_test(
     absl::container_memory
     absl::strings
     absl::test_instance_tracker
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_library(
@@ -474,7 +469,7 @@ absl_cc_test(
     absl::hash
     absl::random_random
     absl::strings
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_library(
@@ -516,7 +511,7 @@ absl_cc_test(
     ${ABSL_TEST_COPTS}
   DEPS
     absl::hash_policy_testing
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_library(
@@ -540,7 +535,7 @@ absl_cc_test(
     ${ABSL_TEST_COPTS}
   DEPS
     absl::hash_policy_traits
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_library(
@@ -555,8 +550,9 @@ absl_cc_library(
     ${ABSL_DEFAULT_COPTS}
   DEPS
     absl::base
+    absl::config
     absl::exponential_biased
-    absl::have_sse
+    absl::sample_recorder
     absl::synchronization
 )
 
@@ -568,9 +564,9 @@ absl_cc_test(
   COPTS
     ${ABSL_TEST_COPTS}
   DEPS
+    absl::config
     absl::hashtablez_sampler
-    absl::have_sse
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_library(
@@ -598,18 +594,9 @@ absl_cc_library(
 
 absl_cc_library(
   NAME
-    have_sse
+    node_slot_policy
   HDRS
-    "internal/have_sse.h"
-  COPTS
-    ${ABSL_DEFAULT_COPTS}
-)
-
-absl_cc_library(
-  NAME
-    node_hash_policy
-  HDRS
-    "internal/node_hash_policy.h"
+    "internal/node_slot_policy.h"
   COPTS
     ${ABSL_DEFAULT_COPTS}
   DEPS
@@ -619,15 +606,15 @@ absl_cc_library(
 
 absl_cc_test(
   NAME
-    node_hash_policy_test
+    node_slot_policy_test
   SRCS
-    "internal/node_hash_policy_test.cc"
+    "internal/node_slot_policy_test.cc"
   COPTS
     ${ABSL_TEST_COPTS}
   DEPS
     absl::hash_policy_traits
-    absl::node_hash_policy
-    gmock_main
+    absl::node_slot_policy
+    GTest::gmock_main
 )
 
 absl_cc_library(
@@ -674,8 +661,6 @@ absl_cc_library(
     absl::endian
     absl::hash_policy_traits
     absl::hashtable_debug_hooks
-    absl::have_sse
-    absl::layout
     absl::memory
     absl::meta
     absl::optional
@@ -702,7 +687,7 @@ absl_cc_test(
     absl::core_headers
     absl::raw_logging_internal
     absl::strings
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_test(
@@ -716,7 +701,7 @@ absl_cc_test(
     absl::raw_hash_set
     absl::tracked
     absl::core_headers
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_library(
@@ -749,7 +734,7 @@ absl_cc_test(
     absl::core_headers
     absl::raw_logging_internal
     absl::span
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_library(
@@ -774,7 +759,7 @@ absl_cc_library(
   DEPS
     absl::hash_generator_testing
     absl::hash_policy_testing
-    gmock
+    GTest::gmock
   TESTONLY
 )
 
@@ -788,7 +773,7 @@ absl_cc_library(
   DEPS
     absl::hash_generator_testing
     absl::hash_policy_testing
-    gmock
+    GTest::gmock
   TESTONLY
 )
 
@@ -801,7 +786,7 @@ absl_cc_library(
     ${ABSL_TEST_COPTS}
   DEPS
     absl::type_traits
-    gmock
+    GTest::gmock
   TESTONLY
 )
 
@@ -815,7 +800,7 @@ absl_cc_library(
   DEPS
     absl::hash_generator_testing
     absl::hash_policy_testing
-    gmock
+    GTest::gmock
   TESTONLY
 )
 
@@ -829,7 +814,7 @@ absl_cc_library(
   DEPS
     absl::hash_generator_testing
     absl::hash_policy_testing
-    gmock
+    GTest::gmock
   TESTONLY
 )
 
@@ -843,7 +828,7 @@ absl_cc_library(
   DEPS
     absl::hash_generator_testing
     absl::hash_policy_testing
-    gmock
+    GTest::gmock
   TESTONLY
 )
 
@@ -856,7 +841,7 @@ absl_cc_library(
     ${ABSL_TEST_COPTS}
   DEPS
     absl::type_traits
-    gmock
+    GTest::gmock
   TESTONLY
 )
 
@@ -870,7 +855,7 @@ absl_cc_library(
   DEPS
     absl::hash_generator_testing
     absl::hash_policy_testing
-    gmock
+    GTest::gmock
   TESTONLY
 )
 
@@ -886,7 +871,7 @@ absl_cc_test(
     absl::unordered_set_lookup_test
     absl::unordered_set_members_test
     absl::unordered_set_modifiers_test
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_test(
@@ -901,5 +886,20 @@ absl_cc_test(
     absl::unordered_map_lookup_test
     absl::unordered_map_members_test
     absl::unordered_map_modifiers_test
-    gmock_main
+    GTest::gmock_main
+)
+
+absl_cc_test(
+  NAME
+    sample_element_size_test
+  SRCS
+    "sample_element_size_test.cc"
+  COPTS
+    ${ABSL_TEST_COPTS}
+  DEPS
+    absl::flat_hash_map
+    absl::flat_hash_set
+    absl::node_hash_map
+    absl::node_hash_set
+    GTest::gmock_main
 )

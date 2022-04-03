@@ -579,6 +579,7 @@ const char* const kTimeZoneNames[] = {"Africa/Abidjan",
                                       "Pacific/Guam",
                                       "Pacific/Honolulu",
                                       "Pacific/Johnston",
+                                      "Pacific/Kanton",
                                       "Pacific/Kiritimati",
                                       "Pacific/Kosrae",
                                       "Pacific/Kwajalein",
@@ -716,6 +717,18 @@ TEST(TimeZones, LoadZonesConcurrently) {
   EXPECT_LE(failures.size(), max_failures) << testing::PrintToString(failures);
 }
 #endif
+
+TEST(TimeZone, UTC) {
+  const time_zone utc = utc_time_zone();
+
+  time_zone loaded_utc;
+  EXPECT_TRUE(load_time_zone("UTC", &loaded_utc));
+  EXPECT_EQ(loaded_utc, utc);
+
+  time_zone loaded_utc0;
+  EXPECT_TRUE(load_time_zone("UTC0", &loaded_utc0));
+  EXPECT_EQ(loaded_utc0, utc);
+}
 
 TEST(TimeZone, NamedTimeZones) {
   const time_zone utc = utc_time_zone();
@@ -1014,7 +1027,11 @@ TEST(MakeTime, SysSecondsLimits) {
 #endif
     const year_t min_tm_year = year_t{std::numeric_limits<int>::min()} + 1900;
     tp = convert(civil_second(min_tm_year, 1, 1, 0, 0, 0), cut);
+#if defined(__Fuchsia__)
+    // Fuchsia's gmtime_r() fails on extreme negative values (fxbug.dev/78527).
+#else
     EXPECT_EQ("-2147481748-01-01T00:00:00+00:00", format(RFC3339, tp, cut));
+#endif
 #endif
   }
 }
@@ -1163,6 +1180,44 @@ TEST(PrevTransition, AmericaNewYork) {
   tp = time_point<absl::time_internal::cctz::seconds>::max();
   EXPECT_TRUE(tz.prev_transition(tp, &trans));
   // We have a transition but we don't know which one.
+}
+
+TEST(NextTransition, Scan) {
+  for (const char* const* np = kTimeZoneNames; *np != nullptr; ++np) {
+    time_zone tz;
+    if (!load_time_zone(*np, &tz)) {
+      continue;  // tolerate kTimeZoneNames/zoneinfo skew
+    }
+    SCOPED_TRACE(testing::Message() << "In " << *np);
+
+    auto tp = time_point<absl::time_internal::cctz::seconds>::min();
+    time_zone::civil_transition trans;
+    while (tz.next_transition(tp, &trans)) {
+      time_zone::civil_lookup from_cl = tz.lookup(trans.from);
+      EXPECT_NE(from_cl.kind, time_zone::civil_lookup::REPEATED);
+      time_zone::civil_lookup to_cl = tz.lookup(trans.to);
+      EXPECT_NE(to_cl.kind, time_zone::civil_lookup::SKIPPED);
+
+      auto trans_tp = to_cl.trans;
+      time_zone::absolute_lookup trans_al = tz.lookup(trans_tp);
+      EXPECT_EQ(trans_al.cs, trans.to);
+      auto pre_trans_tp = trans_tp - absl::time_internal::cctz::seconds(1);
+      time_zone::absolute_lookup pre_trans_al = tz.lookup(pre_trans_tp);
+      EXPECT_EQ(pre_trans_al.cs + 1, trans.from);
+
+      auto offset_delta = trans_al.offset - pre_trans_al.offset;
+      EXPECT_EQ(offset_delta, trans.to - trans.from);
+      if (offset_delta == 0) {
+        // This "transition" is only an is_dst or abbr change.
+        EXPECT_EQ(to_cl.kind, time_zone::civil_lookup::UNIQUE);
+        if (trans_al.is_dst == pre_trans_al.is_dst) {
+          EXPECT_STRNE(trans_al.abbr, pre_trans_al.abbr);
+        }
+      }
+
+      tp = trans_tp;  // continue scan from transition
+    }
+  }
 }
 
 TEST(TimeZoneEdgeCase, AmericaNewYork) {

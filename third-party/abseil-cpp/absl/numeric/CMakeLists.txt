@@ -38,7 +38,7 @@ absl_cc_test(
     absl::bits
     absl::core_headers
     absl::random_random
-    gmock_main
+    GTest::gmock_main
 )
 
 absl_cc_library(
@@ -73,7 +73,7 @@ absl_cc_test(
     absl::core_headers
     absl::hash_testing
     absl::type_traits
-    gmock_main
+    GTest::gmock_main
 )
 
 # component target
@@ -84,5 +84,17 @@ absl_cc_library(
     ${ABSL_DEFAULT_COPTS}
   DEPS
     absl::int128
+  PUBLIC
+)
+
+absl_cc_library(
+  NAME
+    numeric_representation
+  HDRS
+    "internal/representation.h"
+  COPTS
+    ${ABSL_DEFAULT_COPTS}
+  DEPS
+    absl::config
   PUBLIC
 )

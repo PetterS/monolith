@@ -1,4 +1,5 @@
 include(CMakeParseArguments)
+include(GNUInstallDirs)
 
 set(ABSL_INTERNAL_DLL_FILES
   "algorithm/algorithm.h"
@@ -16,8 +17,6 @@ set(ABSL_INTERNAL_DLL_FILES
   "base/internal/dynamic_annotations.h"
   "base/internal/endian.h"
   "base/internal/errno_saver.h"
-  "base/internal/exponential_biased.cc"
-  "base/internal/exponential_biased.h"
   "base/internal/fast_type_id.h"
   "base/internal/hide_ptr.h"
   "base/internal/identity.h"
@@ -27,8 +26,6 @@ set(ABSL_INTERNAL_DLL_FILES
   "base/internal/low_level_alloc.h"
   "base/internal/low_level_scheduling.h"
   "base/internal/per_thread_tls.h"
-  "base/internal/periodic_sampler.cc"
-  "base/internal/periodic_sampler.h"
   "base/internal/pretty_function.h"
   "base/internal/raw_logging.cc"
   "base/internal/raw_logging.h"
@@ -60,6 +57,8 @@ set(ABSL_INTERNAL_DLL_FILES
   "base/policy_checks.h"
   "base/port.h"
   "base/thread_annotations.h"
+  "cleanup/cleanup.h"
+  "cleanup/internal/cleanup.h"
   "container/btree_map.h"
   "container/btree_set.h"
   "container/fixed_array.h"
@@ -79,10 +78,9 @@ set(ABSL_INTERNAL_DLL_FILES
   "container/internal/hashtablez_sampler.cc"
   "container/internal/hashtablez_sampler.h"
   "container/internal/hashtablez_sampler_force_weak_definition.cc"
-  "container/internal/have_sse.h"
   "container/internal/inlined_vector.h"
   "container/internal/layout.h"
-  "container/internal/node_hash_policy.h"
+  "container/internal/node_slot_policy.h"
   "container/internal/raw_hash_map.h"
   "container/internal/raw_hash_set.cc"
   "container/internal/raw_hash_set.h"
@@ -121,14 +119,20 @@ set(ABSL_INTERNAL_DLL_FILES
   "hash/internal/hash.h"
   "hash/internal/hash.cc"
   "hash/internal/spy_hash_state.h"
-  "hash/internal/wyhash.h"
-  "hash/internal/wyhash.cc"
+  "hash/internal/low_level_hash.h"
+  "hash/internal/low_level_hash.cc"
   "memory/memory.h"
   "meta/type_traits.h"
   "numeric/bits.h"
   "numeric/int128.cc"
   "numeric/int128.h"
   "numeric/internal/bits.h"
+  "numeric/internal/representation.h"
+  "profiling/internal/exponential_biased.cc"
+  "profiling/internal/exponential_biased.h"
+  "profiling/internal/periodic_sampler.cc"
+  "profiling/internal/periodic_sampler.h"
+  "profiling/internal/sample_recorder.h"
   "random/bernoulli_distribution.h"
   "random/beta_distribution.h"
   "random/bit_gen_ref.h"
@@ -190,16 +194,43 @@ set(ABSL_INTERNAL_DLL_FILES
   "strings/charconv.cc"
   "strings/charconv.h"
   "strings/cord.cc"
+  "strings/cord_analysis.cc"
+  "strings/cord_analysis.h"
   "strings/cord.h"
   "strings/escaping.cc"
   "strings/escaping.h"
-  "strings/internal/cord_internal.cc"
-  "strings/internal/cord_internal.h"
-  "strings/internal/cord_rep_flat.h"
   "strings/internal/charconv_bigint.cc"
   "strings/internal/charconv_bigint.h"
   "strings/internal/charconv_parse.cc"
   "strings/internal/charconv_parse.h"
+  "strings/internal/cord_data_edge.h"
+  "strings/internal/cord_internal.cc"
+  "strings/internal/cord_internal.h"
+  "strings/internal/cord_rep_btree.cc"
+  "strings/internal/cord_rep_btree.h"
+  "strings/internal/cord_rep_btree_navigator.cc"
+  "strings/internal/cord_rep_btree_navigator.h"
+  "strings/internal/cord_rep_btree_reader.cc"
+  "strings/internal/cord_rep_btree_reader.h"
+  "strings/internal/cord_rep_crc.cc"
+  "strings/internal/cord_rep_crc.h"
+  "strings/internal/cord_rep_consume.h"
+  "strings/internal/cord_rep_consume.cc"
+  "strings/internal/cord_rep_flat.h"
+  "strings/internal/cord_rep_ring.cc"
+  "strings/internal/cord_rep_ring.h"
+  "strings/internal/cord_rep_ring_reader.h"
+  "strings/internal/cordz_functions.cc"
+  "strings/internal/cordz_functions.h"
+  "strings/internal/cordz_handle.cc"
+  "strings/internal/cordz_handle.h"
+  "strings/internal/cordz_info.cc"
+  "strings/internal/cordz_info.h"
+  "strings/internal/cordz_sample_token.cc"
+  "strings/internal/cordz_sample_token.h"
+  "strings/internal/cordz_statistics.h"
+  "strings/internal/cordz_update_scope.h"
+  "strings/internal/cordz_update_tracker.h"
   "strings/internal/stl_type_traits.h"
   "strings/internal/string_constant.h"
   "strings/match.cc"
@@ -424,13 +455,13 @@ set(ABSL_INTERNAL_DLL_TARGETS
   "hashtablez_sampler"
   "hashtable_debug"
   "hashtable_debug_hooks"
-  "have_sse"
-  "node_hash_policy"
+  "node_slot_policy"
   "raw_hash_map"
   "container_common"
   "raw_hash_set"
   "layout"
   "tracked"
+  "sample_recorder"
 )
 
 function(absl_internal_dll_contains)
@@ -494,7 +525,7 @@ function(absl_make_dll)
     abseil_dll
     PUBLIC
       "$<BUILD_INTERFACE:${ABSL_COMMON_INCLUDE_DIRS}>"
-      $<INSTALL_INTERFACE:${ABSL_INSTALL_INCLUDEDIR}>
+      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
 
   target_compile_options(
@@ -512,8 +543,8 @@ function(absl_make_dll)
       ${ABSL_CC_LIB_DEFINES}
   )
   install(TARGETS abseil_dll EXPORT ${PROJECT_NAME}Targets
-        RUNTIME DESTINATION ${ABSL_INSTALL_BINDIR}
-        LIBRARY DESTINATION ${ABSL_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${ABSL_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   )
 endfunction()

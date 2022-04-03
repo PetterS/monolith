@@ -122,6 +122,14 @@ StringConvertResult FormatConvertImpl(const std::string& v,
 StringConvertResult FormatConvertImpl(string_view v,
                                       FormatConversionSpecImpl conv,
                                       FormatSinkImpl* sink);
+#if defined(ABSL_HAVE_STD_STRING_VIEW) && !defined(ABSL_USES_STD_STRING_VIEW)
+inline StringConvertResult FormatConvertImpl(std::string_view v,
+                                             FormatConversionSpecImpl conv,
+                                             FormatSinkImpl* sink) {
+  return FormatConvertImpl(absl::string_view(v.data(), v.size()), conv, sink);
+}
+#endif  // ABSL_HAVE_STD_STRING_VIEW && !ABSL_USES_STD_STRING_VIEW
+
 ArgConvertResult<FormatConversionCharSetUnion(
     FormatConversionCharSetInternal::s, FormatConversionCharSetInternal::p)>
 FormatConvertImpl(const char* v, const FormatConversionSpecImpl conv,
@@ -136,7 +144,7 @@ StringConvertResult FormatConvertImpl(const AbslCord& value,
   size_t space_remaining = 0;
 
   int width = conv.width();
-  if (width >= 0) space_remaining = width;
+  if (width >= 0) space_remaining = static_cast<size_t>(width);
 
   size_t to_write = value.size();
 
