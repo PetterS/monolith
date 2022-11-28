@@ -181,6 +181,10 @@ TEST_CASE("minisatp") {
 
 TEST_CASE("glucose") { simple_test(glucose_solver); }
 
+TEST_CASE("cadical") {
+	simple_test([]() { return cadical_solver(true); });
+}
+
 TEST_CASE("simple_integer_programming_tests_minisat") {
 	IpToSatSolver solver(bind(minisat_solver, true));
 	solver.set_silent(true);

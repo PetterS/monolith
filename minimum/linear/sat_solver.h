@@ -44,5 +44,6 @@ class SatSolver {
 std::unique_ptr<SatSolver> MINIMUM_LINEAR_API minisat_solver(bool silent_mode = false);
 std::unique_ptr<SatSolver> MINIMUM_LINEAR_API cleaneling_solver();
 std::unique_ptr<SatSolver> MINIMUM_LINEAR_API glucose_solver();
+std::unique_ptr<SatSolver> MINIMUM_LINEAR_API cadical_solver(bool silent_mode = false);
 }  // namespace linear
 }  // namespace minimum
